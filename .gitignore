@@ -1,0 +1,11 @@
+# Rahasia & data – jangan pernah di-commit
+deploy/.env
+*.env
+!deploy/.env.example
+*.dump
+*.bundle
+backup/
+lkp-raw/
+__pycache__/
+.DS_Store
+Thumbs.db
