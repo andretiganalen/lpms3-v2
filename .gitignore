@@ -9,3 +9,6 @@ lkp-raw/
 __pycache__/
 .DS_Store
 Thumbs.db
+bin/
+obj/
+*.user
