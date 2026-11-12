@@ -4,7 +4,7 @@
 -- Jalankan: ops/starrocks_apply.sh (mengganti ${...} dari .env — JANGAN commit password)
 -- =====================================================================
 SET CATALOG default_catalog;
-CREATE DATABASE IF NOT EXISTS ${STARROCKS_DATABASE} COMMENT 'LPMS3 main data store (BOP-001)';
+CREATE DATABASE IF NOT EXISTS ${STARROCKS_DATABASE};
 USE ${STARROCKS_DATABASE};
 
 -- Role dengan hak minimum ------------------------------------------------

@@ -5,10 +5,10 @@
 SET CATALOG default_catalog;
 USE ${STARROCKS_DATABASE};
 
-CREATE TABLE IF NOT EXISTS form_definition (code VARCHAR(20) NOT NULL, rev VARCHAR(10) NOT NULL, title STRING, phase STRING, owner_function STRING, sop_refs JSON, menu_path STRING, source_file STRING, active BOOLEAN) PRIMARY KEY (code, rev) DISTRIBUTED BY HASH(code);
-CREATE TABLE IF NOT EXISTS form_instance (id BIGINT NOT NULL, form_code VARCHAR(20), form_rev VARCHAR(10), project_id INT, wbs_node_id BIGINT, doc_no STRING, period_month DATE, revision INT, is_current BOOLEAN, superseded_by BIGINT, status VARCHAR(20), published_level INT, structure_id INT, unit_id INT, source VARCHAR(20), pdf_render_file_id BIGINT, created_by INT, created_at DATETIME, updated_by INT, updated_at DATETIME, synced_at DATETIME) PRIMARY KEY (id) DISTRIBUTED BY HASH(id);
-CREATE TABLE IF NOT EXISTS form_signature (id BIGINT NOT NULL, form_instance_id BIGINT, seq INT, role_label STRING, function_code VARCHAR(20), position_grade VARCHAR(30), signer_user_id INT, signer_name STRING, signer_nik VARCHAR(30), signer_jabatan STRING, external_party BOOLEAN, on_behalf_of INT, method VARCHAR(20), signed_at DATETIME, content_hash VARCHAR(64), synced_at DATETIME) PRIMARY KEY (id) DISTRIBUTED BY HASH(id);
-CREATE TABLE IF NOT EXISTS form_attachment (id BIGINT NOT NULL, form_instance_id BIGINT, field_name STRING, op_attachment_id BIGINT, wbs_node_id BIGINT, ffr710_item STRING, uploaded_by INT, uploaded_at DATETIME, synced_at DATETIME) PRIMARY KEY (id) DISTRIBUTED BY HASH(id);
+CREATE TABLE IF NOT EXISTS form_definition (code VARCHAR(20) NOT NULL, rev VARCHAR(10) NOT NULL, title STRING, phase STRING, owner_function STRING, sop_refs JSON, menu_path STRING, source_file STRING, active BOOLEAN) PRIMARY KEY (code, rev) DISTRIBUTED BY HASH(code) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
+CREATE TABLE IF NOT EXISTS form_instance (id BIGINT NOT NULL, form_code VARCHAR(20), form_rev VARCHAR(10), project_id INT, wbs_node_id BIGINT, doc_no STRING, period_month DATE, revision INT, is_current BOOLEAN, superseded_by BIGINT, status VARCHAR(20), published_level INT, structure_id INT, unit_id INT, source VARCHAR(20), pdf_render_file_id BIGINT, created_by INT, created_at DATETIME, updated_by INT, updated_at DATETIME, synced_at DATETIME) PRIMARY KEY (id) DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
+CREATE TABLE IF NOT EXISTS form_signature (id BIGINT NOT NULL, form_instance_id BIGINT, seq INT, role_label STRING, function_code VARCHAR(20), position_grade VARCHAR(30), signer_user_id INT, signer_name STRING, signer_nik VARCHAR(30), signer_jabatan STRING, external_party BOOLEAN, on_behalf_of INT, method VARCHAR(20), signed_at DATETIME, content_hash VARCHAR(64), synced_at DATETIME) PRIMARY KEY (id) DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
+CREATE TABLE IF NOT EXISTS form_attachment (id BIGINT NOT NULL, form_instance_id BIGINT, field_name STRING, op_attachment_id BIGINT, wbs_node_id BIGINT, ffr710_item STRING, uploaded_by INT, uploaded_at DATETIME, synced_at DATETIME) PRIMARY KEY (id) DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_ffr706_pengajuan_kode (
   form_instance_id BIGINT NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS form_ffr706_pengajuan_kode (
   synced_at DATETIME
 ) PRIMARY KEY (form_instance_id)
 COMMENT 'FFR-706 Pengajuan Kode Kegiatan'
-DISTRIBUTED BY HASH(form_instance_id);
+DISTRIBUTED BY HASH(form_instance_id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_flp01_master_persyaratan (
   id INT NOT NULL,
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS form_flp01_master_persyaratan (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'FLP-01 Checklist Persyaratan Dokumen Pengajuan Pembukaan Kode Proyek/Program/Transfer Load'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_flp01_checklist (
   id BIGINT NOT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS form_flp01_checklist (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'FLP-01 Checklist Persyaratan Dokumen Pengajuan Pembukaan Kode Proyek/Program/Transfer Load'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_bot001_charter (
   form_instance_id BIGINT NOT NULL,
@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS form_bot001_charter (
   synced_at DATETIME
 ) PRIMARY KEY (form_instance_id)
 COMMENT 'BOT-001 Template Project Charter'
-DISTRIBUTED BY HASH(form_instance_id);
+DISTRIBUTED BY HASH(form_instance_id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_bot001_success_criteria (
   id BIGINT NOT NULL,
@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS form_bot001_success_criteria (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'BOT-001 Template Project Charter'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_bot001_high_level_risks (
   id BIGINT NOT NULL,
@@ -120,7 +120,7 @@ CREATE TABLE IF NOT EXISTS form_bot001_high_level_risks (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'BOT-001 Template Project Charter'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_bot001_timeline (
   id BIGINT NOT NULL,
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS form_bot001_timeline (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'BOT-001 Template Project Charter'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_bot001_term_of_payment (
   id BIGINT NOT NULL,
@@ -146,7 +146,7 @@ CREATE TABLE IF NOT EXISTS form_bot001_term_of_payment (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'BOT-001 Template Project Charter'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_bot001_key_stakeholders (
   id BIGINT NOT NULL,
@@ -160,7 +160,7 @@ CREATE TABLE IF NOT EXISTS form_bot001_key_stakeholders (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'BOT-001 Template Project Charter'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_sfr028_go_nogo (
   form_instance_id BIGINT NOT NULL,
@@ -187,7 +187,7 @@ CREATE TABLE IF NOT EXISTS form_sfr028_go_nogo (
   synced_at DATETIME
 ) PRIMARY KEY (form_instance_id)
 COMMENT 'SFR-028 Rapat Tinjauan Order/Kontrak – Go/No Go'
-DISTRIBUTED BY HASH(form_instance_id);
+DISTRIBUTED BY HASH(form_instance_id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_rfr004_profil_proyek (
   form_instance_id BIGINT NOT NULL,
@@ -254,7 +254,7 @@ CREATE TABLE IF NOT EXISTS form_rfr004_profil_proyek (
   synced_at DATETIME
 ) PRIMARY KEY (form_instance_id)
 COMMENT 'RFR-004 Profil Proyek'
-DISTRIBUTED BY HASH(form_instance_id);
+DISTRIBUTED BY HASH(form_instance_id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_rfr005_profil_program (
   form_instance_id BIGINT NOT NULL,
@@ -288,7 +288,7 @@ CREATE TABLE IF NOT EXISTS form_rfr005_profil_program (
   synced_at DATETIME
 ) PRIMARY KEY (form_instance_id)
 COMMENT 'RFR-005 Profil Risiko Program'
-DISTRIBUTED BY HASH(form_instance_id);
+DISTRIBUTED BY HASH(form_instance_id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_rfr002_header (
   form_instance_id BIGINT NOT NULL,
@@ -305,7 +305,7 @@ CREATE TABLE IF NOT EXISTS form_rfr002_header (
   synced_at DATETIME
 ) PRIMARY KEY (form_instance_id)
 COMMENT 'RFR-002 Project Risk Register'
-DISTRIBUTED BY HASH(form_instance_id);
+DISTRIBUTED BY HASH(form_instance_id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_rfr002_risiko (
   id BIGINT NOT NULL,
@@ -341,7 +341,7 @@ CREATE TABLE IF NOT EXISTS form_rfr002_risiko (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'RFR-002 Project Risk Register'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_rfr001_header (
   form_instance_id BIGINT NOT NULL,
@@ -356,7 +356,7 @@ CREATE TABLE IF NOT EXISTS form_rfr001_header (
   synced_at DATETIME
 ) PRIMARY KEY (form_instance_id)
 COMMENT 'RFR-001 Risk Register Unit Kerja (kertas kerja)'
-DISTRIBUTED BY HASH(form_instance_id);
+DISTRIBUTED BY HASH(form_instance_id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_rfr001_risiko (
   id BIGINT NOT NULL,
@@ -395,7 +395,7 @@ CREATE TABLE IF NOT EXISTS form_rfr001_risiko (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'RFR-001 Risk Register Unit Kerja (kertas kerja)'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_vfr015_header (
   form_instance_id BIGINT NOT NULL,
@@ -408,7 +408,7 @@ CREATE TABLE IF NOT EXISTS form_vfr015_header (
   synced_at DATETIME
 ) PRIMARY KEY (form_instance_id)
 COMMENT 'VFR-015 Identifikasi dan Penilaian Bahaya-Risiko K3 dan Aspek-Dampak Lingkungan (HIRA)'
-DISTRIBUTED BY HASH(form_instance_id);
+DISTRIBUTED BY HASH(form_instance_id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_vfr015_aspek_bahaya (
   id BIGINT NOT NULL,
@@ -445,7 +445,7 @@ CREATE TABLE IF NOT EXISTS form_vfr015_aspek_bahaya (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'VFR-015 Identifikasi dan Penilaian Bahaya-Risiko K3 dan Aspek-Dampak Lingkungan (HIRA)'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_cfr022_risalah (
   form_instance_id BIGINT NOT NULL,
@@ -463,7 +463,7 @@ CREATE TABLE IF NOT EXISTS form_cfr022_risalah (
   synced_at DATETIME
 ) PRIMARY KEY (form_instance_id)
 COMMENT 'CFR-022 Risalah Rapat'
-DISTRIBUTED BY HASH(form_instance_id);
+DISTRIBUTED BY HASH(form_instance_id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_cfr022_agenda (
   id BIGINT NOT NULL,
@@ -476,7 +476,7 @@ CREATE TABLE IF NOT EXISTS form_cfr022_agenda (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'CFR-022 Risalah Rapat'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_cfr022_tindak_lanjut (
   id BIGINT NOT NULL,
@@ -491,7 +491,7 @@ CREATE TABLE IF NOT EXISTS form_cfr022_tindak_lanjut (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'CFR-022 Risalah Rapat'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_cfr022_peserta (
   id BIGINT NOT NULL,
@@ -508,7 +508,7 @@ CREATE TABLE IF NOT EXISTS form_cfr022_peserta (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'CFR-022 Risalah Rapat'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_bfr001_change_request (
   form_instance_id BIGINT NOT NULL,
@@ -536,7 +536,7 @@ CREATE TABLE IF NOT EXISTS form_bfr001_change_request (
   synced_at DATETIME
 ) PRIMARY KEY (form_instance_id)
 COMMENT 'BFR-001 Formulir Change Log / Change Request'
-DISTRIBUTED BY HASH(form_instance_id);
+DISTRIBUTED BY HASH(form_instance_id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_ffr708_cover (
   form_instance_id BIGINT NOT NULL,
@@ -568,7 +568,7 @@ CREATE TABLE IF NOT EXISTS form_ffr708_cover (
   synced_at DATETIME
 ) PRIMARY KEY (form_instance_id)
 COMMENT 'FFR-708 Laporan Kemajuan Proyek/Program/Transfer Load (LKP)'
-DISTRIBUTED BY HASH(form_instance_id);
+DISTRIBUTED BY HASH(form_instance_id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_ffr708_rekap (
   id BIGINT NOT NULL,
@@ -594,7 +594,7 @@ CREATE TABLE IF NOT EXISTS form_ffr708_rekap (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'FFR-708 Laporan Kemajuan Proyek/Program/Transfer Load (LKP)'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_ffr708_kurva_s (
   id BIGINT NOT NULL,
@@ -611,7 +611,7 @@ CREATE TABLE IF NOT EXISTS form_ffr708_kurva_s (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'FFR-708 Laporan Kemajuan Proyek/Program/Transfer Load (LKP)'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_ffr708_permasalahan (
   id BIGINT NOT NULL,
@@ -629,7 +629,7 @@ CREATE TABLE IF NOT EXISTS form_ffr708_permasalahan (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'FFR-708 Laporan Kemajuan Proyek/Program/Transfer Load (LKP)'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_ffr708_pembukuan (
   id BIGINT NOT NULL,
@@ -645,7 +645,7 @@ CREATE TABLE IF NOT EXISTS form_ffr708_pembukuan (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'FFR-708 Laporan Kemajuan Proyek/Program/Transfer Load (LKP)'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_cfr027_ketidaksesuaian (
   id BIGINT NOT NULL,
@@ -676,7 +676,7 @@ CREATE TABLE IF NOT EXISTS form_cfr027_ketidaksesuaian (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'CFR-027 Ketidaksesuaian dan Tindakan Koreksi (Keluhan Pelanggan / Ketidaksesuaian SKU / Operasional)'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_pfr037_header (
   form_instance_id BIGINT NOT NULL,
@@ -687,7 +687,7 @@ CREATE TABLE IF NOT EXISTS form_pfr037_header (
   synced_at DATETIME
 ) PRIMARY KEY (form_instance_id)
 COMMENT 'PFR-037 Pengajuan Proposal Pengadaan Barang/Jasa PMN'
-DISTRIBUTED BY HASH(form_instance_id);
+DISTRIBUTED BY HASH(form_instance_id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_pfr037_item (
   id BIGINT NOT NULL,
@@ -704,7 +704,7 @@ CREATE TABLE IF NOT EXISTS form_pfr037_item (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'PFR-037 Pengajuan Proposal Pengadaan Barang/Jasa PMN'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_ffr710_header (
   form_instance_id BIGINT NOT NULL,
@@ -720,7 +720,7 @@ CREATE TABLE IF NOT EXISTS form_ffr710_header (
   synced_at DATETIME
 ) PRIMARY KEY (form_instance_id)
 COMMENT 'FFR-710 Laporan Dokumentasi Proyek (Daftar Isi Kelengkapan Dokumen + Tabel Realisasi)'
-DISTRIBUTED BY HASH(form_instance_id);
+DISTRIBUTED BY HASH(form_instance_id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_ffr710_daftar_isi (
   id BIGINT NOT NULL,
@@ -740,7 +740,7 @@ CREATE TABLE IF NOT EXISTS form_ffr710_daftar_isi (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'FFR-710 Laporan Dokumentasi Proyek (Daftar Isi Kelengkapan Dokumen + Tabel Realisasi)'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_ffr710_c1_pengadaan (
   id BIGINT NOT NULL,
@@ -763,7 +763,7 @@ CREATE TABLE IF NOT EXISTS form_ffr710_c1_pengadaan (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'FFR-710 Laporan Dokumentasi Proyek (Daftar Isi Kelengkapan Dokumen + Tabel Realisasi)'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_ffr710_c2_persediaan (
   id BIGINT NOT NULL,
@@ -789,7 +789,7 @@ CREATE TABLE IF NOT EXISTS form_ffr710_c2_persediaan (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'FFR-710 Laporan Dokumentasi Proyek (Daftar Isi Kelengkapan Dokumen + Tabel Realisasi)'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_ffr710_d1_anggaran (
   id BIGINT NOT NULL,
@@ -807,7 +807,7 @@ CREATE TABLE IF NOT EXISTS form_ffr710_d1_anggaran (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'FFR-710 Laporan Dokumentasi Proyek (Daftar Isi Kelengkapan Dokumen + Tabel Realisasi)'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_ffr710_d2_d4_d7_beban (
   id BIGINT NOT NULL,
@@ -829,7 +829,7 @@ CREATE TABLE IF NOT EXISTS form_ffr710_d2_d4_d7_beban (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'FFR-710 Laporan Dokumentasi Proyek (Daftar Isi Kelengkapan Dokumen + Tabel Realisasi)'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_ffr710_d5a_pendapatan (
   id BIGINT NOT NULL,
@@ -849,7 +849,7 @@ CREATE TABLE IF NOT EXISTS form_ffr710_d5a_pendapatan (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'FFR-710 Laporan Dokumentasi Proyek (Daftar Isi Kelengkapan Dokumen + Tabel Realisasi)'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_ffr710_d5c_penjualan_retail (
   id BIGINT NOT NULL,
@@ -871,7 +871,7 @@ CREATE TABLE IF NOT EXISTS form_ffr710_d5c_penjualan_retail (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'FFR-710 Laporan Dokumentasi Proyek (Daftar Isi Kelengkapan Dokumen + Tabel Realisasi)'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_wfr014_bast (
   form_instance_id BIGINT NOT NULL,
@@ -898,7 +898,7 @@ CREATE TABLE IF NOT EXISTS form_wfr014_bast (
   synced_at DATETIME
 ) PRIMARY KEY (form_instance_id)
 COMMENT 'WFR-014 Berita Acara Serah Terima Pekerjaan / Pemeliharaan (BAST)'
-DISTRIBUTED BY HASH(form_instance_id);
+DISTRIBUTED BY HASH(form_instance_id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_wfr010_header (
   form_instance_id BIGINT NOT NULL,
@@ -913,7 +913,7 @@ CREATE TABLE IF NOT EXISTS form_wfr010_header (
   synced_at DATETIME
 ) PRIMARY KEY (form_instance_id)
 COMMENT 'WFR-010 Bukti Pengembalian Bahan Sisa Proyek/Sisa Produksi'
-DISTRIBUTED BY HASH(form_instance_id);
+DISTRIBUTED BY HASH(form_instance_id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_wfr010_item (
   id BIGINT NOT NULL,
@@ -937,7 +937,7 @@ CREATE TABLE IF NOT EXISTS form_wfr010_item (
   synced_at DATETIME
 ) PRIMARY KEY (id)
 COMMENT 'WFR-010 Bukti Pengembalian Bahan Sisa Proyek/Sisa Produksi'
-DISTRIBUTED BY HASH(id);
+DISTRIBUTED BY HASH(id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
 CREATE TABLE IF NOT EXISTS form_wfr028_stock_opname (
   form_instance_id BIGINT NOT NULL,
@@ -957,5 +957,5 @@ CREATE TABLE IF NOT EXISTS form_wfr028_stock_opname (
   synced_at DATETIME
 ) PRIMARY KEY (form_instance_id)
 COMMENT 'WFR-028 Berita Acara Pemeriksaan Fisik Persediaan (Stock Opname)'
-DISTRIBUTED BY HASH(form_instance_id);
+DISTRIBUTED BY HASH(form_instance_id) PROPERTIES ("replication_num" = "${STARROCKS_REPLICATION_NUM}");
 
