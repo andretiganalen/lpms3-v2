@@ -1,0 +1,21 @@
+# LPMS3 · override untuk OpenProject resmi (tahap F2S, tanpa plugin). Login HANYA lewat IDS (OpenID Connect).
+x-ids-env: &ids
+  OPENPROJECT_OPENID__CONNECT_IDS_DISPLAY__NAME: "IDS Len"
+  OPENPROJECT_OPENID__CONNECT_IDS_IDENTIFIER: "${IDS_CLIENT_ID}"
+  OPENPROJECT_OPENID__CONNECT_IDS_SECRET: "${IDS_CLIENT_SECRET}"
+  OPENPROJECT_OPENID__CONNECT_IDS_ISSUER: "https://dev-ids-intern.len.co.id/"
+  OPENPROJECT_OPENID__CONNECT_IDS_AUTHORIZATION__ENDPOINT: "https://dev-ids-intern.len.co.id/connect/authorize"
+  OPENPROJECT_OPENID__CONNECT_IDS_TOKEN__ENDPOINT: "https://dev-ids-intern.len.co.id/connect/token"
+  OPENPROJECT_OPENID__CONNECT_IDS_USERINFO__ENDPOINT: "https://dev-ids-intern.len.co.id/connect/userinfo"
+  OPENPROJECT_OPENID__CONNECT_IDS_END__SESSION__ENDPOINT: "https://dev-ids-intern.len.co.id/connect/endsession"
+  OPENPROJECT_OPENID__CONNECT_IDS_JWKS__URI: "https://dev-ids-intern.len.co.id/.well-known/openid-configuration/jwks"
+  OPENPROJECT_OPENID__CONNECT_IDS_SCOPE: "openid profile email"
+  OPENPROJECT_OPENID__CONNECT_IDS_ATTRIBUTE__MAP_LOGIN: "email"
+  OPENPROJECT_OPENID__CONNECT_IDS_ATTRIBUTE__MAP_EMAIL: "email"
+  OPENPROJECT_OPENID__CONNECT_IDS_ATTRIBUTE__MAP_FIRST__NAME: "given_name"
+  OPENPROJECT_OPENID__CONNECT_IDS_ATTRIBUTE__MAP_LAST__NAME: "family_name"
+services:
+  web:      { environment: *ids }
+  worker:   { environment: *ids }
+  cron:     { environment: *ids }
+  seeder:   { environment: *ids }
