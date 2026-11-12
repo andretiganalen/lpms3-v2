@@ -4,8 +4,8 @@
 -- Jalankan: ops/starrocks_apply.sh (mengganti ${...} dari .env — JANGAN commit password)
 -- =====================================================================
 SET CATALOG default_catalog;
-CREATE DATABASE IF NOT EXISTS lpms3 COMMENT 'LPMS3 main data store (BOP-001)';
-USE lpms3;
+CREATE DATABASE IF NOT EXISTS ${STARROCKS_DATABASE} COMMENT 'LPMS3 main data store (BOP-001)';
+USE ${STARROCKS_DATABASE};
 
 -- Role dengan hak minimum ------------------------------------------------
 CREATE ROLE IF NOT EXISTS lpms3_writer;   -- aplikasi & layanan sinkron/ETL
