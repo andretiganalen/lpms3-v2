@@ -3,7 +3,7 @@
 -- Sumber tulis: PostgreSQL schema lpms3_form (aplikasi). Disinkron oleh db/starrocks/900_sync_tasks.sql
 -- =====================================================================
 SET CATALOG default_catalog;
-USE lpms3;
+USE ${STARROCKS_DATABASE};
 
 CREATE TABLE IF NOT EXISTS form_definition (code VARCHAR(20) NOT NULL, rev VARCHAR(10) NOT NULL, title STRING, phase STRING, owner_function STRING, sop_refs JSON, menu_path STRING, source_file STRING, active BOOLEAN) PRIMARY KEY (code, rev) DISTRIBUTED BY HASH(code);
 CREATE TABLE IF NOT EXISTS form_instance (id BIGINT NOT NULL, form_code VARCHAR(20), form_rev VARCHAR(10), project_id INT, wbs_node_id BIGINT, doc_no STRING, period_month DATE, revision INT, is_current BOOLEAN, superseded_by BIGINT, status VARCHAR(20), published_level INT, structure_id INT, unit_id INT, source VARCHAR(20), pdf_render_file_id BIGINT, created_by INT, created_at DATETIME, updated_by INT, updated_at DATETIME, synced_at DATETIME) PRIMARY KEY (id) DISTRIBUTED BY HASH(id);

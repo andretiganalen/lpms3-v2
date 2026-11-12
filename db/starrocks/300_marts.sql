@@ -4,7 +4,7 @@
 -- Alat BI (role lpms3_bi) hanya diberi view agregat mart_* tanpa data mentah.
 -- =====================================================================
 SET CATALOG default_catalog;
-USE lpms3;
+USE ${STARROCKS_DATABASE};
 
 -- Kurva-S rencana (dari baseline aktif) vs realisasi (wbs_progress) per proyek per bulan
 CREATE VIEW IF NOT EXISTS mart_scurve_monthly AS

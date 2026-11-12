@@ -4,7 +4,7 @@
 -- Diisi oleh layanan lpms3-data (outbox lpms3.sync_outbox, upsert per PK).
 -- =====================================================================
 SET CATALOG default_catalog;
-USE lpms3;
+USE ${STARROCKS_DATABASE};
 
 CREATE TABLE IF NOT EXISTS org_structure (id INT NOT NULL, code STRING, name STRING, effective_from DATE, effective_to DATE, status VARCHAR(10), synced_at DATETIME) PRIMARY KEY (id) DISTRIBUTED BY HASH(id);
 CREATE TABLE IF NOT EXISTS org_unit (id INT NOT NULL, structure_id INT, parent_id INT, code STRING, name STRING, grade VARCHAR(10), aliases JSON, hr_code STRING, sap_code STRING, synced_at DATETIME) PRIMARY KEY (id) DISTRIBUTED BY HASH(id);

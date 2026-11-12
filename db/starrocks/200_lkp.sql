@@ -4,7 +4,7 @@
 -- Tanpa transaksi multi-statement: status diturunkan dari log approval (append-only).
 -- =====================================================================
 SET CATALOG default_catalog;
-USE lpms3;
+USE ${STARROCKS_DATABASE};
 
 CREATE TABLE IF NOT EXISTS lkp_format_profile (code VARCHAR(30) NOT NULL, version INT NOT NULL, config JSON, active BOOLEAN, created_by STRING, created_at DATETIME) PRIMARY KEY (code, version) DISTRIBUTED BY HASH(code);
 
