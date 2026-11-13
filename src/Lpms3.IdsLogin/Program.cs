@@ -2,9 +2,15 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 var oidc = builder.Configuration.GetSection("Oidc");
+
+// Kunci data-protection dipersist agar cookie/sesi tetap valid setelah restart container.
+builder.Services.AddDataProtection()
+    .SetApplicationName("lpms3-idslogin")
+    .PersistKeysToFileSystem(new DirectoryInfo(builder.Configuration["DataProtection:KeysPath"] ?? "/keys"));
 
 builder.Services.AddAuthentication(o =>
     {
