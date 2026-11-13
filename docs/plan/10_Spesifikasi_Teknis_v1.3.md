@@ -48,7 +48,7 @@ Durasi indikatif: **12 minggu** — platform & konfigurasi BOP-001 di staging be
 | A5 | Versi target: **OpenProject 17.x (branch `stable/17`)**, rilis terakhir yang terverifikasi 17.9.6. Saat eksekusi, cek apakah sudah ada `stable/18`. | Nama variabel/skrip seed mungkin perlu penyesuaian bila mayor berubah. |
 | A6 | Edisi **Community** (gratis, GPLv3). | Fitur [EE] memakai alternatif. |
 | A7 | Bahasa antarmuka default **Bahasa Indonesia**, zona waktu **Asia/Jakarta**. | — |
-| A8 | Repo konfigurasi disimpan di GitHub organisasi Len (privat) atau Git internal (GitLab/Gitea). | Ganti URL remote saja. |
+| A8 | Repo konfigurasi disimpan di GitHub organisasi Len (privat). | Ganti URL remote saja. |
 
 ### 1.2 Keputusan yang perlu ditetapkan (sebelum Fase 2)
 

@@ -7,7 +7,7 @@
 | Dokumen | PLAN-LPMS3-MASTER v2.0 (menggantikan v1.3; v1.3 dipertahankan sebagai Buku Teknis — `10_Spesifikasi_Teknis_v1.3.md`) |
 | Tanggal | 9 November 2026 |
 | Penyusun | Andre Tigana (dibantu Claude) |
-| Repo | `https://gitlab.len.co.id/devops/lpms3-v2` (folder kerja `C:\Projects\lpms3-v2`) |
+| Repo | `https://github.com/andretiganalen/lpms3-v2` (folder kerja `C:\Projects\lpms3-v2`) |
 | Acuan wajib | **BOP-001 rev.01** + seluruh formulir & prosedur di `docs/template-bop001/` (26 berkas formulir, 52 berkas prosedur) + **WBS Template LPMS** (`docs/wbs/WBS_Template_LPMS.xlsx`) + PMBOK 7th/8th |
 | Lampiran | `01_Katalog_Form_SOP.md` · `02_Kamus_Data_Formulir_dan_SOP.md` (509 kolom) · `docs/data-dictionary/LPMS3_Data_Dictionary.xlsx` · `db/*.sql` · `db/starrocks/*.sql` · `10_Spesifikasi_Teknis_v1.3.md` |
 
@@ -387,12 +387,12 @@ Prinsip: tabel **Primary Key** untuk data yang di-*upsert*, **Duplicate Key** un
 
 ## 11. RUNBOOK DEPLOYMENT DI VM UBUNTU (urutan eksekusi)
 
-> Prasyarat jaringan: VM `192.168.125.14` dapat menjangkau `192.168.125.29:9030` (StarRocks FE) dan `gitlab.len.co.id`; port `5100` dibuka untuk subnet pengguna. Rincian perintah OS/Docker/hardening: Buku Teknis §4 (F1–F3).
+> Prasyarat jaringan: VM `192.168.125.14` dapat menjangkau `192.168.125.29:9030` (StarRocks FE) dan GitHub; port `5100` dibuka untuk subnet pengguna. Rincian perintah OS/Docker/hardening: Buku Teknis §4 (F1–F3).
 
 | Langkah | Perintah / tindakan | Verifikasi |
 |---|---|---|
 | D0 | Siapkan VM (Ubuntu 24.04, disk `/srv/lpms3`), Docker, UFW (Buku Teknis F1) | `docker run hello-world` |
-| D1 | `git clone https://gitlab.len.co.id/devops/lpms3-v2.git /srv/lpms3/app` | commit = tag rilis |
+| D1 | `git clone https://github.com/andretiganalen/lpms3-v2.git /srv/lpms3/app` | commit = tag rilis |
 | D2 | `cp deploy/.env.example deploy/.env` → isi secret (SECRET_KEY_BASE, PG, **STARROCKS_ROOT_PASSWORD** hanya untuk langkah D4, password user `lpms3_app/etl/bi`) → `chmod 600` | `.env` tidak ter-track git |
 | D3 | `bash ops/compose_up.sh` (clone upstream `stable/17`, build image `lpms3/openproject` + `lpms3/data`, `docker compose up -d`) | `curl http://192.168.125.14:5100/health_checks/full` = PASSED |
 | D4 | `bash ops/starrocks_apply.sh` — menjalankan `db/starrocks/000→990` memakai root **sekali**, membuat `default_catalog.lpms3` & user aplikasi | `SHOW DATABASES` berisi `lpms3`; `SHOW TABLES` ≈ 80 objek; login `lpms3_app` berhasil |
@@ -426,7 +426,7 @@ STARROCKS_BI_PASSWORD=
 
 | Minggu | Platform & data | Plugin LPMS3 | Formulir & WBS | Milestone |
 |---|---|---|---|---|
-| 0 | Keputusan terbuka §14, akses VM & StarRocks, repo GitLab | — | Serah template formulir yang belum ada | M0 |
+| 0 | Keputusan terbuka §14, akses VM & StarRocks | — | Serah template formulir yang belum ada | M0 |
 | 1 | VM, Docker, staging, StarRocks `lpms3` (D4) | S1 sidebar & kapabilitas dasar | Generator kamus data → DDL | M1 staging + DB siap |
 | 2 | PG schema (D5), outbox & sync worker | S2 Settings, User & Access, Inisiasi | FFR-706, FLP-01, BOT-001, SFR-028, RFR-004/005 | — |
 | 3 | Rekonsiliasi PG↔SR | S3 Perencanaan | **WBS Template engine**, Kurva-S, baseline | M2 WBS & Kurva-S |
