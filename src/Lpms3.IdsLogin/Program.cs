@@ -125,7 +125,9 @@ app.MapGet("/ids/enter", async (HttpContext c, IHttpClientFactory f, IConfigurat
     post.Content = new FormUrlEncodedContent(new Dictionary<string, string> { ["authenticity_token"] = m1.Groups[1].Value, ["username"] = email, ["password"] = pwd });
     using var res = await http.SendAsync(post);
     if ((int)res.StatusCode != 302) return Results.Problem("Login OpenProject gagal (" + (int)res.StatusCode + ").");
-    foreach (var ck in res.Headers.GetValues("Set-Cookie")) c.Response.Headers.Append("Set-Cookie", ck);
+    app.Logger.LogInformation("OP-LOGIN status={S} location={L} cookies={N}", (int)res.StatusCode, res.Headers.Location, res.Headers.TryGetValues("Set-Cookie", out var dbg) ? dbg.Count() : 0);
+    if (!res.Headers.TryGetValues("Set-Cookie", out var cks)) return Results.Problem("Login OpenProject tidak mengembalikan sesi (redirect ke " + res.Headers.Location + ").");
+    foreach (var ck in cks) c.Response.Headers.Append("Set-Cookie", ck);
     return Results.Redirect("/");
 });
 app.MapGet("/ids/admin", (HttpContext c) =>
