@@ -80,5 +80,4 @@ Latih restore di lingkungan uji sebelum dibutuhkan saat insiden.
 ## 8. Hal yang belum selesai
 - Login IDS end-to-end (User dan Admin) sudah terverifikasi di browser pada 2026-11-13.
 - `/srv/lpms3` lama sudah dihapus (2026-11-13).
-- Push ke GitLab `devops/lpms3-v2` ditolak (token tanpa izin Code: Download); GitHub sudah sinkron.
 - Stack pernah mati dua kali tanpa sebab jelas; project compose `lpms3` sama dengan stack v1 (`lpms3-ui`, `lpms3-api`). Pertimbangkan nama project terpisah.
