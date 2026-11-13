@@ -82,4 +82,5 @@ Latih restore di lingkungan uji sebelum dibutuhkan saat insiden.
 - `/srv/lpms3` lama sudah dihapus (2026-11-13).
 - Project compose sudah dipisah dari v1: `lpms3v2` (2026-11-13).
 - Deployment D0–D6 selesai & terverifikasi (2026-11-13): health check PASSED, StarRocks `lpms3` ±83 objek, `form_definition` = 18, `STARROCKS_ROOT_PASSWORD` sudah dikosongkan, backup harian 02:00 aktif.
-- Belum: D7 seed LPMS3, D8 struktur organisasi, D9 uji sinkron PG→StarRocks, D10 smoke test, restore drill backup, D12 go-live.
+- D8 data organisasi dimuat dari Nota 021 (`db/040_lpms3_org_nota021.sql`, dijalankan oleh `ops/pg_apply.sh`): 66 unit (5 direktorat, 18 divisi, 43 bagian), 81 pemetaan fungsi→unit. Jenjang diasumsikan Direktorat=DIREKSI, Divisi=ES1, Bagian=ES2 (menunggu SKEP 001/2026). Posisi dan user belum dimuat (menunggu data HC).
+- Belum: D7 seed LPMS3, D9 uji sinkron PG→StarRocks, D10 smoke test, restore drill backup, D12 go-live.
