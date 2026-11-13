@@ -24,11 +24,11 @@ Akses: http://192.168.125.14:5100 · Folder repo: `~/lpms3-v2` · Docker project
 ```bash
 cd ~/lpms3-v2
 ops/compose_up.sh                         # deploy/restart idempoten (aman diulang)
-cd upstream && docker compose -p lpms3 ps # status
-docker compose -p lpms3 logs -f --tail=100 idslogin   # atau web, proxy, db
-docker compose -p lpms3 restart idslogin  # restart satu layanan
+cd upstream && docker compose -p lpms3v2 ps # status
+docker compose -p lpms3v2 logs -f --tail=100 idslogin   # atau web, proxy, db
+docker compose -p lpms3v2 restart idslogin  # restart satu layanan
 ```
-Selalu pakai `-p lpms3`. Menjalankan compose tanpa `-p lpms3` membuat project ganda (`upstream-*`) pada volume yang sama.
+Selalu pakai `-p lpms3v2`. Menjalankan compose tanpa `-p lpms3v2` membuat project ganda (`upstream-*`) pada volume yang sama.
 
 Health check cepat: `curl -s -o /dev/null -w '%{http_code}\n' http://localhost:5100/` (harus 200).
 
@@ -41,12 +41,12 @@ Health check cepat: `curl -s -o /dev/null -w '%{http_code}\n' http://localhost:5
 Restore database (downtime singkat):
 ```bash
 cd ~/lpms3-v2/upstream
-docker compose -p lpms3 stop web worker cron hocuspocus
-docker compose -p lpms3 exec -T db dropdb -U postgres openproject
-docker compose -p lpms3 exec -T db createdb -U postgres openproject
-docker compose -p lpms3 exec -T db pg_restore -U postgres -d openproject < ../data/backup/<ts>/openproject.dump
+docker compose -p lpms3v2 stop web worker cron hocuspocus
+docker compose -p lpms3v2 exec -T db dropdb -U postgres openproject
+docker compose -p lpms3v2 exec -T db createdb -U postgres openproject
+docker compose -p lpms3v2 exec -T db pg_restore -U postgres -d openproject < ../data/backup/<ts>/openproject.dump
 tar -C ../data -xzf ../data/backup/<ts>/opdata.tgz     # bila aset ikut dipulihkan
-docker compose -p lpms3 start web worker cron hocuspocus
+docker compose -p lpms3v2 start web worker cron hocuspocus
 ```
 Latih restore di lingkungan uji sebelum dibutuhkan saat insiden.
 
@@ -75,7 +75,7 @@ Latih restore di lingkungan uji sebelum dibutuhkan saat insiden.
 - `deploy/.env` dan `deploy/secrets/` jangan di-commit, jangan ditempel di chat/tiket.
 - Jangan menampilkan isi `.env` mentah di terminal bersama (berisi `DATABASE_URL` dengan password).
 - Ganti password PostgreSQL dan secret IDS bila pernah terpapar; ubah di `.env` dan di database, lalu deploy ulang.
-- VM ini juga menjalankan aplikasi lain; jangan `docker system prune` atau `docker compose down -v` tanpa `-p lpms3` dan pengecekan.
+- VM ini juga menjalankan aplikasi lain; jangan `docker system prune` atau `docker compose down -v` tanpa `-p lpms3v2` dan pengecekan.
 
 ## 8. Hal yang belum selesai
 - Login IDS end-to-end (User dan Admin) sudah terverifikasi di browser pada 2026-11-13.

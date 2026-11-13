@@ -9,6 +9,6 @@ mkdir -p data/{pgdata,opdata,lkp-raw,backup,idslogin-keys} deploy/secrets
 cp deploy/.env upstream/.env && chmod 600 upstream/.env
 ln -sf ../deploy/docker-compose.stock.yml upstream/docker-compose.override.yml
 cd upstream
-docker compose -p lpms3 config 2>&1 | grep -q 'variable is not set' && { echo "Ada variabel .env yang kosong"; exit 1; } || true
-docker compose -p lpms3 build idslogin
-docker compose -p lpms3 up -d
+docker compose -p lpms3v2 config 2>&1 | grep -q 'variable is not set' && { echo "Ada variabel .env yang kosong"; exit 1; } || true
+docker compose -p lpms3v2 build idslogin
+docker compose -p lpms3v2 up -d

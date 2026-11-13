@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TS=$(date +%Y%m%d-%H%M); DST="$ROOT/data/backup/$TS"; mkdir -p "$DST"
 cd "$ROOT/upstream"
-docker compose -p lpms3 exec -T db pg_dump -U postgres -Fc openproject > "$DST/openproject.dump"
+docker compose -p lpms3v2 exec -T db pg_dump -U postgres -Fc openproject > "$DST/openproject.dump"
 tar -C "$ROOT/data" -czf "$DST/opdata.tgz" opdata
 tar -C "$ROOT/data" -czf "$DST/lkp-raw.tgz" lkp-raw
 sudo -n tar -C "$ROOT/data" -czf "$DST/idslogin-keys.tgz" idslogin-keys
