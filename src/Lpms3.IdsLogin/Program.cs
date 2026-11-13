@@ -74,6 +74,7 @@ app.MapGet("/ids/enter", async (HttpContext c, IHttpClientFactory f, IConfigurat
     var email = c.User.FindFirst("email")?.Value;
     if (string.IsNullOrEmpty(email)) return Results.Problem("Akun IDS tanpa email.");
     var isAdmin = IsAdmin(c.User);
+    app.Logger.LogInformation("ENTER email={Email} roles=[{Roles}] isAdmin={IsAdmin}", email, string.Join(",", c.User.FindAll("role").Select(r => r.Value)), isAdmin);
     var http = f.CreateClient("op");
     HttpRequestMessage Api(HttpMethod m, string path, object? body = null)
     {
@@ -131,6 +132,7 @@ app.MapGet("/ids/admin", (HttpContext c) =>
 {
     if (c.User.Identity?.IsAuthenticated != true) return Results.Redirect("/ids/login?as=admin");
     var ok = IsAdmin(c.User);
+    app.Logger.LogInformation("ADMIN-GATE email={Email} roles=[{Roles}] ok={Ok}", c.User.FindFirst("email")?.Value, string.Join(",", c.User.FindAll("role").Select(r => r.Value)), ok);
     return ok ? Results.Redirect("/ids/enter")
               : Results.Content("<!doctype html><meta charset=utf-8><body style=\"font-family:system-ui;padding:2rem\"><h1>Akses ditolak</h1><p>Akun ini bukan Admin.</p><a href=\"/\">Kembali</a><br><a href=\"/ids/logout\">Keluar</a>", "text/html; charset=utf-8", statusCode: 403);
 });
