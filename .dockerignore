@@ -1,0 +1,5 @@
+# Konteks build image OpenProject hanya butuh plugin dan Gemfile.plugins. Jangan kirim data/, secret, atau .git.
+*
+!plugin/openproject-lpms3
+!deploy/Gemfile.plugins
+!deploy/patch_gemfile_lock.rb

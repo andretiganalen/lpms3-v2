@@ -1,4 +1,4 @@
 group :opf_plugins do
   gem "openproject-lpms3", path: "/app/custom-plugins/openproject-lpms3"
-  gem "mysql2"   # koneksi StarRocks (MySQL protocol) – tambahkan libmysqlclient-dev di Dockerfile bila perlu
+  # gem "mysql2"   # koneksi StarRocks (MySQL protocol): aktifkan bersama libmysqlclient-dev saat sprint ETL/mirror
 end

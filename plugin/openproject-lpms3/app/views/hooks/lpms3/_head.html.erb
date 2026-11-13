@@ -1,0 +1,4 @@
+<% digest = OpenProject::Lpms3::Assets.digest %>
+<link rel="preload" as="font" type="font/woff2" crossorigin href="<%= lpms3_asset_path(digest:, asset: "fonts/poppins-latin-400.woff2") %>">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="<%= lpms3_asset_path(digest:, asset: "fonts/poppins-latin-500.woff2") %>">
+<link rel="stylesheet" href="<%= lpms3_asset_path(digest:, asset: "uix/uix.css") %>">

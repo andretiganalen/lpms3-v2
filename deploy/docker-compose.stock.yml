@@ -1,4 +1,4 @@
-# LPMS3 · override untuk OpenProject resmi (tahap F2S, tanpa plugin). Landing :5100 (IdsLogin): Login User dan Login Admin, keduanya via IDS.
+# LPMS3 · override untuk OpenProject resmi + plugin LPMS3. Landing :5100 (IdsLogin): Login User dan Login Admin, keduanya via IDS.
 x-ids-env: &ids
   OPENPROJECT_OPENID__CONNECT_IDS_DISPLAY__NAME: "IDS Len"
   OPENPROJECT_OPENID__CONNECT_IDS_IDENTIFIER: "${IDS_CLIENT_ID}"
@@ -14,11 +14,14 @@ x-ids-env: &ids
   OPENPROJECT_OPENID__CONNECT_IDS_ATTRIBUTE__MAP_EMAIL: "email"
   OPENPROJECT_OPENID__CONNECT_IDS_ATTRIBUTE__MAP_FIRST__NAME: "given_name"
   OPENPROJECT_OPENID__CONNECT_IDS_ATTRIBUTE__MAP_LAST__NAME: "family_name"
+# Image OpenProject + plugin LPMS3 (dibangun oleh ops/build_image.sh dari deploy/Dockerfile).
+x-lpms3-op: &lpms3op
+  image: lpms3/openproject:${LPMS3_IMAGE_TAG:-local}
 services:
-  web:      { environment: *ids }
-  worker:   { environment: *ids }
-  cron:     { environment: *ids }
-  seeder:   { environment: *ids }
+  web:      { <<: *lpms3op, environment: *ids }
+  worker:   { <<: *lpms3op, environment: *ids }
+  cron:     { <<: *lpms3op, environment: *ids }
+  seeder:   { <<: *lpms3op, environment: *ids }
   idslogin:
     build: { context: ../src/Lpms3.IdsLogin }
     image: lpms3-idslogin:local
