@@ -66,6 +66,9 @@ Latih restore di lingkungan uji sebelum dibutuhkan saat insiden.
 | Login IDS gagal | Cek `logs idslogin`; pastikan `IDS_CLIENT_ID/SECRET` benar dan `dev-ids-intern.len.co.id` terjangkau dari VM. |
 | Bridge HTTP 400/401 | API key salah/kedaluwarsa, atau host_name salah (lihat atas). |
 | Koneksi StarRocks gagal | Uji `mysql -h 192.168.123.13 -P 9030 -u root`; cek `STARROCKS_*` di `.env`. Gunakan `replication_num=1`. |
+| `/ids/enter` HTTP 500, log `OP-LOGIN ... location=.../two_factor_authentication/request cookies=0` | 2FA OpenProject aktif. Dinonaktifkan (`disabled=true` pada `plugin_openproject_two_factor_authentication`) karena login sudah diautentikasi IDS. Bila terulang, set ulang lewat `rails runner`. |
+| Login OpenProject HTTP 429 "Too many login attempts" | Ban per-username 30 menit bila >20 POST `/login` per menit. Jangan uji berulang cepat; hapus ban dengan menghapus key `rack::attack:allow2ban:ban:login:<email>`. |
+| `Unprotect ticket failed` / sesi hilang setelah restart | Kunci data-protection IdsLogin tidak dipersist; hapus cookie atau pakai incognito setelah restart. |
 | Container mati sendiri | `autoheal` me-restart yang unhealthy; lihat `docker logs` sebelum restart manual berulang. |
 
 ## 7. Aturan keamanan
@@ -75,5 +78,8 @@ Latih restore di lingkungan uji sebelum dibutuhkan saat insiden.
 - VM ini juga menjalankan aplikasi lain; jangan `docker system prune` atau `docker compose down -v` tanpa `-p lpms3` dan pengecekan.
 
 ## 8. Hal yang belum selesai
-- Tes login end-to-end di browser belum diverifikasi.
-- Pembersihan `/srv/lpms3` lama menunggu konfirmasi.
+- Login IDS end-to-end (User dan Admin) sudah terverifikasi di browser pada 2026-11-13.
+- Pembersihan `/srv/lpms3` lama (152 MB, tidak dipakai container mana pun) menunggu konfirmasi.
+- Push ke GitLab `devops/lpms3-v2` ditolak (token tanpa izin Code: Download); GitHub sudah sinkron.
+- Stack pernah mati dua kali tanpa sebab jelas; project compose `lpms3` sama dengan stack v1 (`lpms3-ui`, `lpms3-api`). Pertimbangkan nama project terpisah.
+- Kunci data-protection IdsLogin belum dipersist (sesi hilang tiap restart).
