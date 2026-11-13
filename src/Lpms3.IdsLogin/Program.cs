@@ -58,6 +58,11 @@ app.MapGet("/ids/logout", () => Results.SignOut(new AuthenticationProperties { R
     new[] { CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme }));
 var adminRoles = (builder.Configuration["AdminRoles"] ?? "administrator").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
+var adminEmails = (builder.Configuration["AdminEmails"] ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+bool IsAdmin(System.Security.Claims.ClaimsPrincipal u) =>
+    u.FindAll("role").Any(r => adminRoles.Contains(r.Value, StringComparer.OrdinalIgnoreCase))
+    || (u.FindFirst("email")?.Value is { } m && adminEmails.Contains(m, StringComparer.OrdinalIgnoreCase));
+
 // Jembatan: setelah login IDS, buat/sinkronkan akun OpenProject lalu masuk atas nama pengguna.
 app.MapGet("/ids/enter", async (HttpContext c, IHttpClientFactory f, IConfiguration cfg) =>
 {
@@ -68,7 +73,7 @@ app.MapGet("/ids/enter", async (HttpContext c, IHttpClientFactory f, IConfigurat
     if (string.IsNullOrEmpty(key)) return Results.Problem("OpenProject:BridgeApiKey belum diatur.");
     var email = c.User.FindFirst("email")?.Value;
     if (string.IsNullOrEmpty(email)) return Results.Problem("Akun IDS tanpa email.");
-    var isAdmin = c.User.FindAll("role").Any(r => adminRoles.Contains(r.Value, StringComparer.OrdinalIgnoreCase));
+    var isAdmin = IsAdmin(c.User);
     var http = f.CreateClient("op");
     HttpRequestMessage Api(HttpMethod m, string path, object? body = null)
     {
@@ -125,7 +130,7 @@ app.MapGet("/ids/enter", async (HttpContext c, IHttpClientFactory f, IConfigurat
 app.MapGet("/ids/admin", (HttpContext c) =>
 {
     if (c.User.Identity?.IsAuthenticated != true) return Results.Redirect("/ids/login?as=admin");
-    var ok = c.User.FindAll("role").Any(r => adminRoles.Contains(r.Value, StringComparer.OrdinalIgnoreCase));
+    var ok = IsAdmin(c.User);
     return ok ? Results.Redirect("/ids/enter")
               : Results.Content("<!doctype html><meta charset=utf-8><body style=\"font-family:system-ui;padding:2rem\"><h1>Akses ditolak</h1><p>Akun ini bukan Admin.</p><a href=\"/\">Kembali</a><br><a href=\"/ids/logout\">Keluar</a>", "text/html; charset=utf-8", statusCode: 403);
 });

@@ -31,6 +31,7 @@ services:
       OpenProject__PublicHost: "${OPENPROJECT_HOST__NAME}"
       OpenProject__BridgeApiKey: "${LPMS3_BRIDGE_API_KEY}"
       AdminRoles: "${IDS_ADMIN_ROLES:-admin,administrator}"
+      AdminEmails: "${IDS_ADMIN_EMAILS:-}"
     networks: [frontend]
   proxy:
     volumes:
