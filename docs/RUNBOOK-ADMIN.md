@@ -80,4 +80,6 @@ Latih restore di lingkungan uji sebelum dibutuhkan saat insiden.
 ## 8. Hal yang belum selesai
 - Login IDS end-to-end (User dan Admin) sudah terverifikasi di browser pada 2026-11-13.
 - `/srv/lpms3` lama sudah dihapus (2026-11-13).
-- Stack pernah mati dua kali tanpa sebab jelas; project compose `lpms3` sama dengan stack v1 (`lpms3-ui`, `lpms3-api`). Pertimbangkan nama project terpisah.
+- Project compose sudah dipisah dari v1: `lpms3v2` (2026-11-13).
+- Deployment D0–D6 selesai & terverifikasi (2026-11-13): health check PASSED, StarRocks `lpms3` ±83 objek, `form_definition` = 18, `STARROCKS_ROOT_PASSWORD` sudah dikosongkan, backup harian 02:00 aktif.
+- Belum: D7 seed LPMS3, D8 struktur organisasi, D9 uji sinkron PG→StarRocks, D10 smoke test, restore drill backup, D12 go-live.
