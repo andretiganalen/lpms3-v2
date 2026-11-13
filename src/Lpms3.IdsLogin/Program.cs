@@ -83,8 +83,19 @@ app.MapGet("/ids/enter", async (HttpContext c, IHttpClientFactory f, IConfigurat
     using var found = await http.SendAsync(Api(HttpMethod.Get, "/api/v3/users?filters=" + filter));
     var doc = System.Text.Json.JsonDocument.Parse(await found.Content.ReadAsStringAsync());
     var els = doc.RootElement.GetProperty("_embedded").GetProperty("elements");
-    var given = c.User.FindFirst("given_name")?.Value ?? c.User.Identity.Name ?? email;
-    var family = c.User.FindFirst("family_name")?.Value ?? "-";
+    // IDS dapat mengirim klaim sebagai array JSON (mis. ["username","Nama Lengkap"]); ambil nilai terpanjang.
+    string Pick(string t)
+    {
+        var vs = c.User.FindAll(t).Select(x => x.Value?.Trim() ?? "").Where(x => x.Length > 0)
+            .SelectMany(v => { if (v.StartsWith("[")) { try { return System.Text.Json.JsonSerializer.Deserialize<string[]>(v) ?? new string[0]; } catch { } } return new[] { v }; })
+            .Select(x => x.Trim()).Where(x => x.Length > 0).ToList();
+        return vs.Count == 0 ? "" : vs.OrderByDescending(x => x.Length).First();
+    }
+    var fullName = Pick("given_name"); if (fullName == "") fullName = Pick("name"); if (fullName == "") fullName = email;
+    var familyRaw = Pick("family_name");
+    string given, family;
+    if (familyRaw != "" && familyRaw != "-") { given = fullName; family = familyRaw; }
+    else { var parts = fullName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries); given = parts[0]; family = parts.Length > 1 ? parts[1] : "-"; }
     if (els.GetArrayLength() == 0)
     {
         using var cr = await http.SendAsync(Api(HttpMethod.Post, "/api/v3/users", new { login = email, email, firstName = given, lastName = family, admin = isAdmin, status = "active", password = pwd }));
