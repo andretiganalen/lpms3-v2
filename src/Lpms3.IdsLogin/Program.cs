@@ -45,21 +45,77 @@ builder.Services.AddAuthentication(o =>
     });
 builder.Services.AddAuthorization();
 
+builder.Services.AddHttpClient("op", c => c.Timeout = TimeSpan.FromSeconds(20))
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { UseCookies = false, AllowAutoRedirect = false });
 var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapGet("/health", () => Results.Ok("OK"));
 app.MapGet("/ids/login", (string? @as) =>
-    Results.Challenge(new AuthenticationProperties { RedirectUri = @as == "admin" ? "/ids/admin" : "/" }));
+    Results.Challenge(new AuthenticationProperties { RedirectUri = @as == "admin" ? "/ids/admin" : "/ids/enter" }));
 app.MapGet("/ids/logout", () => Results.SignOut(new AuthenticationProperties { RedirectUri = "/" },
     new[] { CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme }));
-var adminRoles = (builder.Configuration["AdminRoles"] ?? "admin,administrator").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+var adminRoles = (builder.Configuration["AdminRoles"] ?? "administrator").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+// Jembatan: setelah login IDS, buat/sinkronkan akun OpenProject lalu masuk atas nama pengguna.
+app.MapGet("/ids/enter", async (HttpContext c, IHttpClientFactory f, IConfiguration cfg) =>
+{
+    if (c.User.Identity?.IsAuthenticated != true) return Results.Redirect("/ids/login");
+    var baseUrl = cfg["OpenProject:BaseUrl"] ?? "http://web:8080";
+    var host = cfg["OpenProject:PublicHost"] ?? c.Request.Host.Value;
+    var key = cfg["OpenProject:BridgeApiKey"];
+    if (string.IsNullOrEmpty(key)) return Results.Problem("OpenProject:BridgeApiKey belum diatur.");
+    var email = c.User.FindFirst("email")?.Value;
+    if (string.IsNullOrEmpty(email)) return Results.Problem("Akun IDS tanpa email.");
+    var isAdmin = c.User.FindAll("role").Any(r => adminRoles.Contains(r.Value, StringComparer.OrdinalIgnoreCase));
+    var http = f.CreateClient("op");
+    HttpRequestMessage Api(HttpMethod m, string path, object? body = null)
+    {
+        var r = new HttpRequestMessage(m, baseUrl + path);
+        r.Headers.Host = host;
+        r.Headers.Authorization = new("Basic", Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes("apikey:" + key)));
+        if (body != null) r.Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(body), System.Text.Encoding.UTF8, "application/json");
+        return r;
+    }
+    var pwd = Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(24)) + "aA1!";
+    var filter = Uri.EscapeDataString("[{\"login\":{\"operator\":\"=\",\"values\":[\"" + email.Replace("\"", "") + "\"]}}]");
+    using var found = await http.SendAsync(Api(HttpMethod.Get, "/api/v3/users?filters=" + filter));
+    var doc = System.Text.Json.JsonDocument.Parse(await found.Content.ReadAsStringAsync());
+    var els = doc.RootElement.GetProperty("_embedded").GetProperty("elements");
+    var given = c.User.FindFirst("given_name")?.Value ?? c.User.Identity.Name ?? email;
+    var family = c.User.FindFirst("family_name")?.Value ?? "-";
+    if (els.GetArrayLength() == 0)
+    {
+        using var cr = await http.SendAsync(Api(HttpMethod.Post, "/api/v3/users", new { login = email, email, firstName = given, lastName = family, admin = isAdmin, status = "active", password = pwd }));
+        if (!cr.IsSuccessStatusCode) return Results.Problem("Gagal membuat akun OpenProject (" + (int)cr.StatusCode + ").");
+    }
+    else
+    {
+        var id = els[0].GetProperty("id").GetInt32();
+        using var up = await http.SendAsync(Api(HttpMethod.Patch, "/api/v3/users/" + id, new { admin = isAdmin, status = "active", password = pwd }));
+        if (!up.IsSuccessStatusCode) return Results.Problem("Gagal menyinkronkan akun OpenProject (" + (int)up.StatusCode + ").");
+    }
+    // Login form OpenProject atas nama pengguna
+    HttpRequestMessage Web(HttpMethod m, string path, string? cookie = null)
+    { var r = new HttpRequestMessage(m, baseUrl + path); r.Headers.Host = host; if (cookie != null) r.Headers.Add("Cookie", cookie); return r; }
+    using var form = await http.SendAsync(Web(HttpMethod.Get, "/login"));
+    var html = await form.Content.ReadAsStringAsync();
+    var m1 = System.Text.RegularExpressions.Regex.Match(html, "name=\"authenticity_token\"[^>]*value=\"([^\"]+)\"");
+    if (!m1.Success) m1 = System.Text.RegularExpressions.Regex.Match(html, "name=\"csrf-token\"[^>]*content=\"([^\"]+)\"");
+    var sess = string.Join("; ", form.Headers.TryGetValues("Set-Cookie", out var sc) ? sc.Select(x => x.Split(';')[0]) : Array.Empty<string>());
+    var post = Web(HttpMethod.Post, "/login", sess);
+    post.Content = new FormUrlEncodedContent(new Dictionary<string, string> { ["authenticity_token"] = m1.Groups[1].Value, ["username"] = email, ["password"] = pwd });
+    using var res = await http.SendAsync(post);
+    if ((int)res.StatusCode != 302) return Results.Problem("Login OpenProject gagal (" + (int)res.StatusCode + ").");
+    foreach (var ck in res.Headers.GetValues("Set-Cookie")) c.Response.Headers.Append("Set-Cookie", ck);
+    return Results.Redirect("/");
+});
 app.MapGet("/ids/admin", (HttpContext c) =>
 {
     if (c.User.Identity?.IsAuthenticated != true) return Results.Redirect("/ids/login?as=admin");
     var ok = c.User.FindAll("role").Any(r => adminRoles.Contains(r.Value, StringComparer.OrdinalIgnoreCase));
-    return ok ? Results.Redirect("/?admin=1")
+    return ok ? Results.Redirect("/ids/enter")
               : Results.Content("<!doctype html><meta charset=utf-8><body style=\"font-family:system-ui;padding:2rem\"><h1>Akses ditolak</h1><p>Akun ini bukan Admin.</p><a href=\"/\">Kembali</a><br><a href=\"/ids/logout\">Keluar</a>", "text/html; charset=utf-8", statusCode: 403);
 });
 app.MapGet("/", (HttpContext c) =>

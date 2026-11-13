@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
+# Backup OpenProject: dump PostgreSQL + opdata + lkp-raw + env. Retensi 14 hari.
 set -euo pipefail
-TS=$(date +%Y%m%d-%H%M); DST=/srv/lpms3/backup/$TS; mkdir -p "$DST"
-cd /srv/lpms3/app/upstream
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+TS=$(date +%Y%m%d-%H%M); DST="$ROOT/data/backup/$TS"; mkdir -p "$DST"
+cd "$ROOT/upstream"
 docker compose -p lpms3 exec -T db pg_dump -U postgres -Fc openproject > "$DST/openproject.dump"
-tar -C /srv/lpms3 -czf "$DST/opdata.tgz" opdata
-tar -C /srv/lpms3 -czf "$DST/lkp-raw.tgz" lkp-raw
-cp .env "$DST/env.backup" && chmod 600 "$DST/env.backup"
-git -C /srv/lpms3/app rev-parse HEAD > "$DST/config-commit.txt"
-sha256sum "$DST"/* > "$DST/SHA256SUMS"
-find /srv/lpms3/backup -maxdepth 1 -type d -mtime +14 -exec rm -rf {} +
-# StarRocks: BACKUP SNAPSHOT lpms3 ke repository NAS dijadwalkan oleh admin StarRocks (lihat Master Plan §9)
+tar -C "$ROOT/data" -czf "$DST/opdata.tgz" opdata
+tar -C "$ROOT/data" -czf "$DST/lkp-raw.tgz" lkp-raw
+cp "$ROOT/deploy/.env" "$DST/env.backup" && chmod 600 "$DST/env.backup"
+git -C "$ROOT" rev-parse HEAD > "$DST/config-commit.txt"
+(cd "$DST" && sha256sum * > SHA256SUMS)
+find "$ROOT/data/backup" -mindepth 1 -maxdepth 1 -type d -mtime +14 -exec rm -rf {} +
+# StarRocks: BACKUP SNAPSHOT dijadwalkan oleh admin StarRocks (lihat Master Plan §9)

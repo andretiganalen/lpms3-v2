@@ -20,15 +20,19 @@ services:
   cron:     { environment: *ids }
   seeder:   { environment: *ids }
   idslogin:
-    build: { context: /srv/lpms3/app/src/Lpms3.IdsLogin }
+    build: { context: ../src/Lpms3.IdsLogin }
     image: lpms3-idslogin:local
     restart: unless-stopped
     environment:
       Oidc__ClientId: "${IDS_CLIENT_ID}"
       Oidc__ClientSecret: "${IDS_CLIENT_SECRET}"
       Oidc__Authority: "https://dev-ids-intern.len.co.id"
+      OpenProject__BaseUrl: "http://web:8080"
+      OpenProject__PublicHost: "${OPENPROJECT_HOST__NAME}"
+      OpenProject__BridgeApiKey: "${LPMS3_BRIDGE_API_KEY}"
+      AdminRoles: "${IDS_ADMIN_ROLES:-admin,administrator}"
     networks: [frontend]
   proxy:
     volumes:
-      - /srv/lpms3/app/deploy/Caddyfile.landing:/etc/caddy/Caddyfile:ro
+      - ../deploy/Caddyfile.landing:/etc/caddy/Caddyfile:ro
     depends_on: [web, idslogin]

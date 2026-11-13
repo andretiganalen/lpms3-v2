@@ -12,3 +12,6 @@ Thumbs.db
 bin/
 obj/
 *.user
+deploy/secrets/
+upstream/
+data/

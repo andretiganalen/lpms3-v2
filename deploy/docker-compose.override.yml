@@ -10,14 +10,14 @@ services:
       POSTGRES_PASSWORD: ${LPMS3_PG_PASSWORD}
   web:
     <<: *lpms3img
-    build: { context: /srv/lpms3/app, dockerfile: deploy/Dockerfile, args: { OP_TAG: "${OP_TAG}" } }
+    build: { context: .., dockerfile: deploy/Dockerfile, args: { OP_TAG: "${OP_TAG}" } }
     environment: *opdb
   worker: { <<: *lpms3img, environment: *opdb }
   cron:   { <<: *lpms3img, environment: *opdb }
   seeder: { <<: *lpms3img, environment: *opdb }
   lpms3-data:
     image: lpms3/data:${LPMS3_IMAGE_TAG}
-    build: { context: /srv/lpms3/app/etl }
+    build: { context: ../etl }
     restart: unless-stopped
     environment:
       PG_DSN: "postgresql://postgres:${LPMS3_PG_PASSWORD}@db/openproject"
@@ -27,5 +27,5 @@ services:
       STARROCKS_USER: lpms3_etl
       STARROCKS_PASSWORD: ${STARROCKS_ETL_PASSWORD}
     volumes:
-      - /srv/lpms3/lkp-raw:/data/raw
+      - ../data/lkp-raw:/data/raw
     depends_on: [db]
