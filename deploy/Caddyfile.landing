@@ -1,0 +1,17 @@
+# Landing page IDS di :5100; selebihnya ke OpenProject.
+:80 {
+    @ids {
+        path / /ids/* /signin-oidc /signout-callback-oidc /health-ids
+    }
+    handle @ids {
+        reverse_proxy idslogin:5100
+    }
+    handle {
+        reverse_proxy /hocuspocus* hocuspocus:1234
+        reverse_proxy * http://web:8080 {
+            header_up X-Forwarded-Proto {header.X-Forwarded-Proto}
+            header_up X-Forwarded-For {header.X-Forwarded-For}
+        }
+    }
+    log
+}

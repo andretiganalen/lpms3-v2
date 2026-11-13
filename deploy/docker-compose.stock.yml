@@ -1,4 +1,4 @@
-# LPMS3 · override untuk OpenProject resmi (tahap F2S, tanpa plugin). Login HANYA lewat IDS (OpenID Connect).
+# LPMS3 · override untuk OpenProject resmi (tahap F2S, tanpa plugin). Landing :5100 (IdsLogin): Login User dan Login Admin, keduanya via IDS.
 x-ids-env: &ids
   OPENPROJECT_OPENID__CONNECT_IDS_DISPLAY__NAME: "IDS Len"
   OPENPROJECT_OPENID__CONNECT_IDS_IDENTIFIER: "${IDS_CLIENT_ID}"
@@ -19,3 +19,16 @@ services:
   worker:   { environment: *ids }
   cron:     { environment: *ids }
   seeder:   { environment: *ids }
+  idslogin:
+    build: { context: /srv/lpms3/app/src/Lpms3.IdsLogin }
+    image: lpms3-idslogin:local
+    restart: unless-stopped
+    environment:
+      Oidc__ClientId: "${IDS_CLIENT_ID}"
+      Oidc__ClientSecret: "${IDS_CLIENT_SECRET}"
+      Oidc__Authority: "https://dev-ids-intern.len.co.id"
+    networks: [frontend]
+  proxy:
+    volumes:
+      - /srv/lpms3/app/deploy/Caddyfile.landing:/etc/caddy/Caddyfile:ro
+    depends_on: [web, idslogin]
