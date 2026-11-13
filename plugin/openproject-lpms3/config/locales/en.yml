@@ -1,0 +1,33 @@
+en:
+  lpms3:
+    organisasi:
+      menu: "Organization & Functions"
+      title: "Organization & Functions"
+      description: "The effective organization structure and the mapping of generic functions to actual units. User rights derive from the functions their unit performs."
+      empty: "No organization structure version yet. Run ops/pg_apply.sh to load the Nota 021 data."
+      version: "Structure version"
+      status:
+        active: "In effect"
+        draft: "Draft"
+        archived: "Archived"
+      effective_from: "Effective %{date}"
+      basis: "Function mapping basis: Nota 021/N/UQ/VIII/2026"
+      summary: "Structure summary"
+      stats:
+        directorates: "Directorates"
+        divisions: "Divisions"
+        sections: "Sections"
+        mappings: "Function mappings"
+      search_label: "Search units or functions"
+      search_placeholder: "e.g. Project Oversight"
+      search: "Search"
+      reset: "Clear search"
+      no_result: "No unit or function matches \"%{query}\"."
+      col:
+        unit: "Unit"
+        fungsi_baru: "Generic function (new)"
+        fungsi_lama: "Generic function (previous)"
+        tupoksi: "Main duties"
+      show_tupoksi: "Show duties"
+      none: "None"
+      unmapped: "Not yet mapped to a function."

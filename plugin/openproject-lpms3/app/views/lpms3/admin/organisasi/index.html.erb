@@ -1,0 +1,118 @@
+<% html_title t(:label_administration), t("lpms3.organisasi.title") %>
+
+<%=
+  render(Primer::OpenProject::PageHeader.new) do |header|
+    header.with_title { t("lpms3.organisasi.title") }
+    header.with_breadcrumbs([{ href: admin_index_path, text: t("label_administration") }, t("lpms3.organisasi.title")])
+    header.with_description { t("lpms3.organisasi.description") }
+  end
+%>
+
+<% if @structure.nil? %>
+  <section class="lpms3-card lpms3-empty">
+    <p><%= t("lpms3.organisasi.empty") %></p>
+  </section>
+<% else %>
+  <section class="lpms3-meta" aria-label="<%= t("lpms3.organisasi.version") %>">
+    <div class="lpms3-meta__main">
+      <span class="lpms3-meta__label"><%= t("lpms3.organisasi.version") %></span>
+      <strong><%= @structure.name %></strong>
+      <span class="lpms3-chip lpms3-chip--ok"><%= t("lpms3.organisasi.status.#{@structure.status.downcase}") %></span>
+    </div>
+    <div class="lpms3-meta__sub">
+      <%= t("lpms3.organisasi.effective_from", date: l(@structure.effective_from, format: :long)) %>
+      &middot; <%= t("lpms3.organisasi.basis") %>
+    </div>
+  </section>
+
+  <ul class="lpms3-stats" aria-label="<%= t("lpms3.organisasi.summary") %>">
+    <% { "DIREKSI" => :directorates, "ES1" => :divisions, "ES2" => :sections }.each do |grade, key| %>
+      <li class="lpms3-card lpms3-stat">
+        <span class="lpms3-stat__value"><%= @counts[grade].to_i %></span>
+        <span class="lpms3-stat__label"><%= t("lpms3.organisasi.stats.#{key}") %></span>
+      </li>
+    <% end %>
+    <li class="lpms3-card lpms3-stat">
+      <span class="lpms3-stat__value"><%= @mapping_count %></span>
+      <span class="lpms3-stat__label"><%= t("lpms3.organisasi.stats.mappings") %></span>
+    </li>
+  </ul>
+
+  <%= form_tag lpms3_admin_organisasi_path, method: :get, class: "lpms3-search", role: "search" do %>
+    <label for="lpms3-q"><%= t("lpms3.organisasi.search_label") %></label>
+    <input id="lpms3-q" type="search" name="q" value="<%= @query %>" placeholder="<%= t("lpms3.organisasi.search_placeholder") %>" class="lpms3-input">
+    <button type="submit" class="lpms3-btn lpms3-btn--primary"><%= t("lpms3.organisasi.search") %></button>
+    <% if @query.present? %>
+      <%= link_to t("lpms3.organisasi.reset"), lpms3_admin_organisasi_path, class: "lpms3-btn" %>
+    <% end %>
+  <% end %>
+
+  <% if @tree.empty? %>
+    <section class="lpms3-card lpms3-empty">
+      <p><%= t("lpms3.organisasi.no_result", query: @query) %></p>
+    </section>
+  <% end %>
+
+  <% @tree.each do |entry| %>
+    <section class="lpms3-card lpms3-dir">
+      <h2 class="lpms3-dir__title"><%= entry[:dir].name %></h2>
+
+      <% entry[:divisions].each do |d| %>
+        <% div = d[:div] %>
+        <div class="lpms3-div">
+          <h3 class="lpms3-div__title"><%= div.name %></h3>
+          <% if div.mappings.any? %>
+            <ul class="lpms3-chips">
+              <% div.mappings.sort_by { |m| m.fungsi.name }.each do |m| %>
+                <li class="lpms3-chip" title="<%= m.catatan %>"><%= m.fungsi.name %><%= " #{m.catatan[/\A\*+/]}" if m.catatan.to_s.start_with?("*") %></li>
+              <% end %>
+            </ul>
+            <% div.mappings.select { |m| m.catatan.present? }.map(&:catatan).uniq.each do |note| %>
+              <p class="lpms3-note"><%= note %></p>
+            <% end %>
+          <% end %>
+
+          <% if d[:bagian].any? %>
+            <div class="lpms3-table-wrap">
+              <table class="lpms3-table">
+                <thead>
+                  <tr>
+                    <th scope="col"><%= t("lpms3.organisasi.col.unit") %></th>
+                    <th scope="col"><%= t("lpms3.organisasi.col.fungsi_baru") %></th>
+                    <th scope="col"><%= t("lpms3.organisasi.col.fungsi_lama") %></th>
+                    <th scope="col"><%= t("lpms3.organisasi.col.tupoksi") %></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% d[:bagian].each do |bag| %>
+                    <% maps = bag.mappings.sort_by { |m| m.fungsi.name } %>
+                    <% maps.each_with_index do |m, i| %>
+                      <tr>
+                        <% if i.zero? %>
+                          <th scope="row" rowspan="<%= maps.size %>"><%= bag.name %></th>
+                        <% end %>
+                        <td><%= m.fungsi.name %></td>
+                        <td><%= m.fungsi_lama&.name || t("lpms3.organisasi.none") %></td>
+                        <td>
+                          <% if m.lingkup.present? %>
+                            <details>
+                              <summary><%= t("lpms3.organisasi.show_tupoksi") %></summary>
+                              <p><%= m.lingkup %></p>
+                            </details>
+                          <% end %>
+                        </td>
+                      </tr>
+                    <% end %>
+                    <% if maps.empty? %>
+                      <tr><th scope="row"><%= bag.name %></th><td colspan="3"><%= t("lpms3.organisasi.unmapped") %></td></tr>
+                    <% end %>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </section>
+  <% end %>
+<% end %>

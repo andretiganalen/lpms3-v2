@@ -1,0 +1,33 @@
+id:
+  lpms3:
+    organisasi:
+      menu: "Organisasi & Fungsi"
+      title: "Organisasi & Fungsi"
+      description: "Struktur organisasi yang berlaku dan pemetaan Fungsi Generik terhadap Unit Aktual. Hak pengguna diturunkan dari fungsi yang dijalankan unitnya."
+      empty: "Belum ada versi struktur organisasi. Jalankan ops/pg_apply.sh untuk memuat data Nota 021."
+      version: "Versi struktur"
+      status:
+        active: "Berlaku"
+        draft: "Draf"
+        archived: "Diarsipkan"
+      effective_from: "Berlaku sejak %{date}"
+      basis: "Dasar pemetaan fungsi: Nota 021/N/UQ/VIII/2026"
+      summary: "Ringkasan struktur"
+      stats:
+        directorates: "Direktorat"
+        divisions: "Divisi"
+        sections: "Bagian"
+        mappings: "Pemetaan fungsi"
+      search_label: "Cari unit atau fungsi"
+      search_placeholder: "Mis. Pengawasan Proyek"
+      search: "Cari"
+      reset: "Hapus pencarian"
+      no_result: "Tidak ada unit atau fungsi yang cocok dengan \"%{query}\"."
+      col:
+        unit: "Unit"
+        fungsi_baru: "Fungsi generik (baru)"
+        fungsi_lama: "Fungsi generik (lama)"
+        tupoksi: "Tupoksi utama"
+      show_tupoksi: "Lihat tupoksi"
+      none: "Tidak ada"
+      unmapped: "Belum dipetakan ke fungsi."
