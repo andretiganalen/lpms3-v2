@@ -32,6 +32,8 @@ services:
       OpenProject__BridgeApiKey: "${LPMS3_BRIDGE_API_KEY}"
       AdminRoles: "${IDS_ADMIN_ROLES:-admin,administrator}"
       AdminEmails: "${IDS_ADMIN_EMAILS:-}"
+    volumes:
+      - ../data/idslogin-keys:/keys
     networks: [frontend]
   proxy:
     volumes:
