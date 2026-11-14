@@ -70,7 +70,13 @@
   --header-border-bottom-color: var(--uix-border);
   --main-menu-bg-color: var(--uix-surface);
   --main-menu-bg-selected-background: var(--uix-surface-muted);
+  /* Font: OpenProject/Primer memasang font body lewat variabel ini, jadi aturan html/body di bawah saja tidak cukup. */
+  --body-font-family: var(--uix-font);
+  --fontStack-sansSerif: var(--uix-font);
 }
+
+/* OP 17 mewarnai item sidebar terpilih lewat variabel Primer ini; dibatasi ke sidebar saja. */
+.main-menu { --control-transparent-bgColor-selected: var(--uix-surface-muted); }
 
 html, body, button, input, select, textarea { font-family: var(--uix-font); }
 :focus-visible { outline: 3px solid var(--uix-focus-ring); outline-offset: 0; }

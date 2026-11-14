@@ -1,4 +1,11 @@
 # CHANGELOG
+## 2026-11-14 — Rilis 17.9.7-lpms3.1.2 (tema UIx benar-benar berlaku)
+- Verifikasi browser (Chrome headless, 1440×900): berkas plugin di image identik dengan repo dan `uix.css` tersaji byte demi byte sama, tetapi dua pemetaan dari commit awal (`70eb3c5`) **tidak berlaku** di OP 17:
+  - Font: Poppins terunduh tetapi `body` tetap font sistem, karena OP/Primer memasang font lewat `--body-font-family`/`--fontStack-sansSerif`. Kedua variabel kini diarahkan ke `--uix-font`.
+  - Menu sidebar terpilih memakai `--control-transparent-bgColor-selected` (Primer), bukan `--main-menu-bg-selected-background`. Dipetakan ke `--uix-surface-muted`, dibatasi pada `.main-menu`.
+- Hasil: Proyek, Ringkasan, Paket-Penugasan, dan My page memakai font "UIx Poppins", primer `#ae2524`, menu terpilih `#f3f4f6`. Health check penuh 6/6 PASSED.
+- Image: `lpms3/openproject:17.9.7-lpms3.1.2` (`0a2bc899c97d`); idslogin dan data sama dengan 1.1.
+
 ## 2026-11-14 — Rilis 17.9.7-lpms3.1.1 (login wajib IDS)
 - Semua pintu login, registrasi, aktivasi, dan reset password bawaan OpenProject di `:5100` dialihkan ke IDS (`deploy/Caddyfile.landing`); `/logout` → `/ids/logout`.
 - IdsLogin: `/ids/logout` menghapus cookie `_open_project_session` sebelum keluar dari IDS, supaya logout tidak otomatis masuk lagi.
