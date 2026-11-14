@@ -9,7 +9,7 @@ Acuan: Buku Teknis §7.4 dan Master Plan §11. Legenda: ✅ selesai · 🟡 seba
 | 2 | UAT ≥ 95% lulus, 0 defect kritikal, BA UAT | ⛔ 👤 | Smoke D10: 22 PASS, 0 FAIL, 5 N/A. UAT penuh U01–U31 belum (lihat bagian C) |
 | 3 | Password admin bawaan diganti/dinonaktifkan, 2FA admin aktif | ⛔ | Ada 3 akun admin aktif. Periksa akun `admin` bawaan dan aktifkan 2FA |
 | 4 | Backup harian ≥ 7 hari berturut-turut + 1 restore drill | 🟡 | Drill sukses (9–19 dtk). Backup baru berjalan sejak 12 Nov (~3 hari); cron 02:00 aktif — tunggu sampai ≥ 7 hari |
-| 5 | `OP_TAG` & `LPMS3_IMAGE_TAG` dipin dan dicatat di CHANGELOG | ⛔ | `LPMS3_IMAGE_TAG` belum di `deploy/.env` (default `local`). Pin mis. `17.9.6-lpms3.1.0` |
+| 5 | `OP_TAG` & `LPMS3_IMAGE_TAG` dipin dan dicatat di CHANGELOG | ✅ | 2026-11-14: rilis `17.9.7-lpms3.1.0`; base OP, postgres 17.11, memcached 1.6.45 dipin per digest (lihat CHANGELOG). Ganti tag hanya lewat prosedur upgrade |
 | 6 | Monitoring & alert aktif (§8.2) | ⛔ | Belum ada. Minimal: alert untuk `ALARM` outbox di log `lpms3-data`, health check, disk, backup gagal |
 | 7 | Data pilot bersih | ⛔ | Lihat bagian B |
 | 8 | Komunikasi go-live dikirim | ⛔ 👤 | URL `http://192.168.125.14:5100` + kontak dukungan |
@@ -40,7 +40,7 @@ Acuan: Buku Teknis §7.4 dan Master Plan §11. Legenda: ✅ selesai · 🟡 seba
 ## E. Keamanan & operasional
 - [ ] Akses hanya LAN/VPN Len (UFW/subnet); bila publik → TLS + WAF.
 - [ ] Password admin: ganti, simpan di pengelola rahasia; `SECRET_KEY_BASE` tidak boleh diganti setelah go-live.
-- [ ] Pin `TAG` Postgres/OP (jangan floating `17-slim`); catat di CHANGELOG.
+- [x] Pin `TAG` Postgres/OP (jangan floating `17-slim`); catat di CHANGELOG. (2026-11-14)
 - [ ] Alarm: entri outbox `attempts ≥ 10` (log `lpms3-data`), rekonsiliasi harian berselisih, backup gagal.
 - [ ] Uji ulang idempotensi seed di produksi bersih (`lpms3/seed/run.sh`) dan jalankan `lpms3/smoke/run.sh`.
 - [ ] Pelatihan (Spesifikasi §7.3) dan Wiki "LPMS3 Help Center" (Bahasa Indonesia).

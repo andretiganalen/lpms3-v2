@@ -1,7 +1,8 @@
 # Image OpenProject + plugin LPMS3 (tema UIx, Organisasi & Fungsi, sidebar). Dibangun dari konteks root repo:
 #   docker build -f deploy/Dockerfile -t lpms3/openproject:local .
 # OP_IMAGE harus sama dengan image yang dipakai deploy/docker-compose.stock.yml sebelum plugin.
-ARG OP_IMAGE=openproject/openproject:17-slim
+# Dipin ke digest OP 17.9.7 (diuji 2026-11-14). Ganti hanya lewat prosedur upgrade.
+ARG OP_IMAGE=openproject/openproject:17-slim@sha256:4e978557b4009dfdcdab6f18acd1aa9348a2c41ce5cd50c3d535e4c093a5c505
 FROM ${OP_IMAGE}
 COPY --chown=app:app plugin/openproject-lpms3 /app/custom-plugins/openproject-lpms3
 COPY --chown=app:app deploy/Gemfile.plugins /app/Gemfile.plugins
