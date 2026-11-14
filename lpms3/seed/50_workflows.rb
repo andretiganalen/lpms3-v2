@@ -8,6 +8,9 @@ mk = lambda do |type, r, from, to|
 end
 Lpms3Data::TYPES.each do |tname, (statuses, _c, _m)|
   type = Type.find_by!(name: tname)
+  # WP baru OpenProject selalu berstatus default "New"; beri transisi New -> status awal tipe
+  # agar pembuat dapat memilih status awal yang benar di form (CR: hanya Pimpro).
+  (tname == "Change Request" ? ["Pimpro"] : Lpms3Data::GENERAL_ROLES).each { |rn| mk.(type, role[rn], "New", statuses.first) }
   if tname == "Change Request"
     Lpms3Data::CR_FLOW.each { |rn, pairs| pairs.each { |f, t| mk.(type, role[rn], f, t) } }
   else
