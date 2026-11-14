@@ -142,30 +142,50 @@ app.MapGet("/ids/enter", async (HttpContext c, IHttpClientFactory f, IConfigurat
     foreach (var ck in cks) c.Response.Headers.Append("Set-Cookie", ck);
     return Results.Redirect("/projects");
 });
+// Halaman UIx untuk landing & pesan IdsLogin: token dan font Poppins dari uix.css plugin (dilayani OpenProject),
+// versi rilis di URL sebagai pemecah cache. Tema terang saja (UIx), tanpa nilai warna liar.
+// Titik dibuang: segmen :digest di route Rails tidak menerima titik (akan 404). Nilainya hanya pemecah cache.
+var uixRelease = Uri.EscapeDataString((builder.Configuration["Lpms3:Release"] ?? "local").Replace('.', '-'));
+string UixPage(string title, string body) =>
+    "<!doctype html><html lang=\"id\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
+    + "<title>" + title + " · LPMS3</title>"
+    + "<link rel=\"preload\" as=\"font\" type=\"font/woff2\" crossorigin href=\"/lpms3/assets/" + uixRelease + "/fonts/poppins-latin-400.woff2\">"
+    + "<link rel=\"stylesheet\" href=\"/lpms3/assets/" + uixRelease + "/uix/uix.css\"><style>"
+    + "body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--uix-surface-page);color:var(--uix-text-body);font:var(--uix-fs-body)/1.5 var(--uix-font)}"
+    + "main{width:min(400px,calc(100% - 32px));box-sizing:border-box;background:var(--uix-surface);border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);box-shadow:var(--uix-shadow-xs);padding:32px}"
+    + "h1{margin:0 0 4px;font-size:var(--uix-fs-page);font-weight:600;color:var(--uix-text-head)}"
+    + "p{margin:0 0 24px;color:var(--uix-text-secondary)}"
+    + "a.btn{display:flex;align-items:center;justify-content:center;height:38px;box-sizing:border-box;border-radius:var(--uix-radius-control);font-weight:500;text-decoration:none;box-shadow:var(--uix-shadow-xs);background:var(--uix-primary);color:var(--uix-on-primary);border:1px solid var(--uix-primary)}"
+    + "a.btn:hover{background:var(--uix-primary-strong);border-color:var(--uix-primary-strong)}"
+    + "a.btn.o{background:var(--uix-surface);color:var(--uix-text-body);border-color:var(--uix-border-strong)}a.btn.o:hover{background:var(--uix-surface-muted)}"
+    + ".sp{height:12px}small{display:block;margin-top:20px;font-size:12px;color:var(--uix-text-secondary);text-align:center}"
+    + "dl{margin:0 0 24px;display:grid;grid-template-columns:auto 1fr;gap:8px 16px}dt{color:var(--uix-text-secondary)}dd{margin:0;word-break:break-all;color:var(--uix-text-head)}"
+    + "</style></head><body><main>" + body + "</main></body></html>";
+
 app.MapGet("/ids/admin", (HttpContext c) =>
 {
     if (c.User.Identity?.IsAuthenticated != true) return Results.Redirect("/ids/login?as=admin");
     var ok = IsAdmin(c.User);
     app.Logger.LogInformation("ADMIN-GATE email={Email} roles=[{Roles}] ok={Ok}", c.User.FindFirst("email")?.Value, string.Join(",", c.User.FindAll("role").Select(r => r.Value)), ok);
     return ok ? Results.Redirect("/ids/enter")
-              : Results.Content("<!doctype html><meta charset=utf-8><body style=\"font-family:system-ui;padding:2rem\"><h1>Akses ditolak</h1><p>Akun ini bukan Admin.</p><a href=\"/\">Kembali</a><br><a href=\"/ids/logout\">Keluar</a>", "text/html; charset=utf-8", statusCode: 403);
+              : Results.Content(UixPage("Akses ditolak", "<h1>Akses ditolak</h1><p>Akun IDS ini tidak memiliki peran Admin LPMS3. Masuk sebagai pengguna, atau hubungi administrator untuk meminta akses.</p>"
+                  + "<a class=\"btn\" href=\"/ids/enter\">Masuk sebagai pengguna</a><div class=\"sp\"></div><a class=\"btn o\" href=\"/ids/logout\">Keluar</a>"), "text/html; charset=utf-8", statusCode: 403);
 });
 app.MapGet("/", (HttpContext c) =>
 {
     static string E(string? v) => System.Net.WebUtility.HtmlEncode(v ?? "");
-    const string css = ":root{--bg:#f5f6f8;--fg:#1c1f26;--card:#fff;--mut:#667085;--pri:#ae2524;--bd:#e4e7ec}@media(prefers-color-scheme:dark){:root{--bg:#14161a;--fg:#eceef2;--card:#1e2127;--mut:#98a2b3;--bd:#2f343c}}body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,sans-serif}main{width:min(440px,calc(100% - 32px));background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:32px}h1{font-size:1.4rem;margin:0 0 4px}p{color:var(--mut);margin:0 0 24px}a.btn{display:block;text-align:center;background:var(--pri);color:#fff;text-decoration:none;padding:12px;border-radius:8px;font-weight:600}a.btn.o{background:none;color:var(--pri);border:1px solid var(--pri)}.sp{height:12px}small{display:block;margin-top:20px;color:var(--mut);text-align:center}dl{margin:0 0 24px;display:grid;grid-template-columns:auto 1fr;gap:8px 16px}dt{color:var(--mut)}dd{margin:0;word-break:break-all}";
-    string page(string body) => "<!doctype html><html lang=\"id\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>LPMS3 Login IDS</title><style>" + css + "</style></head><body><main>" + body + "</main></body></html>";
+    string page(string body) => UixPage("Masuk", body);
     // Sudah login IDS: '/' (mis. klik logo) menyambung ulang sesi aplikasi lalu masuk ke daftar proyek.
     if (c.User.Identity?.IsAuthenticated == true) return Results.Redirect("/ids/enter");
     if (c.User.Identity?.IsAuthenticated != true)
         return Results.Content(page("<h1>LPMS3</h1><p>Masuk menggunakan akun IDS Len.</p>"
-            + "<a class=\"btn\" href=\"/ids/login?as=user\">Login User</a>"
+            + "<a class=\"btn\" href=\"/ids/login?as=user\">Masuk sebagai pengguna</a>"
             + "<div class=\"sp\"></div>"
-            + "<a class=\"btn o\" href=\"/ids/login?as=admin\">Login Admin</a>"
-            + "<small>Keduanya memakai IDS; hak akses ditentukan oleh peran akun.</small>"), "text/html; charset=utf-8");
+            + "<a class=\"btn o\" href=\"/ids/login?as=admin\">Masuk sebagai admin</a>"
+            + "<small>Keduanya memakai IDS Len. Hak akses ditentukan oleh peran akun.</small>"), "text/html; charset=utf-8");
     string Claim(params string[] t) => t.Select(x => c.User.FindFirst(x)?.Value).FirstOrDefault(v => v != null) ?? "-";
     var roles = string.Join(", ", c.User.FindAll("role").Select(x => x.Value).DefaultIfEmpty("-"));
-    var body = "<h1>Berhasil masuk</h1><p>Login IDS berhasil" + (c.Request.Query.ContainsKey("admin") ? " (Admin)." : ".") + "</p><dl><dt>Nama</dt><dd>" + E(c.User.Identity.Name) + "</dd><dt>Username</dt><dd>" + E(Claim("preferred_username", "username")) + "</dd><dt>Email</dt><dd>" + E(Claim("email")) + "</dd><dt>Peran</dt><dd>" + E(roles) + "</dd></dl><a class=\"btn o\" href=\"/ids/logout\">Keluar</a>";
+    var body = "<h1>Berhasil masuk</h1><p>Login IDS berhasil" + (c.Request.Query.ContainsKey("admin") ? " (Admin)." : ".") + "</p><dl><dt>Nama</dt><dd>" + E(c.User.Identity.Name) + "</dd><dt>Nama pengguna</dt><dd>" + E(Claim("preferred_username", "username")) + "</dd><dt>Email</dt><dd>" + E(Claim("email")) + "</dd><dt>Peran</dt><dd>" + E(roles) + "</dd></dl><a class=\"btn o\" href=\"/ids/logout\">Keluar</a>";
     return Results.Content(page(body), "text/html; charset=utf-8");
 });
 app.Run();

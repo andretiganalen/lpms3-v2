@@ -73,7 +73,14 @@
   /* Font: OpenProject/Primer memasang font body lewat variabel ini, jadi aturan html/body di bawah saja tidak cukup. */
   --body-font-family: var(--uix-font);
   --fontStack-sansSerif: var(--uix-font);
+  /* Ukuran isi 13px (menu, tabel, input) */
+  --body-font-size: var(--uix-fs-body);
+  --main-menu-font-size: var(--uix-fs-body);
 }
+
+/* Kepala tabel: 12px/600, warna sekunder, latar halus, tanpa huruf kapital semua. */
+table thead th { background-color: var(--uix-surface-subtle); }
+table thead th, table thead th * { text-transform: none; font-size: 12px; font-weight: 600; color: var(--uix-text-secondary); }
 
 /* OP 17 mewarnai item sidebar terpilih lewat variabel Primer ini; dibatasi ke sidebar saja. */
 .main-menu { --control-transparent-bgColor-selected: var(--uix-surface-muted); }

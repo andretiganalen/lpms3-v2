@@ -1,4 +1,11 @@
 # CHANGELOG
+## 2026-11-15 — Rilis 17.9.7-lpms3.1.3 (halaman IdsLogin bergaya UIx, tabel, pengaturan)
+- IdsLogin: landing, "Akses ditolak", dan "Berhasil masuk" memakai token dan font Poppins dari `uix.css` (tema terang), teks tombol dirapikan. Versi rilis (`Lpms3__Release`) menjadi pemecah cache URL aset; titik diganti `-` karena segmen `:digest` di route Rails tidak menerima titik (sebelumnya 404).
+- `uix.css`: ukuran isi 13px (`--body-font-size`, `--main-menu-font-size`); kepala tabel 12px/600, warna sekunder, tanpa huruf kapital semua.
+- Seed `80_settings.rb` (idempoten): nama aplikasi "LPMS3", bahasa default Indonesia, pilihan bahasa id/en; akun manusia berbahasa "en" dipindah ke "id" (1 akun).
+- Verifikasi: smoke PASS=22 FAIL=0 N/A=5; landing 200 dan aset CSS/font 200.
+- Image: `lpms3/openproject:17.9.7-lpms3.1.3` (`f6cff65ec9ad`), `lpms3-idslogin:17.9.7-lpms3.1.3`; data sama dengan 1.0.
+
 ## 2026-11-14 — Rilis 17.9.7-lpms3.1.2 (tema UIx benar-benar berlaku)
 - Verifikasi browser (Chrome headless, 1440×900): berkas plugin di image identik dengan repo dan `uix.css` tersaji byte demi byte sama, tetapi dua pemetaan dari commit awal (`70eb3c5`) **tidak berlaku** di OP 17:
   - Font: Poppins terunduh tetapi `body` tetap font sistem, karena OP/Primer memasang font lewat `--body-font-family`/`--fontStack-sansSerif`. Kedua variabel kini diarahkan ke `--uix-font`.
