@@ -75,6 +75,17 @@ begin
   end
   pimpro, pengawas, approver, pembaca = %i[pimpro pengawas approver pembaca].map { |k| users[k][0] }
 
+  # Status awal: WP dibuat dengan status default "New" (seperti form UI), lalu dipindah ke status awal tipe
+  safe("U06", "WP baru (status default New) dapat dipindah ke status awal: CR→Draft, Risiko→Teridentifikasi, NCR→Terbuka") do
+    out = { "Change Request" => "Draft", "Risiko" => "Teridentifikasi", "NCR" => "Terbuka" }.map do |type, st|
+      t = Type.find_by!(name: type)
+      r = WorkPackages::CreateService.new(user: pimpro).call(project: proj, type_id: t.id, subject: "awal #{type}")
+      raise r.errors.full_messages.join(";") unless r.success?
+      [type, r.result.status.name == "New" && move(r.result, pimpro, st)]
+    end
+    [out.all? { |_, ok| ok }, out.inspect]
+  end
+
   # U06 Change Request end-to-end
   cr = nil
   safe("U06", "CR dibuat (Draft) oleh Pimpro") { cr = wp_new(proj, pimpro, "Change Request", "CR uji"); [cr.status.name == "Draft", cr.status.name] }
