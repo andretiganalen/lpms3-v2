@@ -57,6 +57,8 @@ Pemulihan mirror StarRocks: mirror dapat dibangun ulang dari PG. Setelah PG dipu
 ## 5. Akun & login
 - **User biasa**: tombol Login User di landing, autentikasi IDS, akun OpenProject dibuat otomatis oleh bridge.
 - **Admin**: Login Admin via IDS, hanya untuk role di `IDS_ADMIN_ROLES` (default `admin,administrator`) atau email di `IDS_ADMIN_EMAILS` (pisah koma); ubah di `deploy/.env`.
+- **Login wajib lewat IDS (sejak 2026-11-14):** proxy (`deploy/Caddyfile.landing`) mengalihkan `/login`, `/login/*`, `/auth/*`, `/account/lost_password`, `/account/password_recovery`, `/account/set_recovered_password`, `/account/register`, `/account/activate` ke `/ids/login`, dan `/logout` ke `/ids/logout` (keluar dari IDS sekaligus menghapus cookie sesi OpenProject). Login password lokal OpenProject **tidak bisa** dipakai dari `:5100`. Bridge tetap login ke `web:8080` secara internal.
+- **Darurat bila IDS mati:** tidak ada jalur login lokal lewat `:5100`. Administrasi lewat `docker compose -p lpms3v2 exec web bin/rails console` di server, atau sementara hapus blok `@oplogin`/`@oplogout` di Caddyfile lalu `docker compose -p lpms3v2 restart proxy` (kembalikan setelah selesai).
 - **Admin lokal OpenProject / akun bridge**: kredensial ada di `deploy/secrets/`. Akun `lpms3-bridge` adalah admin layanan, jangan dihapus atau dinonaktifkan.
 - Rotasi API key bridge: buat key baru di akun `lpms3-bridge` (OpenProject → My account → Access tokens), simpan ke `LPMS3_BRIDGE_API_KEY` di `deploy/.env` dan `deploy/secrets/bridge.key`, lalu `ops/compose_up.sh`.
 - Rails runner di image ini (Rails 8.1/Ruby 4.0) bisa gagal; kebijakan password OpenProject berlaku untuk akun yang dibuat manual.
