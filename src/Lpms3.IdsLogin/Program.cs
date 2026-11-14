@@ -60,8 +60,14 @@ app.UseAuthorization();
 app.MapGet("/health", () => Results.Ok("OK"));
 app.MapGet("/ids/login", (string? @as) =>
     Results.Challenge(new AuthenticationProperties { RedirectUri = @as == "admin" ? "/ids/admin" : "/ids/enter" }));
-app.MapGet("/ids/logout", () => Results.SignOut(new AuthenticationProperties { RedirectUri = "/" },
-    new[] { CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme }));
+// Logout tunggal: hapus sesi OpenProject (cookie dibuat bridge) lalu keluar dari IDS.
+// Tanpa ini, '/' akan menyambung ulang sesi OpenProject dari sesi IDS yang masih aktif.
+app.MapGet("/ids/logout", (HttpContext c) =>
+{
+    c.Response.Cookies.Delete("_open_project_session", new CookieOptions { Path = "/" });
+    return Results.SignOut(new AuthenticationProperties { RedirectUri = "/" },
+        new[] { CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme });
+});
 var adminRoles = (builder.Configuration["AdminRoles"] ?? "administrator").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
 var adminEmails = (builder.Configuration["AdminEmails"] ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);

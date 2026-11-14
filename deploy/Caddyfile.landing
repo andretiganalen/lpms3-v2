@@ -6,6 +6,16 @@
     handle @ids {
         reverse_proxy idslogin:5100
     }
+    # Login wajib lewat IDS: semua pintu login/registrasi/reset password bawaan OpenProject ditutup di proxy.
+    # Bridge IdsLogin login ke web:8080 langsung (tidak lewat proxy), jadi tidak terpengaruh.
+    @oplogout path /logout
+    handle @oplogout {
+        redir * /ids/logout 302
+    }
+    @oplogin path /login /login/* /auth/* /account/lost_password* /account/password_recovery* /account/set_recovered_password* /account/register* /account/activate*
+    handle @oplogin {
+        redir * /ids/login 302
+    }
     handle {
         reverse_proxy /hocuspocus* hocuspocus:1234
         reverse_proxy * http://web:8080 {
