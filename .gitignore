@@ -15,3 +15,6 @@ obj/
 deploy/secrets/
 upstream/
 data/
+
+# Dokumen Nota 021 (tidak untuk repo)
+docs/021-N-UQ-VIII-2026_*.pdf
