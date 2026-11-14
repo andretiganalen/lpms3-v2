@@ -48,6 +48,7 @@ services:
       OpenProject__BridgeApiKey: "${LPMS3_BRIDGE_API_KEY}"
       AdminRoles: "${IDS_ADMIN_ROLES:-admin,administrator}"
       AdminEmails: "${IDS_ADMIN_EMAILS:-}"
+      Lpms3__Release: "${LPMS3_IMAGE_TAG:-local}"   # pemecah cache uix.css di landing
     volumes:
       - ../data/idslogin-keys:/keys
     networks: [frontend]
