@@ -1,0 +1,873 @@
+[
+ {
+  "tabel": "T1",
+  "no": 1,
+  "fase": "P1 Inisiasi",
+  "aktivitas": "Pembukaan Kode Proyek",
+  "A": [
+   "Struktural Fungsi Pelaksanaan Proyek"
+  ],
+  "R": [
+   "Fungsi Pelaksanaan Proyek"
+  ],
+  "S": [
+   "Fungsi Pengendali Anggaran"
+  ],
+  "C": [
+   "Fungsi Perencanaan Proyek"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T1",
+  "no": 2,
+  "fase": "P1 Inisiasi",
+  "aktivitas": "Penetapan Pimpro dan Tim Proyek",
+  "A": [
+   "Struktural Fungsi Pelaksanaan Proyek"
+  ],
+  "R": [
+   "Fungsi Pelaksanaan Proyek"
+  ],
+  "S": [
+   "Fungsi Pengendali Anggaran",
+   "Fungsi Perencanaan Proyek",
+   "Fungsi Rekrutmen"
+  ],
+  "C": [
+   "Fungsi Pengawasan Proyek"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T1",
+  "no": 3,
+  "fase": "P1 Inisiasi",
+  "aktivitas": "Penetapan Project Charter",
+  "A": [
+   "Struktural Fungsi Pelaksanaan Proyek"
+  ],
+  "R": [
+   "Fungsi Pelaksanaan Proyek"
+  ],
+  "S": [
+   "Fungsi Perencanaan Proyek"
+  ],
+  "C": [
+   "Fungsi Pengendali Anggaran",
+   "Fungsi Keuangan"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T2",
+  "no": 1,
+  "fase": "P2 Perencanaan",
+  "aktivitas": "Manajemen Ruang Lingkup",
+  "A": [
+   "Pimpro"
+  ],
+  "R": [
+   "Tim Proyek"
+  ],
+  "S": [
+   "Fungsi Perencanaan Proyek",
+   "Fungsi Rekayasa Solusi Teknis Proyek"
+  ],
+  "C": [
+   "Fungsi Pemasaran"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T2",
+  "no": 2,
+  "fase": "P2 Perencanaan",
+  "aktivitas": "Manajemen Jadwal Proyek",
+  "A": [
+   "Pimpro"
+  ],
+  "R": [
+   "Tim Proyek"
+  ],
+  "S": [
+   "Fungsi Perencanaan Proyek",
+   "Fungsi Rekayasa Solusi Teknis Proyek"
+  ],
+  "C": [
+   "Fungsi Pemasaran",
+   "Fungsi Perencanaan Pengadaan"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T2",
+  "no": 3,
+  "fase": "P2 Perencanaan",
+  "aktivitas": "Manajemen Biaya Proyek",
+  "A": [
+   "Pimpro"
+  ],
+  "R": [
+   "Tim Proyek",
+   "Fungsi Pengendali Anggaran",
+   "Fungsi Keuangan",
+   "Fungsi Perencanaan Pengadaan"
+  ],
+  "S": [
+   "Fungsi Perencanaan Proyek"
+  ],
+  "C": [
+   "Fungsi Pengawasan Proyek"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T2",
+  "no": 4,
+  "fase": "P2 Perencanaan",
+  "aktivitas": "Manajemen Mutu Proyek",
+  "A": [
+   "Pimpro"
+  ],
+  "R": [
+   "Tim Proyek",
+   "Fungsi Penjaminan Mutu"
+  ],
+  "S": [
+   "Fungsi Rekayasa Solusi Teknis Proyek"
+  ],
+  "C": [
+   "Struktural Fungsi Penjaminan Mutu"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T2",
+  "no": 5,
+  "fase": "P2 Perencanaan",
+  "aktivitas": "Manajemen Sumber Daya",
+  "A": [
+   "Pimpro"
+  ],
+  "R": [
+   "Tim Proyek"
+  ],
+  "S": [
+   "Fungsi Perencanaan Proyek"
+  ],
+  "C": [
+   "Fungsi Rekrutmen",
+   "Fungsi Pembelajaran dan Pengembangan SDM",
+   "Fungsi Rekayasa Solusi Teknis Proyek"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T2",
+  "no": 6,
+  "fase": "P2 Perencanaan",
+  "aktivitas": "Manajemen Komunikasi",
+  "A": [
+   "Pimpro"
+  ],
+  "R": [
+   "Tim Proyek"
+  ],
+  "S": [
+   "Fungsi Perencanaan Proyek"
+  ],
+  "C": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pemasaran"
+  ],
+  "I": [
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T2",
+  "no": 7,
+  "fase": "P2 Perencanaan",
+  "aktivitas": "Manajemen Risiko & K3L Proyek",
+  "A": [
+   "Pimpro"
+  ],
+  "R": [
+   "Tim Proyek"
+  ],
+  "S": [
+   "Fungsi Perencanaan Proyek"
+  ],
+  "C": [
+   "Fungsi Manajemen Risiko",
+   "Fungsi K3",
+   "Fungsi Pengelolaan Lingkungan"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T2",
+  "no": 8,
+  "fase": "P2 Perencanaan",
+  "aktivitas": "Manajemen Pengadaan",
+  "A": [
+   "Pimpro"
+  ],
+  "R": [
+   "Tim Proyek",
+   "Fungsi Perencanaan Pengadaan"
+  ],
+  "S": [
+   "Fungsi Perencanaan Proyek"
+  ],
+  "C": [
+   "Fungsi Pemasaran",
+   "Fungsi Operasional Pengadaan"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T2",
+  "no": 9,
+  "fase": "P2 Perencanaan",
+  "aktivitas": "Manajemen Stakeholder",
+  "A": [
+   "Pimpro"
+  ],
+  "R": [
+   "Tim Proyek",
+   "Fungsi Pemasaran"
+  ],
+  "S": [
+   "Fungsi Perencanaan Proyek"
+  ],
+  "C": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pemasaran"
+  ],
+  "I": [
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T3",
+  "no": 1,
+  "fase": "P3 Eksekusi",
+  "aktivitas": "Mengarahkan dan Mengelola Pekerjaan Proyek",
+  "A": [
+   "Pimpro"
+  ],
+  "R": [
+   "Tim Proyek"
+  ],
+  "S": [
+   "Fungsi Pengawasan Proyek",
+   "Fungsi Penjaminan Mutu",
+   "Fungsi Rekayasa Solusi Teknis Proyek"
+  ],
+  "C": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek",
+   "Fungsi Pemasaran",
+   "Fungsi Pengendali Anggaran",
+   "Fungsi Kontrak Bisnis",
+   "Fungsi Rekayasa Solusi Teknis Proyek"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T3",
+  "no": 2,
+  "fase": "P3 Eksekusi",
+  "aktivitas": "Pengelolaan Pengetahuan Proyek",
+  "A": [
+   "Pimpro"
+  ],
+  "R": [
+   "Tim Proyek"
+  ],
+  "S": [],
+  "C": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T3",
+  "no": 3,
+  "fase": "P3 Eksekusi",
+  "aktivitas": "Pembentukan, Pengembangan, dan Pengelolaan Tim Proyek",
+  "A": [
+   "Pimpro"
+  ],
+  "R": [
+   "Tim Proyek"
+  ],
+  "S": [
+   "Fungsi Rekrutmen",
+   "Fungsi Pembelajaran dan Pengembangan SDM"
+  ],
+  "C": [
+   "Struktural Fungsi Pelaksanaan Proyek"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T3",
+  "no": 4,
+  "fase": "P3 Eksekusi",
+  "aktivitas": "Pengelolaan Mutu Proyek",
+  "A": [
+   "Pimpro"
+  ],
+  "R": [
+   "Tim Proyek"
+  ],
+  "S": [
+   "Fungsi Penjaminan Mutu",
+   "Fungsi Rekayasa Solusi Teknis Proyek"
+  ],
+  "C": [
+   "Struktural Fungsi Penjaminan Mutu"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T3",
+  "no": 5,
+  "fase": "P3 Eksekusi",
+  "aktivitas": "Pengelolaan Komunikasi Proyek",
+  "A": [
+   "Pimpro"
+  ],
+  "R": [
+   "Tim Proyek"
+  ],
+  "S": [
+   "Fungsi Pemasaran"
+  ],
+  "C": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pemasaran"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T3",
+  "no": 6,
+  "fase": "P3 Eksekusi",
+  "aktivitas": "Implementasi Project Risk Response & K3L",
+  "A": [
+   "Pimpro"
+  ],
+  "R": [
+   "Tim Proyek"
+  ],
+  "S": [
+   "Fungsi Manajemen Risiko",
+   "Fungsi K3",
+   "Fungsi Pengelolaan Lingkungan Hidup"
+  ],
+  "C": [
+   "Fungsi Manajemen Risiko",
+   "Struktural Fungsi K3L"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T3",
+  "no": 7,
+  "fase": "P3 Eksekusi",
+  "aktivitas": "Pengadaan Proyek",
+  "A": [
+   "Pimpro"
+  ],
+  "R": [
+   "Fungsi Perencanaan Pengadaan",
+   "Fungsi Operasional Pengadaan"
+  ],
+  "S": [
+   "Tim Proyek",
+   "Fungsi Pengelola Gudang",
+   "Fungsi Rekayasa Solusi Teknis Proyek"
+  ],
+  "C": [
+   "Fungsi Pengawasan Proyek",
+   "Fungsi Penjaminan Mutu",
+   "Fungsi Quality Control"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T3",
+  "no": 8,
+  "fase": "P3 Eksekusi",
+  "aktivitas": "Engagement Stakeholder",
+  "A": [
+   "Pimpro"
+  ],
+  "R": [
+   "Tim Proyek"
+  ],
+  "S": [
+   "Fungsi Pemasaran"
+  ],
+  "C": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pemasaran"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T5",
+  "no": 1,
+  "fase": "P3 Pengawasan & Pengendalian",
+  "aktivitas": "Pengawasan dan Pengendalian Proyek (Monitoring and Controlling Project Work)",
+  "A": [
+   "Struktural Fungsi Pengawasan Proyek"
+  ],
+  "R": [
+   "Fungsi Pengawasan Proyek"
+  ],
+  "S": [
+   "Pimpro",
+   "Tim Proyek"
+  ],
+  "C": [
+   "Fungsi Perencanaan Pengadaan",
+   "Fungsi Operasional Pengadaan",
+   "Fungsi Rekayasa Solusi Teknis Proyek"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T5",
+  "no": 2,
+  "fase": "P3 Pengawasan & Pengendalian",
+  "aktivitas": "Kendali Perubahan Terintegrasi (Perform Integrated Change Control)",
+  "A": [
+   "Struktural Fungsi Pengawasan Proyek"
+  ],
+  "R": [
+   "Fungsi Pengawasan Proyek"
+  ],
+  "S": [
+   "Pimpro",
+   "Tim Proyek",
+   "Fungsi Rekayasa Solusi Teknis Proyek"
+  ],
+  "C": [
+   "Fungsi terkait sesuai jenis perubahan"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T5",
+  "no": 3,
+  "fase": "P3 Pengawasan & Pengendalian",
+  "aktivitas": "Kontrol dan Validasi Ruang Lingkup Proyek",
+  "A": [
+   "Struktural Fungsi Pengawasan Proyek"
+  ],
+  "R": [
+   "Fungsi Pengawasan Proyek"
+  ],
+  "S": [
+   "Pimpro",
+   "Tim Proyek",
+   "Fungsi Rekayasa Solusi Teknis Proyek",
+   "Fungsi Penjaminan Mutu"
+  ],
+  "C": [
+   "Fungsi Pemasaran"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T5",
+  "no": 4,
+  "fase": "P3 Pengawasan & Pengendalian",
+  "aktivitas": "Pemantauan Jadwal Proyek",
+  "A": [
+   "Struktural Fungsi Pengawasan Proyek"
+  ],
+  "R": [
+   "Fungsi Pengawasan Proyek"
+  ],
+  "S": [
+   "Pimpro",
+   "Tim Proyek",
+   "Fungsi Rekayasa Solusi Teknis Proyek",
+   "Fungsi Perencanaan Pengadaan",
+   "Fungsi Operasional Pengadaan"
+  ],
+  "C": [
+   "Fungsi Perencanaan Proyek",
+   "Fungsi Manajemen Risiko"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T5",
+  "no": 5,
+  "fase": "P3 Pengawasan & Pengendalian",
+  "aktivitas": "Pemantauan Biaya Proyek",
+  "A": [
+   "Struktural Fungsi Pengawasan Proyek"
+  ],
+  "R": [
+   "Fungsi Pengawasan Proyek"
+  ],
+  "S": [
+   "Pimpro",
+   "Fungsi Pengendali Anggaran"
+  ],
+  "C": [
+   "Fungsi Keuangan"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T5",
+  "no": 6,
+  "fase": "P3 Pengawasan & Pengendalian",
+  "aktivitas": "Pemantauan Mutu Proyek",
+  "A": [
+   "Fungsi Pengawasan Proyek"
+  ],
+  "R": [
+   "Fungsi Penjaminan Mutu"
+  ],
+  "S": [
+   "Pimpro",
+   "Tim Proyek",
+   "Fungsi Rekayasa Solusi Teknis Proyek",
+   "Fungsi Operasional Pengadaan"
+  ],
+  "C": [
+   "Struktural Fungsi Pengawasan Proyek"
+  ],
+  "I": [
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T5",
+  "no": 7,
+  "fase": "P3 Pengawasan & Pengendalian",
+  "aktivitas": "Pemantauan Sumber Daya Proyek",
+  "A": [
+   "Struktural Fungsi Pengawasan Proyek"
+  ],
+  "R": [
+   "Fungsi Pengawasan Proyek"
+  ],
+  "S": [
+   "Pimpro",
+   "Tim Proyek"
+  ],
+  "C": [
+   "Fungsi Pengembangan Organisasi",
+   "Fungsi Rekrutmen"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T5",
+  "no": 8,
+  "fase": "P3 Pengawasan & Pengendalian",
+  "aktivitas": "Pemantauan Komunikasi Proyek",
+  "A": [
+   "Struktural Fungsi Pengawasan Proyek"
+  ],
+  "R": [
+   "Fungsi Pengawasan Proyek"
+  ],
+  "S": [
+   "Pimpro"
+  ],
+  "C": [
+   "Fungsi Pemasaran"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T5",
+  "no": 9,
+  "fase": "P3 Pengawasan & Pengendalian",
+  "aktivitas": "Pemantauan Risiko & K3L Proyek",
+  "A": [
+   "Struktural Fungsi Pengawasan Proyek"
+  ],
+  "R": [
+   "Fungsi Pengawasan Proyek"
+  ],
+  "S": [
+   "Pimpro"
+  ],
+  "C": [
+   "Fungsi Manajemen Risiko",
+   "Fungsi K3",
+   "Fungsi Pengelolaan Lingkungan Hidup"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T5",
+  "no": 10,
+  "fase": "P3 Pengawasan & Pengendalian",
+  "aktivitas": "Pemantauan Pengadaan Barang/Jasa Proyek",
+  "A": [
+   "Struktural Fungsi Pengawasan Proyek"
+  ],
+  "R": [
+   "Fungsi Pengawasan Proyek"
+  ],
+  "S": [
+   "Pimpro",
+   "Tim Proyek",
+   "Fungsi Perencanaan Pengadaan",
+   "Fungsi Operasional Pengadaan",
+   "Fungsi Rekayasa Solusi Teknis Proyek"
+  ],
+  "C": [
+   "Struktural Fungsi Operasional Pengadaan",
+   "Struktural Fungsi Perencanaan Pengadaan",
+   "Fungsi Pengelola Gudang"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T5",
+  "no": 11,
+  "fase": "P3 Pengawasan & Pengendalian",
+  "aktivitas": "Pemantauan Stakeholder Engagement",
+  "A": [
+   "Struktural Fungsi Pengawasan Proyek"
+  ],
+  "R": [
+   "Fungsi Pengawasan Proyek",
+   "Fungsi Pemasaran"
+  ],
+  "S": [
+   "Pimpro"
+  ],
+  "C": [
+   "Struktural Fungsi Pelaksanaan Proyek"
+  ],
+  "I": [
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T6",
+  "no": 1,
+  "fase": "P4 Penutupan",
+  "aktivitas": "Proyek Selesai 100%",
+  "A": [
+   "Struktural Fungsi Pelaksanaan Proyek"
+  ],
+  "R": [
+   "Pimpro"
+  ],
+  "S": [
+   "Fungsi Rekayasa Solusi Teknis Proyek",
+   "Fungsi Pengendali Anggaran",
+   "Fungsi Perencanaan Pengadaan",
+   "Fungsi Operasional Pengadaan",
+   "Fungsi Pemasaran",
+   "Fungsi Pengelola Gudang"
+  ],
+  "C": [
+   "Fungsi Pengawasan Proyek"
+  ],
+  "I": [
+   "Fungsi Perencanaan Perusahaan",
+   "Fungsi Akuntansi",
+   "Fungsi Keuangan",
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T6",
+  "no": 2,
+  "fase": "P4 Penutupan",
+  "aktivitas": "Terminasi Proyek",
+  "A": [
+   "Direksi / Project Sponsor"
+  ],
+  "R": [
+   "Pimpro",
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek"
+  ],
+  "S": [
+   "Tim Proyek",
+   "Fungsi Pelaksanaan Proyek",
+   "Fungsi Pengawasan Proyek",
+   "Fungsi Kontrak Bisnis (bila diperlukan)"
+  ],
+  "C": [
+   "Fungsi Pengendali Anggaran",
+   "Fungsi Akuntansi",
+   "Fungsi Manajemen Risiko"
+  ],
+  "I": [
+   "Seluruh Fungsi Terkait"
+  ]
+ },
+ {
+  "tabel": "T6",
+  "no": 3,
+  "fase": "P4 Penutupan",
+  "aktivitas": "Pembukaan Kode Purnajual Proyek",
+  "A": [
+   "Struktural Fungsi Pelaksanaan Proyek"
+  ],
+  "R": [
+   "Fungsi Pelaksanaan Proyek"
+  ],
+  "S": [
+   "Fungsi Pengendali Anggaran",
+   "Fungsi Perencanaan Pengadaan"
+  ],
+  "C": [
+   "Struktural Fungsi Pengawasan Proyek"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ },
+ {
+  "tabel": "T6",
+  "no": 4,
+  "fase": "P4 Penutupan",
+  "aktivitas": "Pendokumentasian Arsip Proyek",
+  "A": [
+   "Pimpro"
+  ],
+  "R": [
+   "Tim Proyek"
+  ],
+  "S": [
+   "Fungsi Pelaksanaan Proyek",
+   "Fungsi Pengelolaan Data",
+   "Fungsi Rekayasa Solusi Teknis Proyek"
+  ],
+  "C": [
+   "Fungsi Pengawasan Proyek"
+  ],
+  "I": [
+   "Struktural Fungsi Pelaksanaan Proyek",
+   "Struktural Fungsi Pengawasan Proyek",
+   "Project Sponsor"
+  ]
+ }
+]
