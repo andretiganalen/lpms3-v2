@@ -22,6 +22,19 @@ services:
   worker:   { <<: *lpms3op, environment: *ids }
   cron:     { <<: *lpms3op, environment: *ids }
   seeder:   { <<: *lpms3op, environment: *ids }
+  lpms3-data:
+    build: { context: ../etl }
+    image: lpms3/data:local
+    restart: unless-stopped
+    environment:
+      PG_DSN: "postgresql://postgres:${LPMS3_PG_PASSWORD}@db:5432/openproject"
+      STARROCKS_HOST: "${STARROCKS_HOST}"
+      STARROCKS_PORT: "${STARROCKS_PORT}"
+      STARROCKS_DATABASE: "${STARROCKS_DATABASE}"
+      STARROCKS_USER: lpms3_etl
+      STARROCKS_PASSWORD: "${STARROCKS_ETL_PASSWORD}"
+    depends_on: [db]
+    networks: [backend]
   idslogin:
     build: { context: ../src/Lpms3.IdsLogin }
     image: lpms3-idslogin:local
