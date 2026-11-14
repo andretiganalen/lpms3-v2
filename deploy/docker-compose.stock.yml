@@ -24,7 +24,7 @@ services:
   seeder:   { <<: *lpms3op, environment: *ids }
   lpms3-data:
     build: { context: ../etl }
-    image: lpms3/data:local
+    image: lpms3/data:${LPMS3_IMAGE_TAG:-local}
     restart: unless-stopped
     environment:
       PG_DSN: "postgresql://postgres:${LPMS3_PG_PASSWORD}@db:5432/openproject"
@@ -37,7 +37,7 @@ services:
     networks: [backend]
   idslogin:
     build: { context: ../src/Lpms3.IdsLogin }
-    image: lpms3-idslogin:local
+    image: lpms3-idslogin:${LPMS3_IMAGE_TAG:-local}
     restart: unless-stopped
     environment:
       Oidc__ClientId: "${IDS_CLIENT_ID}"
@@ -51,6 +51,8 @@ services:
     volumes:
       - ../data/idslogin-keys:/keys
     networks: [frontend]
+  cache:
+    image: memcached:1.6.45@sha256:a395a1bcf5e0e2b0fa4a0142e12b4e24a2320ba4b7c6ffa8655a1a86e8f29dee
   proxy:
     volumes:
       - ../deploy/Caddyfile.landing:/etc/caddy/Caddyfile:ro
