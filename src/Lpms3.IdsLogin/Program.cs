@@ -134,7 +134,7 @@ app.MapGet("/ids/enter", async (HttpContext c, IHttpClientFactory f, IConfigurat
     app.Logger.LogInformation("OP-LOGIN status={S} location={L} cookies={N}", (int)res.StatusCode, res.Headers.Location, res.Headers.TryGetValues("Set-Cookie", out var dbg) ? dbg.Count() : 0);
     if (!res.Headers.TryGetValues("Set-Cookie", out var cks)) return Results.Problem("Login OpenProject tidak mengembalikan sesi (redirect ke " + res.Headers.Location + ").");
     foreach (var ck in cks) c.Response.Headers.Append("Set-Cookie", ck);
-    return Results.Redirect("/");
+    return Results.Redirect("/projects");
 });
 app.MapGet("/ids/admin", (HttpContext c) =>
 {
@@ -149,6 +149,8 @@ app.MapGet("/", (HttpContext c) =>
     static string E(string? v) => System.Net.WebUtility.HtmlEncode(v ?? "");
     const string css = ":root{--bg:#f5f6f8;--fg:#1c1f26;--card:#fff;--mut:#667085;--pri:#ae2524;--bd:#e4e7ec}@media(prefers-color-scheme:dark){:root{--bg:#14161a;--fg:#eceef2;--card:#1e2127;--mut:#98a2b3;--bd:#2f343c}}body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,sans-serif}main{width:min(440px,calc(100% - 32px));background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:32px}h1{font-size:1.4rem;margin:0 0 4px}p{color:var(--mut);margin:0 0 24px}a.btn{display:block;text-align:center;background:var(--pri);color:#fff;text-decoration:none;padding:12px;border-radius:8px;font-weight:600}a.btn.o{background:none;color:var(--pri);border:1px solid var(--pri)}.sp{height:12px}small{display:block;margin-top:20px;color:var(--mut);text-align:center}dl{margin:0 0 24px;display:grid;grid-template-columns:auto 1fr;gap:8px 16px}dt{color:var(--mut)}dd{margin:0;word-break:break-all}";
     string page(string body) => "<!doctype html><html lang=\"id\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>LPMS3 Login IDS</title><style>" + css + "</style></head><body><main>" + body + "</main></body></html>";
+    // Sudah login IDS: '/' (mis. klik logo) menyambung ulang sesi aplikasi lalu masuk ke daftar proyek.
+    if (c.User.Identity?.IsAuthenticated == true) return Results.Redirect("/ids/enter");
     if (c.User.Identity?.IsAuthenticated != true)
         return Results.Content(page("<h1>LPMS3</h1><p>Masuk menggunakan akun IDS Len.</p>"
             + "<a class=\"btn\" href=\"/ids/login?as=user\">Login User</a>"
