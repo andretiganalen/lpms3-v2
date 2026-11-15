@@ -138,3 +138,8 @@ html, body, button, input, select, textarea { font-family: var(--uix-font); }
 
 /* MOD-05: banner promosi Enterprise (Angular <op-enterprise-banner> dan komponen Rails) disembunyikan. */
 op-enterprise-banner, .op-enterprise-banner-container { display: none !important; }
+
+/* Ikon berlian (penanda fitur Enterprise) disembunyikan di semua menu, tombol, dan blok:
+   SVG server-side (octicon), SVG Angular (atribut op-enterprise-addons-icon), dan ikon font lama. */
+.octicon-op-enterprise-addons, svg[op-enterprise-addons-icon], svg.upsell-colored,
+.icon-enterprise, .icon-enterprise-addons { display: none !important; }
