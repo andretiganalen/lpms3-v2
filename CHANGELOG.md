@@ -1,4 +1,7 @@
 # CHANGELOG
+## 17.9.7-lpms3.1.18 — ikon berlian Enterprise disembunyikan
+- `uix.css`: menyembunyikan `svg.octicon-op-enterprise-addons`, `svg.upsell-colored`, `svg[op-enterprise-addons-icon]` (Angular), `.icon-enterprise`, `.icon-enterprise-addons`. Diperiksa di 9 halaman server-side: semua ikon berlian (78 + 71 elemen) tercakup selector. Label menu fitur Enterprise tidak diubah.
+
 ## 17.9.7-lpms3.1.17 — audit kepatuhan BOP-001 dan penutupan risiko
 - `OPENPROJECT_DROP__OLD__SESSIONS__ON__LOGOUT` dikembalikan ke `true`; `OPENPROJECT_SHOW__PRODUCT__VERSION=false` (menghilangkan tautan versi/commit ke github.com).
 - Plugin: `pagination_guard.rb` — halaman di luar rentang (mis. `/projects?page=99`) kini dialihkan ke halaman 1, bukan HTTP 500 bawaan OpenProject.
