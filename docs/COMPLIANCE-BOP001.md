@@ -120,5 +120,16 @@ Legenda: ✅ lulus penuh · 🟡 lulus sebagian (alur status lulus, aturan tamba
 
 ## 8. Pekerjaan rumah (ditunda atas keputusan pemilik)
 
-1. **SMTP internal (D2):** host, port, kredensial dari IT Development. Sampai selesai, email dan notifikasi (U19) tidak berfungsi; 812 job latar historis gagal `ECONNREFUSED localhost:25` (terbaru tercatat 2026-11-14, sebelum hardening). Monitor memisahkan galat ini sebagai WARN.
+1. **SMTP internal (D2):** **ditunda; bukan kebutuhan saat ini** (keputusan pemilik 2026-11-15). Notifikasi task/worklist memakai notifikasi internal antar akun IDS yang terdaftar di Fungsi Organisasi/Fungsi Generik. 812 job email historis gagal `ECONNREFUSED localhost:25` (terbaru 2026-11-14); monitor memisahkannya sebagai WARN. U19 dicakup ulang menjadi uji notifikasi internal.
 2. Item butir 1–13 pada §6 di luar yang sudah dikerjakan sesi ini.
+
+## 9. Permintaan pendaftaran akun IDS (2026-11-15)
+
+| Akun | Status |
+| :-- | :-- |
+| `hariyadi.maramis@len.co.id`, `ilham.nugraha@len.co.id`, `kristian@len.co.id`, `andre.tigana@len.co.id` | **Belum terdaftar di IDS** — IDS (`dev-ids-intern.len.co.id`) bukan bagian repo ini dan agen tidak memiliki akses admin IDS (hanya `client_id/secret` untuk login OIDC). Perlu didaftarkan oleh admin IDS. |
+
+- Di sisi LPMS3 tidak ada yang perlu dibuat: IdsLogin membuat akun OpenProject otomatis pada login IDS pertama (non-admin; admin hanya bila peran IDS ∈ `AdminRoles` atau email ∈ `AdminEmails`). Password lokal OpenProject diacak dan tidak dipakai.
+- Kata sandi awal bersama tidak dicatat di repo. Disarankan memaksa ganti saat login pertama di IDS.
+- `andre.tigana@len.co.id` (akun baru) berbeda dari admin `andre.tigana.k@len.co.id`; pastikan peruntukannya jelas agar tidak membingungkan.
+- Penempatan posisi/fungsi (`lpms3.position`, `lpms3.user_position`; saat ini kosong) ditentukan admin `andre.tigana.k@len.co.id`.
