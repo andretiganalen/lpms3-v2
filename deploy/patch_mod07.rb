@@ -15,3 +15,10 @@ File.write(path, s)
   abort "MOD-07: pola tidak ditemukan di #{file}" unless t.include?(from)
   File.write(file, t.sub(from, to))
 end
+
+# Tautan <noscript> ke enable-javascript.com (situs pihak ketiga) dihapus.
+base = "/app/app/views/layouts/base.html.erb"
+b = File.read(base)
+line = %(      <a href="http://www.enable-javascript.com/" target="_blank"><%= t(:noscript_learn_more) %></a>\n)
+abort "MOD-07: tautan noscript tidak ditemukan" unless b.include?(line)
+File.write(base, b.sub(line, ""))

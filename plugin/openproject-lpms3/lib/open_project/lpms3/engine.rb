@@ -21,7 +21,7 @@ module OpenProject::Lpms3
            { controller: "/lpms3/admin/internal_features_settings", action: :show },
            if: Proc.new { User.current.admin? },
            caption: :"lpms3.internal_features.menu",
-           icon: "settings"
+           icon: "gear"
     end
 
     config.to_prepare do
