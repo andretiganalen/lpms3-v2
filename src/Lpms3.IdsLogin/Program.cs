@@ -158,6 +158,10 @@ string UixPage(string title, string body) =>
     + "a.btn{display:flex;align-items:center;justify-content:center;height:38px;box-sizing:border-box;border-radius:var(--uix-radius-control);font-weight:500;text-decoration:none;box-shadow:var(--uix-shadow-xs);background:var(--uix-primary);color:var(--uix-on-primary);border:1px solid var(--uix-primary)}"
     + "a.btn:hover{background:var(--uix-primary-strong);border-color:var(--uix-primary-strong)}"
     + "a.btn.o{background:var(--uix-surface);color:var(--uix-text-body);border-color:var(--uix-border-strong)}a.btn.o:hover{background:var(--uix-surface-muted)}"
+    + "button.btn{width:100%;cursor:pointer;font:inherit;font-weight:500;display:flex;align-items:center;justify-content:center;height:38px;border-radius:var(--uix-radius-control);box-shadow:var(--uix-shadow-xs);background:var(--uix-primary);color:var(--uix-on-primary);border:1px solid var(--uix-primary)}button.btn:hover{background:var(--uix-primary-strong)}"
+    + "fieldset{border:0;margin:0 0 20px;padding:0;display:grid;gap:8px}legend{padding:0;margin-bottom:8px;color:var(--uix-text-secondary)}"
+    + "label.rd{display:flex;align-items:center;gap:10px;height:38px;box-sizing:border-box;padding:0 12px;border:1px solid var(--uix-border-strong);border-radius:var(--uix-radius-control);cursor:pointer;color:var(--uix-text-body)}"
+    + "label.rd:has(input:checked){border-color:var(--uix-primary);background:var(--uix-surface-muted)}label.rd input{accent-color:var(--uix-primary);margin:0}"
     + ".sp{height:12px}small{display:block;margin-top:20px;font-size:12px;color:var(--uix-text-secondary);text-align:center}"
     + "dl{margin:0 0 24px;display:grid;grid-template-columns:auto 1fr;gap:8px 16px}dt{color:var(--uix-text-secondary)}dd{margin:0;word-break:break-all;color:var(--uix-text-head)}"
     + "</style></head><body><main>" + body + "</main></body></html>";
@@ -179,9 +183,10 @@ app.MapGet("/", (HttpContext c) =>
     if (c.User.Identity?.IsAuthenticated == true) return Results.Redirect("/ids/enter");
     if (c.User.Identity?.IsAuthenticated != true)
         return Results.Content(page("<h1>LPMS3</h1><p>Masuk menggunakan akun IDS Len.</p>"
-            + "<a class=\"btn\" href=\"/ids/login?as=user\">Masuk sebagai pengguna</a>"
-            + "<div class=\"sp\"></div>"
-            + "<a class=\"btn o\" href=\"/ids/login?as=admin\">Masuk sebagai admin</a>"
+            + "<form method=\"get\" action=\"/ids/login\"><fieldset><legend>Masuk sebagai</legend>"
+            + "<label class=\"rd\"><input type=\"radio\" name=\"as\" value=\"user\" checked><span>Pengguna</span></label>"
+            + "<label class=\"rd\"><input type=\"radio\" name=\"as\" value=\"admin\"><span>Admin</span></label></fieldset>"
+            + "<button class=\"btn\" type=\"submit\">Masuk dengan IDS</button></form>"
             + "<small>Keduanya memakai IDS Len. Hak akses ditentukan oleh peran akun.</small>"), "text/html; charset=utf-8");
     string Claim(params string[] t) => t.Select(x => c.User.FindFirst(x)?.Value).FirstOrDefault(v => v != null) ?? "-";
     var roles = string.Join(", ", c.User.FindAll("role").Select(x => x.Value).DefaultIfEmpty("-"));

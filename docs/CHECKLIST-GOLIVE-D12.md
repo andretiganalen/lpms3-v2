@@ -9,16 +9,16 @@ Acuan: Buku Teknis §7.4 dan Master Plan §11. Legenda: ✅ selesai · 🟡 seba
 | 2 | UAT ≥ 95% lulus, 0 defect kritikal, BA UAT | ⛔ 👤 | Smoke D10: 22 PASS, 0 FAIL, 5 N/A. UAT penuh U01–U31 belum (lihat bagian C) |
 | 3 | Password admin bawaan diganti/dinonaktifkan, 2FA admin aktif | ⛔ | Ada 3 akun admin aktif. Periksa akun `admin` bawaan dan aktifkan 2FA |
 | 4 | Backup harian ≥ 7 hari berturut-turut + 1 restore drill | 🟡 | Drill sukses (9–19 dtk). Backup baru berjalan sejak 12 Nov (~3 hari); cron 02:00 aktif — tunggu sampai ≥ 7 hari |
-| 5 | `OP_TAG` & `LPMS3_IMAGE_TAG` dipin dan dicatat di CHANGELOG | ✅ | 2026-11-14: rilis `17.9.7-lpms3.1.3` (1.1 + tema UIx + halaman IDS); base OP, postgres 17.11, memcached 1.6.45 dipin per digest (lihat CHANGELOG). Ganti tag hanya lewat prosedur upgrade |
+| 5 | `OP_TAG` & `LPMS3_IMAGE_TAG` dipin dan dicatat di CHANGELOG | ✅ | 2026-11-14: rilis `17.9.7-lpms3.1.4` (1.1 + tema UIx + halaman IDS); base OP, postgres 17.11, memcached 1.6.45 dipin per digest (lihat CHANGELOG). Ganti tag hanya lewat prosedur upgrade |
 | 6 | Monitoring & alert aktif (§8.2) | ⛔ | Belum ada. Minimal: alert untuk `ALARM` outbox di log `lpms3-data`, health check, disk, backup gagal |
 | 7 | Data pilot bersih | ⛔ | Lihat bagian B |
 | 8 | Komunikasi go-live dikirim | ⛔ 👤 | URL `http://192.168.125.14:5100` + kontak dukungan |
 | 9 | Berita acara go-live oleh System Owner | ⛔ 👤 | Fungsi PMO (business owner), TI (technical owner) |
 
 ## B. Pembersihan data sebelum go-live
-- [ ] Hapus user `pimpro.demo`, proyek `demo-nvg-monocular-100`, dan `lpms3/seed/demo_project.rb`.
-- [ ] Hapus proyek bawaan OpenProject "Demo project" dan "Scrum project".
-- [ ] Batasi visibilitas proyek template (`lpms3-tpl-*`) hanya untuk PMO/Admin. Saat ini terlihat oleh user yang mewarisi keanggotaan grup.
+- [x] Hapus user `pimpro.demo` dan proyek `demo-nvg-monocular-100` (2026-11-15). Berkas `lpms3/seed/demo_project.rb` masih ada di repo.
+- [x] Hapus proyek bawaan OpenProject "Demo project" dan "Scrum project".
+- [x] (non-publik; keanggotaan grup fungsi dipertahankan untuk RASCI) Batasi visibilitas proyek template (`lpms3-tpl-*`) hanya untuk PMO/Admin. Saat ini terlihat oleh user yang mewarisi keanggotaan grup.
 - [ ] Pastikan tidak ada sisa data uji (smoke D10 menghapus datanya sendiri; periksa `smoke-d10%`).
 - [ ] Hapus file `.env` di root repo (berisi kredensial root StarRocks produksi; sudah git-ignored). Pertimbangkan rotasi password root.
 - [ ] Pastikan `STARROCKS_ROOT_PASSWORD` kosong di `deploy/.env` (D6).
