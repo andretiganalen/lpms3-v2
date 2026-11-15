@@ -1,4 +1,12 @@
 # CHANGELOG
+## 17.9.7-lpms3.1.30 — menu Mata uang & kurs (konversi dan budget korporasi)
+- **Menu baru** "Mata uang & kurs" (`/lpms3/mata-uang`, sidebar global dan Administrasi): konverter untuk semua pengguna login; kurs terhadap mata uang dasar **IDR**; daftar mata uang (IDR dasar, USD, EUR, SGD, JPY aktif; CNY, AUD, GBP nonaktif; dapat ditambah/diubah/dinonaktifkan).
+- **Hak akses**: izin global baru `manage_currency_rates`; seed `lpms3/seed/90_currency.rb` membuat **peran global "Keuangan"**. Admin dan akun Keuangan dapat mengubah mata uang dan kurs; pengguna lain hanya melihat dan mengonversi (403 bila mengubah). Sumber eksternal hanya dapat diatur admin.
+- **Kurs append-only**: setiap perubahan = baris riwayat baru (siapa, kapan, sumber, catatan); tidak dapat diubah atau dihapus. Kurs berlaku sejak tanggal efektif; pada tanggal sama yang terakhir diisi menang. Konversi lewat mata uang dasar dengan BigDecimal; pasangan tanpa kurs menghasilkan "belum ada kurs", bukan angka palsu.
+- **Sumber kurs yang direkomendasikan**: ECB via Frankfurter (`api.frankfurter.dev`), **nonaktif secara bawaan** (tidak ada panggilan eksternal sampai admin mengaktifkan; host tetap, bukan input pengguna). Tombol "Ambil kurs sekarang" dan opsional otomatis hari kerja 09.10 (`Lpms3::FxFetchJob`).
+- **Budget**: mata uang budget OpenProject diselaraskan ke mata uang dasar (`Rp`, format awalan, tombol "Pakai Rp sebagai mata uang budget"); tabel budget project yang boleh dilihat pengguna dikonversi ke mata uang dan tanggal pilihan.
+- Tabel `lpms3_currencies` dan `lpms3_exchange_rates` (migrasi plugin). Nama mata uang adalah isian pengguna (tidak diterjemahkan saat ganti bahasa). Uji: `lpms3/smoke/currency.rb` (`run_currency.sh`, 37 PASS, masuk `ops/verify.sh`).
+
 ## 17.9.7-lpms3.1.28 — menu fase induk-anak tersorot, panduan untuk tamu
 - Menu project per fase: **Ringkasan / Gerbang / Langkah / Register** kini rute sendiri (`/projects/:id/lpms3/fase/:fase/:bagian`); anak aktif tersorot dan **induk fasenya terbuka dan ikut tersorot** (latar abu, bobot 500, ikon merah, penanda 3px; garis hierarki di sisi anak). Halaman fase menampilkan kartu sesuai bagian (Ringkasan = semua). Bagian tak dikenal 404. Sidebar yang tidak dimuat ulang (Turbo) ikut menyinkronkan induk-anak.
 - `/lpms3/panduan` dapat dibuka tanpa login (seperti halaman statis sebelumnya).
