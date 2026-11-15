@@ -30,8 +30,8 @@ Acuan: Buku Teknis §7.4 dan Master Plan §11. Legenda: ✅ selesai · 🟡 seba
 **Belum dibuat:** meeting template, S/C sebagai field user, penataan form tipe, tema/sidebar plugin (D11 Spesifikasi §12.8).
 
 ## D. Data & integrasi
-- [ ] **Data HC:** posisi dan user belum dimuat (D8). Jenjang diasumsikan Direktorat=DIREKSI, Divisi=ES1, Bagian=ES2 — konfirmasi dengan SKEP 001/2026.
-- [ ] **SMTP (D2):** belum dikonfigurasi (`ECONNREFUSED localhost:25`). Perlu untuk notifikasi U19.
+- [ ] **Data HC:** posisi dan user belum dimuat (D8). 2026-11-15: pemilik meminta 4 akun uji didaftarkan di IDS (lihat `docs/COMPLIANCE-BOP001.md` §9); penempatan posisi ditentukan admin `andre.tigana.k@len.co.id` (tabel `lpms3.position`/`user_position` masih kosong). Jenjang diasumsikan Direktorat=DIREKSI, Divisi=ES1, Bagian=ES2 — konfirmasi dengan SKEP 001/2026.
+- [~] **SMTP (D2): ditunda atas keputusan pemilik (2026-11-15) — bukan blocker go-live tahap ini.** Notifikasi task/worklist cukup lewat notifikasi internal (pusat notifikasi OpenProject) antar akun IDS yang terdaftar pada Fungsi Organisasi/Fungsi Generik. Email ke pengguna belum dipakai; job email tetap gagal `ECONNREFUSED localhost:25` (dipantau sebagai WARN). U19 diubah cakupannya menjadi uji notifikasi internal.
 - [ ] **Kolom mirror StarRocks yang masih NULL:** `jenis_kode`, `kelas_kontrak`, `lini_bisnis`, `current_phase`, `lpms2_project_id`, `nik`, `sr_login` — tentukan sumbernya. Field user (Pimpro/Sponsor) dan `tgl_mulai` terisi hanya bila custom field diisi.
 - [ ] **Snapshot harian StarRocks:** tidak ada repository BACKUP (`SHOW REPOSITORIES` kosong). Minta admin StarRocks; sementara mirror dapat dibangun ulang dari PG.
 - [ ] **Koneksi LPMS 2 (read-only)** untuk "Add New" (Spesifikasi §12.7): belum ada.
