@@ -1,4 +1,10 @@
 # CHANGELOG
+## 17.9.7-lpms3.1.6 — MOD-01
+- Env isolasi di `deploy/docker-compose.stock.yml` (web/worker/cron/seeder): security badge off, community links off, help link `/panduan-internal`, login wajib, drop sesi lama saat login on / saat logout off, CSP img-src `'self' data: blob:` (ditulis sebagai array YAML; format string di plan ditolak parser), email delivery `smtp`, self-registration 0.
+- Tidak dipasang (setting tidak ada di 17.9.7): `ONBOARDING_VIDEO_URL`, `OMNIAUTH_ALLOW_SINGLE_SIGN_ON`.
+- Plugin: `config/initializers/inhouse_ids_sso_guard.rb` — hanya memeriksa kelengkapan config IDS & mencatat log; tidak menyentuh lisensi/token.
+- Perlu tindak lanjut: host SMTP internal belum ada (D12), halaman `/panduan-internal` belum ada (404).
+
 ## 17.9.7-lpms3.1.5 — MOD-05
 - `static_links.yml` di image: tautan openproject.org/.com, docs S3, chargebee, youtube, github opf → `/` (patch `sed` di `deploy/Dockerfile`, build gagal bila masih ada sisa).
 - Caddy `:5100` menutup `/admin/enterprise_trial*` dan `save/delete_trial_key` (404). Rute Rails tidak dihapus karena `enterprise_tokens_controller` dan komponen trial memakai path helper-nya (akan 500).
