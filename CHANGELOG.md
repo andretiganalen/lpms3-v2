@@ -1,4 +1,10 @@
 # CHANGELOG
+## 17.9.7-lpms3.1.25 — menu per fase BOP-001 dan sidebar yang tidak dimuat ulang
+- **Menu project dikelompokkan per 5 fase BOP-001** (Inisiasi, Perencanaan, Eksekusi, Pengawasan & Kendali, Penutupan) sebagai container di bawah Ikhtisar, masing-masing berisi Ringkasan fase, Gerbang, Langkah, Register. Dibangun di plugin (`OpenProject::Lpms3::Phases`, `Lpms3::PhasesController`, rute `/projects/:id/lpms3/fase/:fase`).
+- **Halaman fase** (UIx): stepper 5 fase dengan progres selesai/total, gerbang G1–G4 (G3 menutup Eksekusi dan Pengawasan), tabel langkah `[T1-..]`..`[T6-..]`, register per tipe dengan tautan ke tabel paket-penugasan, tombol "Buka di tabel paket-penugasan". Akses: harus punya izin lihat paket-penugasan; non-anggota 404.
+- **Sidebar tidak dimuat ulang** saat berpindah halaman (Turbo Drive): `#main-menu` ditandai `data-turbo-permanent` selama konteks sama; item terpilih disinkronkan; konteks berbeda (pindah project/Administrasi) memakai sidebar baru. Diverifikasi di Chrome: penanda dokumen tetap, elemen sidebar sama, menu bawah bertahan.
+- Baru: `lpms3/smoke/fase_walkthrough.rb` + `run_fase.sh` (alur 5 fase pada proyek uji: langkah, dokumen, gerbang, progres, arsip; 30 PASS, 0 FAIL, 1 N/A) dan masuk `ops/verify.sh`.
+
 ## 17.9.7-lpms3.1.22 — UIx menyeluruh, Tampilan (logo/ikon/warna), pemilih bahasa, Pengaturan di sidebar
 - Administrasi → **Tampilan** (in-house, `/admin/lpms3/branding`): ganti logo, ikon/thumbnail (favicon + apple-touch), 4 warna; validasi isi berkas (PNG/JPEG/WEBP/ICO/SVG tanpa skrip, maks. 300 KB), warna `#RRGGBB`, reset. Tidak memakai CustomStyle/EnterpriseToken.
 - **Pemilih bahasa ID/EN** di kanan atas header (`/lpms3/language`, hanya bahasa aktif, alihan aman), dan **Pengaturan** di kiri bawah sidebar.

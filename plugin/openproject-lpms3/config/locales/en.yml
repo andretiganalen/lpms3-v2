@@ -72,3 +72,44 @@ en:
     sidebar:
       settings: "Settings"
       my_settings: "My settings"
+    phases:
+      stepper: "BOP-001 project phases"
+      progress: "%{done} of %{total} done"
+      gates: "Gates"
+      steps: "BOP-001 steps"
+      registers: "Registers and documents"
+      no_gates: "No gates for this phase yet."
+      no_steps: "No steps yet. Create the project from an LPMS3 template."
+      open_table: "Open in work package table"
+      unassigned: "Unassigned"
+      no_date: "No date"
+      col:
+        step: "Step"
+        status: "Status"
+        assignee: "Assignee"
+        due: "Due date"
+      menu:
+        ringkasan: "Phase summary"
+        gerbang: "Gates"
+        langkah: "Steps"
+        register: "Registers"
+      inisiasi:
+        title: "Initiation"
+        menu_title: "Initiation"
+        description: "Project code opening, project manager and team appointment, and Project Charter (BOP-001 §5.1). Closed by gate G1."
+      perencanaan:
+        title: "Planning"
+        menu_title: "Planning"
+        description: "Project management plan review, Kick-Off, and Baseline 0 (BOP-001 §5.2). Closed by gate G2."
+      eksekusi:
+        title: "Execution"
+        menu_title: "Execution"
+        description: "Delivery work, quality, communication, risk, procurement, and stakeholders (BOP-001 §5.3)."
+      pengawasan:
+        title: "Monitoring & Control"
+        menu_title: "Monitor & Control"
+        description: "Schedule, cost, quality, risk monitoring and integrated change control (BOP-001 §5.4). Runs in parallel with Execution and is closed by gate G3 (handover)."
+      penutupan:
+        title: "Closing"
+        menu_title: "Closing"
+        description: "100% completion, termination, after-sales code, and project archive (BOP-001 §5.5). Closed by gate G4."

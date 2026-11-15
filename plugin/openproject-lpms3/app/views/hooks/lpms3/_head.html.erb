@@ -69,3 +69,45 @@
     })();
   <% end %>
 <% end %>
+<%= javascript_tag(nonce: true) do %>
+  // Sidebar tetap (tidak dimuat ulang) saat berpindah halaman lewat Turbo Drive, seperti sidebar :8585.
+  // Elemen #main-menu ditandai data-turbo-permanent selama konteksnya sama (project atau area yang sama);
+  // bila konteks berganti (mis. pindah project atau ke Administrasi), sidebar baru dipakai.
+  (function () {
+    if (window.__lpms3SidebarPersist) { return; }
+    window.__lpms3SidebarPersist = true;
+
+    function context(root) {
+      var a = root && root.querySelector('#menu-sidebar a.op-menu--item-action[href]');
+      if (!a) { return null; }
+      try { return new URL(a.href, location.href).pathname.split('/').slice(0, 3).join('/'); } catch (e) { return null; }
+    }
+
+    function syncSelected() {
+      var nav = document.getElementById('main-menu');
+      if (!nav) { return; }
+      var path = location.pathname, best = null, len = -1;
+      nav.querySelectorAll('a.op-menu--item-action[href]').forEach(function (a) {
+        var p;
+        try { p = new URL(a.href, location.href).pathname; } catch (e) { return; }
+        if ((path === p || path.indexOf(p + '/') === 0) && p.length > len) { best = a; len = p.length; }
+      });
+      nav.querySelectorAll('a.op-menu--item-action.selected').forEach(function (a) { a.classList.remove('selected'); });
+      if (best) { best.classList.add('selected'); }
+    }
+
+    document.addEventListener('turbo:before-render', function (event) {
+      var current = document.getElementById('main-menu');
+      var incoming = event.detail && event.detail.newBody && event.detail.newBody.querySelector('#main-menu');
+      if (!current || !incoming) { return; }
+      if (context(current) === context(incoming)) {
+        current.setAttribute('data-turbo-permanent', '');
+        incoming.setAttribute('data-turbo-permanent', '');
+      } else {
+        current.removeAttribute('data-turbo-permanent');
+      }
+    });
+    document.addEventListener('turbo:render', syncSelected);
+    document.addEventListener('turbo:load', syncSelected);
+  })();
+<% end %>
