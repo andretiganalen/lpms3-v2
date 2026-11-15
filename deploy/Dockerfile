@@ -22,3 +22,6 @@ RUN sed -i 's#OpenProject::Configuration.security_badge_displayed? && Setting.se
 # MOD-06: matikan Gravatar dan bersihkan domain eksternal di CSP.
 COPY --chown=app:app deploy/patch_mod06.rb /tmp/patch_mod06.rb
 RUN ruby /tmp/patch_mod06.rb && rm /tmp/patch_mod06.rb && ruby -c /app/config/initializers/content_security_policy.rb
+# MOD-07: default app_title dan organization_name = identitas portal internal.
+COPY --chown=app:app deploy/patch_mod07.rb /tmp/patch_mod07.rb
+RUN ruby /tmp/patch_mod07.rb && rm /tmp/patch_mod07.rb && ruby -c /app/config/constants/settings/definition.rb

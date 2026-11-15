@@ -1,4 +1,9 @@
 # CHANGELOG
+## 17.9.7-lpms3.1.13 — MOD-07
+- Seed `80_settings.rb`: `organization_name` = "PT Len Industri (Persero)" (nama organisasi ini asumsi; ubah di seed bila keliru), `emails_footer` id/en tanpa tautan. `app_title` sudah "LPMS3".
+- `deploy/patch_mod07.rb` (build): default bawaan `app_title`/`organization_name` diganti, dan `text_powered_by` (en, id) menjadi teks netral tanpa `%{link}`. Override via plugin tidak berlaku (locale inti menang), jadi dipatch langsung.
+- Temuan: layout email OpenProject 17.9.7 tidak memuat tautan vendor; `text_powered_by` tidak dipakai kode aplikasi. Email uji berisi hanya tautan ke host internal.
+
 ## 17.9.7-lpms3.1.11 — MOD-06
 - Gravatar: sebelumnya AKTIF (`enable_gravatars=true`); kini `engine.rb` default `false` dan `AvatarManager.gravatar_enabled?` selalu `false`. Avatar lokal tetap aktif.
 - CSP dibersihkan: tanpa `*.chargebee.com`, `js.chargebee.com`, `start.openproject.com`, `releases.openproject.com` (object-src kini `'none'`), dan video onboarding. Sekaligus memperbaiki entri rusak `://` di `default-src`/`form-action`/`media-src` yang muncul sejak MOD-05.
