@@ -1,0 +1,92 @@
+<% phase_title = t(::OpenProject::Lpms3::Phases.title_key(@phase)) %>
+<% html_title phase_title, @project.name %>
+
+<%=
+  render(Primer::OpenProject::PageHeader.new) do |header|
+    header.with_title { phase_title }
+    header.with_breadcrumbs([{ href: project_path(@project), text: @project.name }, phase_title])
+    header.with_description { t("lpms3.phases.#{@phase.key}.description") }
+  end
+%>
+
+<div class="lpms3-page">
+  <ol class="lpms3-stepper" aria-label="<%= t("lpms3.phases.stepper") %>">
+    <% @phases.each_with_index do |ph, i| %>
+      <% pr = @progress[ph.key] %>
+      <li class="lpms3-stepper__item<%= ' is-current' if ph == @phase %>">
+        <%= link_to lpms3_project_phase_path(@project, ph.key), "aria-current": (ph == @phase ? "step" : nil) do %>
+          <span class="lpms3-stepper__no"><%= i + 1 %></span>
+          <span class="lpms3-stepper__name"><%= t(::OpenProject::Lpms3::Phases.title_key(ph)) %></span>
+          <span class="lpms3-stepper__meta"><%= t("lpms3.phases.progress", done: pr[:done], total: pr[:total]) %></span>
+        <% end %>
+      </li>
+    <% end %>
+  </ol>
+
+  <section class="lpms3-card" id="gerbang">
+    <h3 class="lpms3-card__title"><%= t("lpms3.phases.gates") %></h3>
+    <% if @gates.empty? %>
+      <p class="lpms3-hint"><%= t("lpms3.phases.no_gates") %></p>
+    <% else %>
+      <ul class="lpms3-gates">
+        <% @gates.each do |g| %>
+          <li>
+            <%= link_to g.subject, work_package_path(g) %>
+            <span class="lpms3-chip<%= ' lpms3-chip--ok' if g.status.is_closed? %>"><%= g.status.name %></span>
+            <% if g.due_date || g.start_date %><span class="lpms3-hint"><%= l(g.due_date || g.start_date) %></span><% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  </section>
+
+  <section class="lpms3-card" id="langkah">
+    <h3 class="lpms3-card__title"><%= t("lpms3.phases.steps") %></h3>
+    <% if @steps.empty? %>
+      <p class="lpms3-hint"><%= t("lpms3.phases.no_steps") %></p>
+    <% else %>
+      <div class="lpms3-table-wrap">
+        <table class="lpms3-table">
+          <thead>
+            <tr>
+              <th scope="col"><%= t("lpms3.phases.col.step") %></th>
+              <th scope="col"><%= t("lpms3.phases.col.status") %></th>
+              <th scope="col"><%= t("lpms3.phases.col.assignee") %></th>
+              <th scope="col"><%= t("lpms3.phases.col.due") %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @steps.each do |wp| %>
+              <tr>
+                <th scope="row"><%= link_to wp.subject.sub(/\A\[T\d+-(\d+)\]\s*/, '\1. '), work_package_path(wp) %></th>
+                <td><span class="lpms3-chip<%= ' lpms3-chip--ok' if wp.status.is_closed? %>"><%= wp.status.name %></span></td>
+                <td><%= wp.assigned_to&.name || t("lpms3.phases.unassigned") %></td>
+                <td><%= wp.due_date ? l(wp.due_date) : t("lpms3.phases.no_date") %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </section>
+
+  <% if @type_rows.any? %>
+    <section class="lpms3-card" id="register">
+      <h3 class="lpms3-card__title"><%= t("lpms3.phases.registers") %></h3>
+      <ul class="lpms3-registers">
+        <% @type_rows.each do |type, total, done| %>
+          <% props = { f: [{ n: "type", o: "=", v: [type.id.to_s] }, { n: "status", o: "*", v: [] }], t: "id:desc" }.to_json %>
+          <li>
+            <%= link_to type.name, project_work_packages_path(@project, query_props: props) %>
+            <span class="lpms3-hint"><%= t("lpms3.phases.progress", done:, total:) %></span>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+
+  <p>
+    <% props = { f: [{ n: "subject", o: "~", v: ["[#{@phase.prefix}-"] }, { n: "status", o: "*", v: [] }], t: "id:asc" }.to_json %>
+    <%= link_to t("lpms3.phases.open_table"), project_work_packages_path(@project, query_props: props), class: "button" %>
+  </p>
+</div>

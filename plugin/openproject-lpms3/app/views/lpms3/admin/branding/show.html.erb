@@ -1,0 +1,61 @@
+<% html_title t(:label_administration), t("lpms3.branding.title") %>
+
+<%=
+  render(Primer::OpenProject::PageHeader.new) do |header|
+    header.with_title { t("lpms3.branding.title") }
+    header.with_breadcrumbs([{ href: admin_index_path, text: t("label_administration") }, t("lpms3.branding.title")])
+    header.with_description { t("lpms3.branding.description") }
+  end
+%>
+
+<div class="lpms3-page">
+<%= form_with url: lpms3_admin_branding_path, method: :patch, local: true, multipart: true do %>
+  <section class="lpms3-card">
+    <h3 class="lpms3-card__title"><%= t("lpms3.branding.images") %></h3>
+    <% { logo: t("lpms3.branding.logo_hint"), favicon: t("lpms3.branding.favicon_hint") }.each do |key, hint| %>
+      <% current = @b.setting(key) %>
+      <div class="lpms3-form-row">
+        <label class="lpms3-form-row__label" for="<%= key %>"><%= t("lpms3.branding.#{key}") %></label>
+        <div class="lpms3-form-row__control">
+          <% if current.start_with?("data:image/") %>
+            <img class="lpms3-preview" src="<%= current %>" alt="<%= t("lpms3.branding.#{key}") %>">
+            <label><input type="checkbox" name="remove_<%= key %>" value="1"> <%= t("lpms3.branding.remove") %></label>
+          <% else %>
+            <span class="lpms3-hint"><%= t("lpms3.branding.default_in_use") %></span>
+          <% end %>
+          <input type="file" id="<%= key %>" name="<%= key %>" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon,.ico">
+        </div>
+        <span></span>
+        <p class="lpms3-hint"><%= hint %></p>
+      </div>
+    <% end %>
+  </section>
+
+  <section class="lpms3-card">
+    <h3 class="lpms3-card__title"><%= t("lpms3.branding.colors") %></h3>
+    <p class="lpms3-hint"><%= t("lpms3.branding.colors_hint") %></p>
+    <% @b::COLOR_KEYS.each do |key| %>
+      <% v = @b.setting(key) %>
+      <div class="lpms3-form-row">
+        <label class="lpms3-form-row__label" for="<%= key %>"><%= t("lpms3.branding.#{key}") %></label>
+        <div class="lpms3-form-row__control">
+          <input type="color" id="<%= key %>" name="<%= key %>" value="<%= @b.valid_color?(v) ? v : @b::DEFAULTS[key] %>">
+          <% if @b.valid_color?(v) %><code><%= v %></code><% else %><span class="lpms3-hint"><%= t("lpms3.branding.default_in_use") %></span><% end %>
+          <label><input type="checkbox" name="default_<%= key %>" value="1"> <%= t("lpms3.branding.use_default") %></label>
+        </div>
+      </div>
+    <% end %>
+  </section>
+
+  <div class="lpms3-actions">
+    <button type="submit" class="button -primary"><%= t("lpms3.branding.save") %></button>
+  </div>
+<% end %>
+
+<%= form_with url: lpms3_admin_branding_reset_path, method: :post, local: true do %>
+  <div class="lpms3-actions">
+    <label><input type="checkbox" required> <%= t("lpms3.branding.reset_confirm") %></label>
+    <button type="submit" class="button"><%= t("lpms3.branding.reset") %></button>
+  </div>
+<% end %>
+</div>
