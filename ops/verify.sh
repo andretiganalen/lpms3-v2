@@ -12,3 +12,5 @@ for u in / /ids/login /login /panduan-internal /admin/enterprise_trial /admin/en
   printf '%s -> %s\n' "$u" "$(curl -s -o /dev/null -w '%{http_code}' -H "$H" -X GET localhost:5100$u)"
 done
 echo "== smoke D10 =="; bash lpms3/smoke/run.sh 2>&1 | grep -E '^(FAIL|RINGKASAN)'
+echo "== audit BOP-001 =="; bash ops/audit_bop001.sh 2>&1 | grep -E '^(FAIL|RINGKASAN)'
+echo "== monitor =="; bash ops/monitor.sh 2>&1 | tail -5; echo "(kosong = semua OK)"

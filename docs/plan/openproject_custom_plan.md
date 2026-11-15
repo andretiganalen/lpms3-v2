@@ -59,13 +59,13 @@ Anda **WAJIB BERHENTI (`HALT`)** seketika dan membatalkan perubahan sementara (`
 - `DEPLOY_SOP.md` merujuk "smoke test" tanpa lokasi → kini `lpms3/smoke/run.sh` lewat `ops/verify.sh`.
 - Pesan log guard IDS menyiratkan OIDC OpenProject dipakai; login sebenarnya lewat IdsLogin bridge (strategi OmniAuth OpenProject tidak aktif karena gerbang Enterprise) → pesan diperjelas.
 
-**Risiko terbuka (butuh keputusan/parameter, belum bisa diselesaikan agen):**
-1. **SMTP:** `email_delivery_method=smtp` tetapi host default `localhost:25` tidak ada → 812 job GoodJob gagal tercatat (termasuk 60 `Mails::MemberCreatedJob`, `ECONNREFUSED`), sudah terjadi sebelum MOD-01. Email tidak terkirim. Butuh host/port/kredensial SMTP internal.
-2. **`DROP_OLD_SESSIONS_ON_LOGOUT=false`** (sesuai plan) lebih lemah dari bawaan `true`. Perlu keputusan pemilik.
-3. **Branch belum digabung ke `main`:** deploy berjalan dari working tree branch; `main` tertinggal 11 commit.
-4. `/admin/roles?page=2` memberi 500 ("current_page can't be larger than page_count") saat halaman di luar rentang diminta; perilaku bawaan OpenProject, tidak terkait perubahan kita, tidak diperbaiki.
-5. Tautan versi `github.com/opf/...` di Administration → Information (pasif).
-6. Item checklist D12: 2FA, monitoring, UAT.
+**Status risiko (diperbarui 2026-11-15, rilis 1.17):**
+1. **SMTP:** masih terbuka, **ditunda sebagai pekerjaan rumah** (host/port/kredensial dari IT Development). 812 job GoodJob historis gagal `ECONNREFUSED localhost:25`; terbaru 2026-11-14, sebelum MOD-01.
+2. ~~`DROP_OLD_SESSIONS_ON_LOGOUT=false`~~ → **dikembalikan ke `true`** (bawaan OpenProject) di `deploy/docker-compose.stock.yml`.
+3. ~~Branch belum digabung~~ → digabung ke `main` lewat pull request (lihat CHANGELOG 1.17).
+4. ~~`/admin/roles?page=N` dan `/projects?page=N` di luar rentang → 500~~ → diperbaiki oleh `plugin/.../config/initializers/pagination_guard.rb` (GET dialihkan ke halaman 1).
+5. ~~Tautan versi `github.com/opf/...`~~ → disembunyikan lewat `OPENPROJECT_SHOW__PRODUCT__VERSION=false`.
+6. **D12:** 2FA admin (harus di IDS), monitoring (`ops/monitor.sh` aktif, belum ada saluran alert), UAT (3/31 lulus penuh) — rincian di `docs/COMPLIANCE-BOP001.md`. Temuan baru: `.env` di root repo berisi kredensial root StarRocks (teks biasa) → rotasi wajib.
 
 ---
 
