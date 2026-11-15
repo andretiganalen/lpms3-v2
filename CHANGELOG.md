@@ -1,4 +1,9 @@
 # CHANGELOG
+## 17.9.7-lpms3.1.7 — MOD-02 (revisi in-house)
+- Plugin: `OpenProject::Lpms3::Features` (katalog 35 kunci, klaster A-F, `IMPLEMENTED` awalnya kosong) dan setting `internal_enabled_features` (default `[]`, tabel `settings`).
+- `EnterpriseToken` tidak diubah; gerbang lisensi OpenProject tetap tertutup (diverifikasi: `allows_to?(:board_view)` tetap `false` sebelum/sesudah).
+- Plan MOD-02/MOD-03 direvisi: fitur dikembangkan sendiri di plugin, menu tetap sebagai kerangka. Penghapusan tampilan fitur Enterprise terkunci dijadwalkan di MOD-03 langkah 8 (belum dikerjakan).
+
 ## 17.9.7-lpms3.1.6 — MOD-01
 - Env isolasi di `deploy/docker-compose.stock.yml` (web/worker/cron/seeder): security badge off, community links off, help link `/panduan-internal`, login wajib, drop sesi lama saat login on / saat logout off, CSP img-src `'self' data: blob:` (ditulis sebagai array YAML; format string di plan ditolak parser), email delivery `smtp`, self-registration 0.
 - Tidak dipasang (setting tidak ada di 17.9.7): `ONBOARDING_VIDEO_URL`, `OMNIAUTH_ALLOW_SINGLE_SIGN_ON`.
