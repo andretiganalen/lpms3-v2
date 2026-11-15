@@ -8,12 +8,10 @@
     }
     # Login wajib lewat IDS: semua pintu login/registrasi/reset password bawaan OpenProject ditutup di proxy.
     # Bridge IdsLogin login ke web:8080 langsung (tidak lewat proxy), jadi tidak terpengaruh.
-    # Panduan internal (tujuan tombol bantuan "?"): halaman statis dari deploy/panduan.
+    # Panduan internal (tombol bantuan "?"): dilayani aplikasi (mengikuti bahasa akun) di /lpms3/panduan.
     @panduan path /panduan-internal /panduan-internal/*
     handle @panduan {
-        root * /srv/panduan
-        rewrite * /index.html
-        file_server
+        redir * /lpms3/panduan 302
     }
     @oplogout path /logout
     handle @oplogout {

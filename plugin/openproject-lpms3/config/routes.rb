@@ -2,9 +2,10 @@ Rails.application.routes.draw do
   # Aset tema (CSS & font Poppins dilayani dari server sendiri; tanpa Google Fonts)
   get "lpms3/assets/:digest/*asset", to: "lpms3/assets#show", as: :lpms3_asset, format: false
 
-  get "projects/:project_id/lpms3/fase/:phase", to: "lpms3/phases#show", as: :lpms3_project_phase,
-      constraints: { phase: /inisiasi|perencanaan|eksekusi|pengawasan|penutupan/ }
+  get "projects/:project_id/lpms3/fase/:phase(/:section)", to: "lpms3/phases#show", as: :lpms3_project_phase,
+      constraints: { phase: /inisiasi|perencanaan|eksekusi|pengawasan|penutupan/, section: /ringkasan|gerbang|langkah|register/ }
 
+  get "lpms3/panduan", to: "lpms3/guide#show", as: :lpms3_guide
   post "lpms3/language", to: "lpms3/language#update", as: :lpms3_language
 
   scope "admin" do

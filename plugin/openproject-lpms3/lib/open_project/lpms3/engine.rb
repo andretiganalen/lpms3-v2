@@ -41,11 +41,11 @@ module OpenProject::Lpms3
         menu :project_menu, parent, url,
              caption: OpenProject::Lpms3::Phases.menu_title_key(ph), icon: ph.icon, after: previous, if: visible,
              skip_permissions_check: true
-        { ringkasan: nil, gerbang: "gerbang", langkah: "langkah", register: "register" }.each do |section, anchor|
+        %i[ringkasan gerbang langkah register].each do |section|
           next if section == :register && ph.types.empty?
 
           menu :project_menu, OpenProject::Lpms3::Phases.menu_name(ph, section),
-               url.merge(anchor ? { anchor: } : {}),
+               url.merge(section == :ringkasan ? {} : { section: section.to_s }),
                caption: :"lpms3.phases.menu.#{section}", parent:, if: visible, skip_permissions_check: true
         end
         previous = parent

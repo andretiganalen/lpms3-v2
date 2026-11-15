@@ -113,3 +113,29 @@ id:
         title: "Penutupan"
         menu_title: "Penutupan"
         description: "Proyek selesai 100%, terminasi, kode purnajual, dan arsip proyek (BOP-001 §5.5). Ditutup oleh gerbang G4."
+    guide:
+      title: "Panduan internal LPMS3"
+      intro: "Panduan singkat bekerja di LPMS3 mengikuti proses proyek BOP-001."
+      back: "Kembali ke LPMS3"
+      phase_list: "Lima fase BOP-001"
+      start:
+        title: "Memulai"
+        body: "Masuk lewat halaman IDS. Setelah masuk Anda tiba di beranda: pilih project dari menu Project atau blok favorit. Setiap project memiliki sidebar berisi Ikhtisar, lima fase BOP-001, dan paket-penugasan."
+      language:
+        title: "Mengganti bahasa"
+        body: "Gunakan tombol ID / EN di kanan atas. Menu, label, tombol, dan panduan ini berganti bahasa. Isian Anda dan tim (nama project, subjek dan deskripsi paket-penugasan, komentar, dokumen) tidak pernah diterjemahkan atau diubah."
+      phases:
+        title: "Fase"
+        body: "Setiap halaman fase menampilkan stepper progres, gerbang, langkah template, dan register fase tersebut. Buka sebuah langkah untuk memperbarui status, penanggung jawab, dan tenggatnya."
+      gates:
+        title: "Gerbang"
+        body: "Gerbang G1 sampai G4 adalah milestone penutup fase. G1 menutup Inisiasi, G2 Perencanaan, G3 (serah terima) menutup Eksekusi serta Pengawasan & Pengendalian, dan G4 menutup Penutupan. Gerbang baru selesai setelah langkah fasenya selesai."
+      registers:
+        title: "Register dan dokumen"
+        body: "Register (risiko, isu, permintaan perubahan, deliverable, dan lainnya) adalah tipe paket-penugasan. Tabel register di setiap halaman fase tertaut ke tabel paket-penugasan lengkap untuk menyaring, mengubah, dan mengekspor."
+      notifications:
+        title: "Notifikasi"
+        body: "Notifikasi hanya tampil di dalam LPMS3 (ikon lonceng). Notifikasi email belum diaktifkan."
+      support:
+        title: "Bantuan"
+        body: "Untuk bantuan lebih lanjut, hubungi administrator LPMS3 atau IT Development."

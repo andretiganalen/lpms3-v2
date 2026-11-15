@@ -17,7 +17,7 @@ x-ids-env: &ids
   # MOD-01: isolasi telemetri/komunitas/bantuan + login terpusat (self-registration mati).
   OPENPROJECT_SECURITY__BADGE__DISPLAYED: "false"
   OPENPROJECT_SHOW__COMMUNITY__LINKS: "false"
-  OPENPROJECT_FORCE__HELP__LINK: "/panduan-internal"
+  OPENPROJECT_FORCE__HELP__LINK: "/lpms3/panduan"
   OPENPROJECT_LOGIN__REQUIRED: "true"
   OPENPROJECT_DROP__OLD__SESSIONS__ON__LOGIN: "true"
   OPENPROJECT_DROP__OLD__SESSIONS__ON__LOGOUT: "true"   # bawaan OpenProject; plan awal "false" ditolak (sesi lama tetap hidup setelah logout)
@@ -68,5 +68,4 @@ services:
   proxy:
     volumes:
       - ../deploy/Caddyfile.landing:/etc/caddy/Caddyfile:ro
-      - ../deploy/panduan:/srv/panduan:ro
     depends_on: [web, idslogin]

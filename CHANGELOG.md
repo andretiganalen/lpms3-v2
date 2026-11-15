@@ -1,4 +1,17 @@
 # CHANGELOG
+## 17.9.7-lpms3.1.28 — menu fase induk-anak tersorot, panduan untuk tamu
+- Menu project per fase: **Ringkasan / Gerbang / Langkah / Register** kini rute sendiri (`/projects/:id/lpms3/fase/:fase/:bagian`); anak aktif tersorot dan **induk fasenya terbuka dan ikut tersorot** (latar abu, bobot 500, ikon merah, penanda 3px; garis hierarki di sisi anak). Halaman fase menampilkan kartu sesuai bagian (Ringkasan = semua). Bagian tak dikenal 404. Sidebar yang tidak dimuat ulang (Turbo) ikut menyinkronkan induk-anak.
+- `/lpms3/panduan` dapat dibuka tanpa login (seperti halaman statis sebelumnya).
+- Uji: `lpms3/smoke/lang_switch.rb` menambah pemeriksaan menu induk-anak, 404 bagian, panduan tamu.
+
+## 17.9.7-lpms3.1.26 — bahasa menyeluruh, panduan mengikuti bahasa, UIx total (font, bentuk, notifikasi, loader)
+- **Terjemahan Indonesia**: 3.705 kunci tambahan (Angular `js.*` dan Rails: label model/atribut, pengaturan project, tipe, jurnal, ekspor, dll.) di `config/lpms3_id_overrides.yml` (total 3.918). Kunci fitur yang dimatikan (Jira, storage, Enterprise, SCIM) sengaja tidak diterjemahkan.
+- **Panduan internal** kini halaman aplikasi `/lpms3/panduan` yang mengikuti bahasa akun (ID/EN); `/panduan-internal` dialihkan ke sana, tombol bantuan "?" menunjuk ke sana. Folder statis `deploy/panduan` dihapus.
+- **Isian pengguna tidak diterjemahkan**: nama project, subjek/deskripsi paket-penugasan, komentar tetap persis. Diuji oleh `lpms3/smoke/lang_switch.rb` (`run_lang.sh`, masuk `ops/verify.sh`).
+- **UIx total** (`uix.css`): variabel Primer/OpenProject dipetakan ke token UIx (ukuran font 12/13/16/18/20, bobot 400/500/600, radius 6/8/12, tinggi kontrol 30/34/38, bayangan xs/md/lg/xl, warna semantik, tombol, kolom isian, dropdown, modal). Notifikasi (toast, flash, banner, galat formulir) putih dengan penanda status 3px dan ikon berwarna status. **Loader** bawaan OpenProject (dua kotak hijau berputar, loading.gif) diganti cincin UIx dengan busur merah dan titik berdenyut; menghormati `prefers-reduced-motion`.
+- Rujukan: `ops/monitor.sh` dan `ops/verify.sh` memeriksa `/lpms3/panduan`.
+- **Homework tetap**: SMTP ditunda (notifikasi internal saja).
+
 ## 17.9.7-lpms3.1.25 — menu per fase BOP-001 dan sidebar yang tidak dimuat ulang
 - **Menu project dikelompokkan per 5 fase BOP-001** (Inisiasi, Perencanaan, Eksekusi, Pengawasan & Kendali, Penutupan) sebagai container di bawah Ikhtisar, masing-masing berisi Ringkasan fase, Gerbang, Langkah, Register. Dibangun di plugin (`OpenProject::Lpms3::Phases`, `Lpms3::PhasesController`, rute `/projects/:id/lpms3/fase/:fase`).
 - **Halaman fase** (UIx): stepper 5 fase dengan progres selesai/total, gerbang G1–G4 (G3 menutup Eksekusi dan Pengawasan), tabel langkah `[T1-..]`..`[T6-..]`, register per tipe dengan tautan ke tabel paket-penugasan, tombol "Buka di tabel paket-penugasan". Akses: harus punya izin lihat paket-penugasan; non-anggota 404.

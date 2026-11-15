@@ -23,7 +23,10 @@ module Lpms3
     # Sidebar menandai container fase yang sedang dibuka (lihat engine.rb).
     current_menu_item do |controller|
       ph = ::OpenProject::Lpms3::Phases.find(controller.params[:phase])
-      ph ? ::OpenProject::Lpms3::Phases.menu_name(ph) : :work_packages
+      next :work_packages unless ph
+
+      # Anak menu (Ringkasan/Gerbang/Langkah/Register) yang aktif; induk fase ikut tersorot (li.open di sidebar).
+      ::OpenProject::Lpms3::Phases.menu_name(ph, (controller.params[:section].presence || "ringkasan").to_sym)
     end
 
     layout "base"
@@ -31,6 +34,9 @@ module Lpms3
     def show
       @phase = ::OpenProject::Lpms3::Phases.find(params[:phase])
       return render_404 unless @phase
+
+      @section = (params[:section].presence || "ringkasan")
+      @all = @section == "ringkasan"
 
       scope = ::WorkPackage.visible(User.current).where(project_id: @project.id)
       @phases = ::OpenProject::Lpms3::Phases::ALL

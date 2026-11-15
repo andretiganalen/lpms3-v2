@@ -57,6 +57,18 @@
   --uix-radius-chip: 6px;
   --uix-control-h: 34px;
   --uix-shadow-xs: 0 0 0 1px rgba(16, 24, 40, .04), 0 1px 2px rgba(16, 24, 40, .06);
+  --uix-success-soft: #f0fdf4;
+  --uix-warning-soft: #fffbeb;
+  --uix-danger-soft: #fef2f2;
+  --uix-info-soft: #eff6ff;
+  --uix-warning: #bb4d00;
+  --uix-shadow-lg: 0 0 0 1px rgba(16, 24, 40, .05), 0 12px 16px -4px rgba(16, 24, 40, .08), 0 4px 6px -2px rgba(16, 24, 40, .03);
+  --uix-shadow-xl: 0 0 0 1px rgba(16, 24, 40, .05), 0 20px 24px -4px rgba(16, 24, 40, .08), 0 8px 8px -4px rgba(16, 24, 40, .03);
+  --uix-font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --uix-fs-small: 12px;
+  --uix-control-h-sm: 30px;
+  --uix-control-h-lg: 38px;
+  --uix-backdrop: rgba(16, 24, 40, .45);
   --uix-shadow-md: 0 0 0 1px rgba(16, 24, 40, .05), 0 4px 8px -2px rgba(16, 24, 40, .10), 0 12px 24px -4px rgba(16, 24, 40, .08);
 }
 
@@ -196,3 +208,218 @@ op-enterprise-banner, .op-enterprise-banner-container { display: none !important
 .lpms3-gates li, .lpms3-registers li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 0; border-top: 1px solid var(--uix-border-subtle); }
 .lpms3-gates li:first-child, .lpms3-registers li:first-child { border-top: 0; }
 @media (max-width: 900px) { .lpms3-stepper { grid-template-columns: 1fr; } }
+
+
+/* =====================================================================================================
+   Penyelarasan total ke UIx: variabel Primer/OpenProject (ukuran font, bobot, radius, kontrol, bayangan,
+   warna semantik) dipetakan ke token --uix-*. Selektor html:root:root:root menang atas tema terang/gelap Primer.
+   ===================================================================================================== */
+html:root:root:root {
+  /* Ukuran font: isi 13, kecil 12, judul kartu 16, bagian 18, halaman/modal 20 */
+  --base-text-size-xs: var(--uix-fs-small);
+  --base-text-size-sm: var(--uix-fs-body);
+  --base-text-size-md: var(--uix-fs-body);
+  --base-text-size-lg: var(--uix-fs-card-title);
+  --base-text-size-xl: var(--uix-fs-page);
+  --text-body-size-small: var(--uix-fs-small);
+  --text-body-size-medium: var(--uix-fs-body);
+  --text-body-size-large: var(--uix-fs-card-title);
+  --text-caption-size: var(--uix-fs-small);
+  --text-title-size-small: var(--uix-fs-card-title);
+  --text-title-size-medium: var(--uix-fs-section);
+  --text-title-size-large: var(--uix-fs-page);
+  --text-subtitle-size: var(--uix-fs-card-title);
+  --text-display-size: var(--uix-fs-page);
+  /* Bobot: hanya 400/500/600 (tanpa 700) */
+  --base-text-weight-light: 400;
+  --base-text-weight-normal: 400;
+  --base-text-weight-medium: 500;
+  --base-text-weight-semibold: 600;
+  --base-text-weight-bold: 600;
+  --text-body-weight: 400;
+  --text-caption-weight: 400;
+  --text-subtitle-weight: 500;
+  --text-title-weight-small: 600;
+  --text-title-weight-medium: 600;
+  --text-title-weight-large: 600;
+  --text-display-weight: 600;
+  --fontStack-system: var(--uix-font);
+  --fontStack-sansSerifDisplay: var(--uix-font);
+  --body-font-color: var(--uix-text-body);
+  --body-background: var(--uix-surface-page);
+  /* Bentuk: kontrol 8, kartu/modal 12, chip/baris menu 6 */
+  --borderRadius-small: var(--uix-radius-chip);
+  --borderRadius-medium: var(--uix-radius-control);
+  --borderRadius-large: var(--uix-radius-card);
+  --borderRadius-default: var(--uix-radius-control);
+  --overlay-borderRadius: var(--uix-radius-card);
+  --control-small-size: var(--uix-control-h-sm);
+  --control-medium-size: var(--uix-control-h);
+  --control-large-size: var(--uix-control-h-lg);
+  /* Bayangan: xs kartu/tombol, md dropdown, lg drawer, xl modal */
+  --shadow-resting-xsmall: var(--uix-shadow-xs);
+  --shadow-resting-small: var(--uix-shadow-xs);
+  --shadow-resting-medium: var(--uix-shadow-xs);
+  --shadow-floating-small: var(--uix-shadow-md);
+  --shadow-floating-medium: var(--uix-shadow-md);
+  --shadow-floating-legacy: var(--uix-shadow-md);
+  --shadow-floating-large: var(--uix-shadow-lg);
+  --shadow-floating-xlarge: var(--uix-shadow-xl);
+  --overlay-bgColor: var(--uix-surface);
+  --overlay-borderColor: var(--uix-border);
+  --overlay-backdrop-bgColor: var(--uix-backdrop);
+  /* Warna semantik: aksen = merah korporat, status hanya untuk status */
+  --fgColor-default: var(--uix-text-body);
+  --fgColor-muted: var(--uix-text-secondary);
+  --fgColor-accent: var(--uix-primary);
+  --fgColor-link: var(--uix-primary);
+  --fgColor-success: var(--uix-success);
+  --fgColor-danger: var(--uix-danger);
+  --fgColor-attention: var(--uix-warning-text);
+  --borderColor-default: var(--uix-border);
+  --borderColor-accent-emphasis: var(--uix-primary);
+  --borderColor-accent-muted: var(--uix-border);
+  --borderColor-success-emphasis: var(--uix-success);
+  --borderColor-danger-emphasis: var(--uix-danger);
+  --borderColor-attention-emphasis: var(--uix-warning-text);
+  --bgColor-accent-emphasis: var(--uix-primary);
+  --bgColor-accent-muted: var(--uix-surface-muted);
+  --bgColor-success-muted: var(--uix-success-soft);
+  --bgColor-danger-muted: var(--uix-danger-soft);
+  --bgColor-attention-muted: var(--uix-warning-soft);
+  --control-borderColor-rest: var(--uix-field-border);
+  --control-borderColor-emphasis: var(--uix-border-strong);
+  --control-borderColor-selected: var(--uix-primary);
+  --control-borderColor-danger: var(--uix-danger);
+  --control-borderColor-success: var(--uix-success);
+  --control-borderColor-warning: var(--uix-warning-text);
+  --focus-outlineColor: var(--uix-focus-ring);
+  --focus-outline: 3px solid var(--uix-focus-ring);
+  /* Tombol (kelas .button OpenProject dan Primer) */
+  --button--background-color: var(--uix-surface);
+  --button--background-hover-color: var(--uix-surface-muted);
+  --button--font-color: var(--uix-text-body);
+  --button--active-border-color: var(--uix-border-strong);
+  --button--primary-background-color: var(--uix-primary);
+  --button--primary-background-hover-color: var(--uix-primary-strong);
+  --button--primary-background-active-color: var(--uix-primary-strong);
+  --button--primary-border-color: var(--uix-primary);
+  --button--primary-font-color: var(--uix-on-primary);
+  --button-default-bgColor-rest: var(--uix-surface);
+  --button-default-bgColor-hover: var(--uix-surface-muted);
+  --button-default-bgColor-active: var(--uix-surface-muted);
+  --button-default-fgColor-rest: var(--uix-text-body);
+  --button-default-borderColor-rest: var(--uix-border-strong);
+  --button-default-borderColor-hover: var(--uix-border-strong);
+  --button-primary-bgColor-rest: var(--uix-primary);
+  --button-primary-bgColor-hover: var(--uix-primary-strong);
+  --button-primary-bgColor-active: var(--uix-primary-strong);
+  --button-primary-fgColor-rest: var(--uix-on-primary);
+  --button-primary-borderColor-rest: var(--uix-primary);
+  --button-danger-bgColor-rest: var(--uix-surface);
+  --button-danger-fgColor-rest: var(--uix-danger);
+  --button-danger-bgColor-hover: var(--uix-danger);
+  --button-danger-fgColor-hover: var(--uix-on-primary);
+  --button-danger-bgColor-active: var(--uix-danger);
+  --button-danger-fgColor-active: var(--uix-on-primary);
+}
+
+/* Teks dasar dan bobot: tidak ada 700 (tebal bawaan diturunkan ke 600). */
+body { background: var(--uix-surface-page); color: var(--uix-text-body); font: 400 var(--uix-fs-body)/1.5 var(--uix-font); }
+b, strong, th, h1, h2, h3, h4, h5, h6 { font-weight: 600; }
+h1 { font-size: var(--uix-fs-page); color: var(--uix-text-head); }
+h2 { font-size: var(--uix-fs-section); color: var(--uix-text-head); }
+h3, h4 { font-size: var(--uix-fs-card-title); color: var(--uix-text-head); }
+a { color: var(--uix-primary); }
+a:hover { color: var(--uix-primary-strong); }
+code, kbd, pre, samp, tt { font-family: var(--uix-font-mono); }
+small, .form--field-instructions, .form--field-extra-actions { font-size: var(--uix-fs-small); }
+
+/* Kontrol: tombol 34px/radius 8/bobot 500; kolom isian dengan batas dan cuci UIx. */
+.button, a.button, button.button, .Button { min-height: var(--uix-control-h); border-radius: var(--uix-radius-control); font: 500 var(--uix-fs-body)/1.2 var(--uix-font); box-shadow: var(--uix-shadow-xs); }
+.button.-small, .Button--small { min-height: var(--uix-control-h-sm); }
+.button.-large, .Button--large { min-height: var(--uix-control-h-lg); }
+input[type="text"], input[type="search"], input[type="email"], input[type="password"], input[type="number"], input[type="url"],
+input[type="date"], input[type="tel"], select, textarea, .form--text-field, .form--select, .form--text-area, .TextInput-wrapper, .FormControl-input {
+  font-family: var(--uix-font); font-size: var(--uix-fs-body); color: var(--uix-text-head);
+  background-color: var(--uix-input-wash); border: 1px solid var(--uix-field-border); border-radius: var(--uix-radius-control); }
+input[type="text"], input[type="search"], input[type="email"], input[type="password"], input[type="number"], input[type="url"],
+input[type="date"], input[type="tel"], select, .form--text-field, .form--select { min-height: var(--uix-control-h); }
+input:focus, select:focus, textarea:focus, .form--text-field:focus, .ng-select.ng-select-focused > .ng-select-container { border-color: var(--uix-focus-border); outline: 3px solid var(--uix-focus-ring); outline-offset: 0; box-shadow: none; }
+input::placeholder, textarea::placeholder { color: var(--uix-text-muted); }
+input:disabled, select:disabled, textarea:disabled { opacity: .5; }
+.ng-select .ng-select-container { min-height: var(--uix-control-h); border-radius: var(--uix-radius-control); border-color: var(--uix-field-border); background-color: var(--uix-input-wash); font-size: var(--uix-fs-body); }
+.ng-dropdown-panel { border-radius: var(--uix-radius-control); border: 1px solid var(--uix-border); box-shadow: var(--uix-shadow-md); font-size: var(--uix-fs-body); }
+.ng-dropdown-panel .ng-option { min-height: 32px; border-radius: var(--uix-radius-chip); }
+.ng-dropdown-panel .ng-option:hover, .ng-dropdown-panel .ng-option.ng-option-marked { background: var(--uix-surface-muted); }
+.ng-dropdown-panel .ng-option.ng-option-selected { background: transparent; font-weight: 500; color: var(--uix-text-head); }
+
+/* Kartu, modal, dialog, popover: radius 12, garis UIx. */
+.Overlay, .op-modal, .spot-modal, dialog.Overlay { border-radius: var(--uix-radius-card); border: 1px solid var(--uix-border); box-shadow: var(--uix-shadow-xl); background: var(--uix-surface); }
+.Overlay--size-auto, .Overlay--size-medium { font-size: var(--uix-fs-body); }
+.Overlay-title, .Overlay-header h1, .Overlay-header h2, .op-modal--header { font: 600 var(--uix-fs-page)/1.3 var(--uix-font); color: var(--uix-text-head); }
+.Overlay::backdrop, .Overlay--backdrop, .modal-overlay { background: var(--uix-backdrop); }
+.dropdown-menu, .ActionList, .SelectPanel, .op-hover-card, .Popover-message { border-radius: var(--uix-radius-control); box-shadow: var(--uix-shadow-md); border: 1px solid var(--uix-border); }
+.ActionListItem, .ActionList-item, .op-menu--item { border-radius: var(--uix-radius-chip); font-size: var(--uix-fs-body); }
+.ActionListItem:hover, .ActionList-item:hover { background: var(--uix-surface-muted); }
+.Label, .op-principal--name-chip, .Counter, .badge { border-radius: var(--uix-radius-chip); font-size: var(--uix-fs-small); font-weight: 500; }
+
+/* Notifikasi (toast, flash, banner, pesan galat formulir): putih, garis halus, penanda status 3px di kiri, ikon berwarna status, teks netral.
+   Nada tenang (UIx §6): tanpa latar alarm; warna hanya menandai status. */
+.op-toast, .op-toast.-error, .op-toast.-success, .op-toast.-warning, .op-toast.-info, .op-toast.-upload, .op-toast.-loading,
+.op-toast--notice, #errorExplanation, .flash, .Banner, .macro-unavailable {
+  position: relative; background-color: var(--uix-surface); color: var(--uix-text-body);
+  border: 1px solid var(--uix-border); border-left: 3px solid var(--uix-info); border-radius: var(--uix-radius-card);
+  box-shadow: var(--uix-shadow-md); font: 400 var(--uix-fs-body)/1.5 var(--uix-font); }
+.op-toast.-success, .flash.-success, .Banner--success { border-left-color: var(--uix-success); }
+.op-toast.-warning, #errorExplanation.warning, .op-toast--notice.-warning, .flash.-warning, .Banner--warning { border-left-color: var(--uix-warning-text); }
+.op-toast.-error, #errorExplanation, #errorExplanation.error, .op-toast--notice.-error, .flash.-error, .Banner--danger, .macro-unavailable { border-left-color: var(--uix-danger); }
+.op-toast.-info, .op-toast.-upload, .op-toast.-loading, #errorExplanation.info, .Banner--info { border-left-color: var(--uix-info); }
+.op-toast.-error:before, #errorExplanation.error:before, #errorExplanation.nodata:before { color: var(--uix-danger); }
+.op-toast.-success:before { color: var(--uix-success); }
+.op-toast.-warning:before, #errorExplanation.warning:before { color: var(--uix-warning-text); }
+.op-toast.-info:before, #errorExplanation.info:before { color: var(--uix-info); }
+.op-toast .op-toast--content > div, .op-toast .op-toast--content > p { color: var(--uix-text-body); }
+.op-toast .op-toast--close { color: var(--uix-text-secondary); }
+.op-toast .op-toast--close:hover { color: var(--uix-text-head); }
+.op-toast--wrapper { background-color: transparent; }
+.op-toast .op-toast--content progress[value]::-webkit-progress-bar { background-color: var(--uix-surface-muted); }
+.op-toast .op-toast--content progress[value]::-webkit-progress-value { background-color: var(--uix-primary); }
+.op-toast .op-toast--content progress[value]::-moz-progress-bar { background-color: var(--uix-primary); }
+
+/* Loader UIx menggantikan animasi bawaan OpenProject (dua kotak hijau berputar) dan loading.gif:
+   cincin 3px abu-abu dengan busur merah korporat, titik pusat berdenyut; diam bila pengguna meminta gerakan dikurangi. */
+@keyframes uix-spin { to { transform: rotate(360deg); } }
+@keyframes uix-pulse { 0%, 100% { transform: scale(.6); opacity: .5; } 50% { transform: scale(1); opacity: 1; } }
+.op-loading-indicator { background: transparent; width: 48px; height: 48px; overflow: visible; margin: 0; left: calc(50% - 24px); top: 33%; position: relative; }
+.op-loading-indicator div { display: none !important; animation: none !important; }
+.op-loading-indicator::before { content: ""; position: absolute; inset: 0; box-sizing: border-box; border: 3px solid var(--uix-border);
+  border-top-color: var(--uix-primary); border-radius: 50%; animation: uix-spin .9s linear infinite; }
+.op-loading-indicator::after { content: ""; position: absolute; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px;
+  border-radius: 50%; background: var(--uix-primary); animation: uix-pulse 1.8s ease-in-out infinite; }
+.op-loading-indicator_embedded { top: 0; left: 0; }
+.loading-indicator--background { background: var(--uix-surface-page); opacity: .85; }
+/* Spinner kecil (inline, tombol, tabel): cincin yang sama, ukuran mengikuti teks. */
+.spinner, .ajax-indicator, #ajax-indicator { background-image: none !important; }
+.spinner { width: 16px; height: 16px; box-sizing: border-box; border: 2px solid var(--uix-border); border-top-color: var(--uix-primary); border-radius: 50%; animation: uix-spin .9s linear infinite; }
+.spinner img { display: none; }
+.anim-rotate { animation-duration: .9s; }
+.ck.ck-spinner-container, .ck .ck-spinner { color: var(--uix-primary); }
+@media (prefers-reduced-motion: reduce) {
+  .op-loading-indicator::before, .spinner, .anim-rotate { animation-duration: 3s; }
+  .op-loading-indicator::after { animation: none; opacity: 1; transform: none; }
+}
+
+/* Menu fase (induk-anak) di sidebar project: induk fase yang sedang dibuka ikut tersorot, anak aktif bertanda 3px merah di garis hierarki.
+   Pola sama dengan item terpilih UIx §5: latar abu, bobot 500, ikon merah, penanda 3px (tidak ada latar merah). */
+.main-menu ul.menu_root > li.open > .main-item-wrapper a.op-menu--item-action,
+.main-menu .main-menu--children-menu-header .main-menu--parent-node { position: relative; background: var(--uix-surface-muted); color: var(--uix-text-head); font-weight: 500; border-radius: var(--uix-radius-chip); }
+.main-menu ul.menu_root > li.open > .main-item-wrapper a.op-menu--item-action::before { content: ""; position: absolute; left: -4px; top: 6px; bottom: 6px; width: 3px; border-radius: 0 3px 3px 0; background: var(--uix-primary); }
+.main-menu ul.menu_root > li.open > .main-item-wrapper a.op-menu--item-action svg { color: var(--uix-primary); }
+.main-menu .main-menu--children-menu-header { border-bottom: 1px solid var(--uix-border-subtle); }
+.main-menu .main-menu--children-menu-header .main-menu--parent-node { display: block; margin: 2px 4px; padding: 8px 12px; font-weight: 600; }
+.main-menu ul.main-menu--children { position: relative; margin-left: 20px; padding-left: 0; border-left: 1px solid var(--uix-border); }
+.main-menu ul.main-menu--children > li > a.op-menu--item-action { position: relative; display: flex; align-items: center; min-height: 36px; margin: 2px 4px 2px 8px; padding: 0 12px; border-radius: var(--uix-radius-chip); color: var(--uix-text-body); font-size: var(--uix-fs-body); }
+.main-menu ul.main-menu--children > li > a.op-menu--item-action:hover { background: var(--uix-surface-muted); color: var(--uix-text-head); }
+.main-menu ul.main-menu--children > li > a.op-menu--item-action.selected { background: var(--uix-surface-muted); color: var(--uix-text-head); font-weight: 500; }
+.main-menu ul.main-menu--children > li > a.op-menu--item-action.selected::before { content: ""; position: absolute; left: -9px; top: 6px; bottom: 6px; width: 3px; border-radius: 0 3px 3px 0; background: var(--uix-primary); }

@@ -23,6 +23,7 @@
     <% end %>
   </ol>
 
+  <% if @all || @section == "gerbang" %>
   <section class="lpms3-card" id="gerbang">
     <h3 class="lpms3-card__title"><%= t("lpms3.phases.gates") %></h3>
     <% if @gates.empty? %>
@@ -40,6 +41,9 @@
     <% end %>
   </section>
 
+  <% end %>
+
+  <% if @all || @section == "langkah" %>
   <section class="lpms3-card" id="langkah">
     <h3 class="lpms3-card__title"><%= t("lpms3.phases.steps") %></h3>
     <% if @steps.empty? %>
@@ -70,7 +74,9 @@
     <% end %>
   </section>
 
-  <% if @type_rows.any? %>
+  <% end %>
+
+  <% if (@all || @section == "register") && @type_rows.any? %>
     <section class="lpms3-card" id="register">
       <h3 class="lpms3-card__title"><%= t("lpms3.phases.registers") %></h3>
       <ul class="lpms3-registers">

@@ -113,3 +113,29 @@ en:
         title: "Closing"
         menu_title: "Closing"
         description: "100% completion, termination, after-sales code, and project archive (BOP-001 §5.5). Closed by gate G4."
+    guide:
+      title: "LPMS3 internal guide"
+      intro: "A short guide to working in LPMS3, following the BOP-001 project process."
+      back: "Back to LPMS3"
+      phase_list: "The five BOP-001 phases"
+      start:
+        title: "Getting started"
+        body: "Sign in through the IDS page. After signing in you land on the home page: pick a project from the Projects menu or the favorites block. Each project has a sidebar with an Overview, the five BOP-001 phases and its work packages."
+      language:
+        title: "Switching language"
+        body: "Use the ID / EN buttons at the top right. Menus, labels, buttons and this guide change language. What you or your team typed (project names, work package subjects and descriptions, comments, documents) is never translated or changed."
+      phases:
+        title: "Phases"
+        body: "Each phase page shows a progress stepper, the gates, the template steps, and the registers for that phase. Open a step to update its status, assignee and due date."
+      gates:
+        title: "Gates"
+        body: "Gates G1 to G4 are milestones that close a phase. G1 closes Initiation, G2 Planning, G3 (handover) closes Execution and Monitoring & Control, and G4 closes Closure. A gate is only completed once its phase steps are done."
+      registers:
+        title: "Registers and documents"
+        body: "Registers (risks, issues, change requests, deliverables and others) are work package types. The register table on each phase page links to the full work package table, where you can filter, edit and export."
+      notifications:
+        title: "Notifications"
+        body: "Notifications are shown inside LPMS3 only (the bell icon). Email notifications are not active yet."
+      support:
+        title: "Help"
+        body: "For further help, contact your LPMS3 administrator or IT Development."

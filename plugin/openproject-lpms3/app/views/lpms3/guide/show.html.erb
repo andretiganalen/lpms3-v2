@@ -1,0 +1,24 @@
+<% html_title t("lpms3.guide.title") %>
+<%=
+  render(Primer::OpenProject::PageHeader.new) do |header|
+    header.with_title { t("lpms3.guide.title") }
+    header.with_description { t("lpms3.guide.intro") }
+  end
+%>
+<div class="lpms3-page">
+  <% %w[start language phases gates registers notifications support].each do |sec| %>
+    <section class="lpms3-card" id="<%= sec %>">
+      <h3 class="lpms3-card__title"><%= t("lpms3.guide.#{sec}.title") %></h3>
+      <p><%= t("lpms3.guide.#{sec}.body") %></p>
+    </section>
+  <% end %>
+  <section class="lpms3-card" id="fase-list">
+    <h3 class="lpms3-card__title"><%= t("lpms3.guide.phase_list") %></h3>
+    <ol>
+      <% ::OpenProject::Lpms3::Phases::ALL.each do |ph| %>
+        <li><strong><%= t(::OpenProject::Lpms3::Phases.title_key(ph)) %></strong> &mdash; <%= t("lpms3.phases.#{ph.key}.description") %></li>
+      <% end %>
+    </ol>
+  </section>
+  <p class="lpms3-hint"><%= link_to t("lpms3.guide.back"), "/" %></p>
+</div>

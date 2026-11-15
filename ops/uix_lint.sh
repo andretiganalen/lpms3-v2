@@ -27,13 +27,13 @@ PY
 )
 [ -z "$undef" ] && ok CSS-token "semua token --uix-* terdefinisi" || bad CSS-token "tak terdefinisi: $undef"
 # 3. Font hanya UIx Poppins / var(--uix-font)
-f=$(strip $CSS | grep -oE 'font-family:[^;]+' | grep -vE 'UIx Poppins|var\(--uix-font\)' | sort -u | tr '\n' ' ')
+f=$(strip $CSS | grep -oE 'font-family:[^;]+' | grep -vE 'UIx Poppins|var\(--uix-font(-mono)?\)' | sort -u | tr '\n' ' ')
 [ -z "$f" ] && ok CSS-font "hanya Poppins UIx" || bad CSS-font "$f"
 # 4. Tidak ada bobot 700+ (Poppins hanya 400/500/600)
 w=$(strip $CSS | grep -oE 'font-weight:\s*(700|800|900|bold)' | sort -u | tr '\n' ' ')
 [ -z "$w" ] && ok CSS-weight "tanpa bobot 700+" || bad CSS-weight "$w"
 # 5. View/partial plugin dan halaman panduan: tanpa hex warna, tanpa font-family, tanpa emoji
-files=$(find plugin/openproject-lpms3/app/views deploy/panduan -type f \( -name '*.erb' -o -name '*.html' \))
+files=$(find plugin/openproject-lpms3/app/views -type f \( -name '*.erb' -o -name '*.html' \))
 h=$(grep -nE '#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b' $files | grep -vE 'href="#|#RRGGBB|&#|id="#' | head -5)
 [ -z "$h" ] && ok VIEW-hex "tanpa hex warna di view/halaman" || bad VIEW-hex "$h"
 e=$(grep -nP '[\x{1F300}-\x{1FAFF}\x{2600}-\x{27BF}]' $files plugin/openproject-lpms3/config/locales/*.yml 2>/dev/null | head -3)

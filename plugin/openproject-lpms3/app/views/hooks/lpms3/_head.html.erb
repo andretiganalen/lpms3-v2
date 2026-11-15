@@ -94,6 +94,16 @@
       });
       nav.querySelectorAll('a.op-menu--item-action.selected').forEach(function (a) { a.classList.remove('selected'); });
       if (best) { best.classList.add('selected'); }
+      // Induk-anak: bila item terpilih adalah anak (Ringkasan/Gerbang/Langkah/Register), induk fasenya dibuka dan ikut tersorot.
+      var root = nav.querySelector('ul.menu_root');
+      nav.querySelectorAll('ul.menu_root > li.open').forEach(function (li) { li.classList.remove('open'); });
+      var li = best && best.closest('ul.main-menu--children') ? best.closest('ul.menu_root > li') : null;
+      if (root) { root.classList.toggle('closed', !!li); }
+      if (li) {
+        li.classList.add('open');
+        var head = li.querySelector('.main-item-wrapper a.op-menu--item-action');
+        if (head) { head.classList.add('selected'); }
+      }
     }
 
     document.addEventListener('turbo:before-render', function (event) {

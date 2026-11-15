@@ -31,7 +31,7 @@ done
 H='Host: 192.168.125.14:5100'
 chk_http() { code="$(curl -s -o /dev/null -m 15 -w '%{http_code}' -H "$H" "localhost:5100$1")"
   if [ "$code" = "$2" ]; then say OK http "$1 -> $code"; else say CRIT http "$1 -> $code (harap $2)"; fi; }
-chk_http / 200; chk_http /ids/login 302; chk_http /panduan-internal 200
+chk_http / 200; chk_http /ids/login 302; chk_http /panduan-internal 302; chk_http /lpms3/panduan 200
 
 # 3. Disk
 use="$(df --output=pcent / | tail -1 | tr -dc '0-9')"
