@@ -14,3 +14,4 @@ done
 echo "== smoke D10 =="; bash lpms3/smoke/run.sh 2>&1 | grep -E '^(FAIL|RINGKASAN)'
 echo "== audit BOP-001 =="; bash ops/audit_bop001.sh 2>&1 | grep -E '^(FAIL|RINGKASAN)'
 echo "== monitor =="; bash ops/monitor.sh 2>&1 | tail -5; echo "(kosong = semua OK)"
+echo "== UIx lint =="; bash ops/uix_lint.sh 2>&1 | grep -E "^(FAIL|SKIP|==)"

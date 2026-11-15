@@ -56,8 +56,8 @@
   --uix-radius-card: 12px;
   --uix-radius-chip: 6px;
   --uix-control-h: 34px;
-  --uix-shadow-xs: 0 1px 2px rgba(16, 24, 40, .05);
-  --uix-shadow-md: 0 4px 8px -2px rgba(16, 24, 40, .10), 0 2px 4px -2px rgba(16, 24, 40, .06);
+  --uix-shadow-xs: 0 0 0 1px rgba(16, 24, 40, .04), 0 1px 2px rgba(16, 24, 40, .06);
+  --uix-shadow-md: 0 0 0 1px rgba(16, 24, 40, .05), 0 4px 8px -2px rgba(16, 24, 40, .10), 0 12px 24px -4px rgba(16, 24, 40, .08);
 }
 
 /* Menyelaraskan variabel desain OpenProject dengan token UIx (menu Design OpenProject tidak dipakai). */
@@ -143,3 +143,42 @@ op-enterprise-banner, .op-enterprise-banner-container { display: none !important
    SVG server-side (octicon), SVG Angular (atribut op-enterprise-addons-icon), dan ikon font lama. */
 .octicon-op-enterprise-addons, svg[op-enterprise-addons-icon], svg.upsell-colored,
 .icon-enterprise, .icon-enterprise-addons { display: none !important; }
+
+/* Pemilih bahasa (pojok kanan atas header) */
+#lpms3-lang { display: inline-flex; align-items: center; gap: 2px; margin-right: 8px; padding: 2px; border: 1px solid var(--uix-border); border-radius: var(--uix-radius-control); background: var(--uix-surface); }
+#lpms3-lang .lpms3-lang__btn { border: 0; background: transparent; color: var(--uix-text-body); font: 500 12px/1 var(--uix-font); padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+#lpms3-lang .lpms3-lang__btn:hover { background: var(--uix-surface-muted); }
+#lpms3-lang .lpms3-lang__btn.is-active { background: var(--uix-primary); color: var(--uix-on-primary); }
+#lpms3-lang .lpms3-lang__btn:focus-visible { outline: 3px solid var(--uix-focus-ring); outline-offset: 0; }
+
+/* Pengaturan di kiri bawah sidebar (pola .bottom-menu UIx): baris 40px, radius 6px, ikon 16px; terpilih = latar abu, bobot 500, ikon merah, penanda 3px. */
+#menu-sidebar { display: flex; flex-direction: column; min-height: 100%; }
+#lpms3-bottom-menu { margin-top: auto; padding: 8px 0; border-top: 1px solid var(--uix-border); background: var(--uix-surface); position: sticky; bottom: 0; }
+#lpms3-bottom-menu a { position: relative; display: flex; align-items: center; gap: 10px; height: 40px; margin: 2px 4px; padding: 0 12px; border-radius: var(--uix-radius-chip); color: var(--uix-text-body); font: 400 var(--uix-fs-body)/1.4 var(--uix-font); text-decoration: none; }
+#lpms3-bottom-menu a:hover { background: var(--uix-surface-muted); color: var(--uix-text-head); }
+#lpms3-bottom-menu a svg { width: 16px; height: 16px; flex: none; color: var(--uix-text-secondary); }
+#lpms3-bottom-menu a[aria-current="page"] { background: var(--uix-surface-muted); font-weight: 500; color: var(--uix-text-head); }
+#lpms3-bottom-menu a[aria-current="page"] svg { color: var(--uix-primary); }
+#lpms3-bottom-menu a[aria-current="page"]::before { content: ""; position: absolute; left: -4px; top: 6px; bottom: 6px; width: 3px; border-radius: 0 3px 3px 0; background: var(--uix-primary); }
+#lpms3-bottom-menu a:focus-visible { outline: 3px solid var(--uix-focus-ring); outline-offset: 0; }
+
+/* Halaman LPMS3 (Tampilan, Modul Fitur): kartu, judul kartu 16/600, baris form, tombol 34px radius 8 (UIx §3-§5). */
+.lpms3-page .lpms3-card { padding: 16px 20px; margin-bottom: 16px; }
+.lpms3-card__title { margin: 0 0 12px; font: 600 var(--uix-fs-card-title)/1.4 var(--uix-font); color: var(--uix-text-head); }
+.lpms3-hint { margin: 0; color: var(--uix-text-secondary); font-size: 12px; }
+.lpms3-form-row { display: grid; grid-template-columns: 280px 1fr; gap: 6px 16px; align-items: center; padding: 12px 0; border-top: 1px solid var(--uix-border-subtle); }
+.lpms3-form-row:first-of-type { border-top: 0; }
+.lpms3-form-row__label { font-weight: 500; color: var(--uix-text-head); }
+.lpms3-form-row__control { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.lpms3-preview { max-height: 48px; max-width: 240px; padding: 4px; border: 1px solid var(--uix-border); border-radius: var(--uix-radius-chip); background: var(--uix-surface); }
+.lpms3-page input[type="color"] { width: 56px; height: var(--uix-control-h); padding: 2px; border: 1px solid var(--uix-field-border); border-radius: var(--uix-radius-control); background: var(--uix-input-wash); cursor: pointer; }
+.lpms3-page input[type="file"] { font: 400 var(--uix-fs-body)/1.4 var(--uix-font); color: var(--uix-text-body); }
+.lpms3-page code { font-size: 12px; color: var(--uix-text-secondary); }
+.lpms3-page .button { display: inline-flex; align-items: center; height: var(--uix-control-h); padding: 0 14px; border: 1px solid var(--uix-border-strong); border-radius: var(--uix-radius-control); background: var(--uix-surface); color: var(--uix-text-body); font: 500 var(--uix-fs-body)/1 var(--uix-font); box-shadow: var(--uix-shadow-xs); cursor: pointer; }
+.lpms3-page .button:hover { background: var(--uix-surface-muted); }
+.lpms3-page .button.-primary { background: var(--uix-primary); border-color: var(--uix-primary); color: var(--uix-on-primary); }
+.lpms3-page .button.-primary:hover { background: var(--uix-primary-strong); border-color: var(--uix-primary-strong); }
+.lpms3-page .button:focus-visible { outline: 3px solid var(--uix-focus-ring); outline-offset: 0; }
+.lpms3-page .lpms3-actions { display: flex; align-items: center; gap: 12px; margin: 0 0 16px; }
+.lpms3-page .lpms3-table-wrap { margin-top: 4px; }
+#lpms3-lang { align-self: center; height: var(--uix-control-h); box-sizing: border-box; }

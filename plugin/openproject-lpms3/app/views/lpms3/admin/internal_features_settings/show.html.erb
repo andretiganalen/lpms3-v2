@@ -8,6 +8,7 @@
   end
 %>
 
+<div class="lpms3-page">
 <%= form_with url: lpms3_admin_internal_features_path, method: :patch, local: true do %>
   <section class="lpms3-meta">
     <div class="lpms3-meta__main">
@@ -21,7 +22,7 @@
 
   <% @clusters.each do |cluster, cluster_title, features| %>
     <section class="lpms3-card" aria-label="<%= cluster_title %>">
-      <h3><%= cluster_title %></h3>
+      <h3 class="lpms3-card__title"><%= cluster_title %></h3>
       <div class="lpms3-table-wrap">
         <table class="lpms3-table">
           <thead>
@@ -63,3 +64,4 @@
 
   <p><button type="submit" class="button -primary"><%= t("lpms3.internal_features.save") %></button></p>
 <% end %>
+</div>

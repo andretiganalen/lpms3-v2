@@ -1,4 +1,11 @@
 # CHANGELOG
+## 17.9.7-lpms3.1.22 — UIx menyeluruh, Tampilan (logo/ikon/warna), pemilih bahasa, Pengaturan di sidebar
+- Administrasi → **Tampilan** (in-house, `/admin/lpms3/branding`): ganti logo, ikon/thumbnail (favicon + apple-touch), 4 warna; validasi isi berkas (PNG/JPEG/WEBP/ICO/SVG tanpa skrip, maks. 300 KB), warna `#RRGGBB`, reset. Tidak memakai CustomStyle/EnterpriseToken.
+- **Pemilih bahasa ID/EN** di kanan atas header (`/lpms3/language`, hanya bahasa aktif, alihan aman), dan **Pengaturan** di kiri bawah sidebar.
+- UIx: bayangan `xs`/`md` disamakan dengan `leno.css` (:8585); gaya halaman LPMS3 (kartu, judul 16/600, tombol 34px/radius 8, input warna); panduan memakai token. 213 teks Indonesia (override sesudah kamus inti), audit bahasa 238 → 46 kunci.
+- Perbaikan: `*` sisa markdown di deskripsi katalog fitur; lokasi menu katalog diterjemahkan.
+- Baru: `ops/uix_lint.sh` (8 pemeriksaan, masuk `ops/verify.sh`), `docs/UIX-COMPLIANCE.md`.
+
 ## 17.9.7-lpms3.1.18 — ikon berlian Enterprise disembunyikan
 - `uix.css`: menyembunyikan `svg.octicon-op-enterprise-addons`, `svg.upsell-colored`, `svg[op-enterprise-addons-icon]` (Angular), `.icon-enterprise`, `.icon-enterprise-addons`. Diperiksa di 9 halaman server-side: semua ikon berlian (78 + 71 elemen) tercakup selector. Label menu fitur Enterprise tidak diubah.
 

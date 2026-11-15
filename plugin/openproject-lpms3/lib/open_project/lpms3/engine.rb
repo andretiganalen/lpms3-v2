@@ -1,5 +1,6 @@
 require "open_project/plugins"
 require "open_project/lpms3/features"
+require "open_project/lpms3/branding"
 
 module OpenProject::Lpms3
   class Engine < ::Rails::Engine
@@ -21,6 +22,13 @@ module OpenProject::Lpms3
            { controller: "/lpms3/admin/internal_features_settings", action: :show },
            if: Proc.new { User.current.admin? },
            caption: :"lpms3.internal_features.menu",
+           icon: "gear"
+
+      menu :admin_menu,
+           :lpms3_branding,
+           { controller: "/lpms3/admin/branding", action: :show },
+           if: Proc.new { User.current.admin? },
+           caption: :"lpms3.branding.menu",
            icon: "gear"
     end
 
