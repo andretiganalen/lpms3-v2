@@ -12,3 +12,7 @@ COPY --chown=app:app deploy/patch_gemfile_lock.rb /tmp/patch_gemfile_lock.rb
 RUN ruby /tmp/patch_gemfile_lock.rb 0.1.0 /app/custom-plugins/openproject-lpms3 \
  && rm /tmp/patch_gemfile_lock.rb \
  && bundle exec ruby -e 'abort("plugin tidak termuat") unless Gem.loaded_specs["openproject-lpms3"]'
+# MOD-05: netralisasi tautan keluar ke openproject.*/github opf/chargebee/youtube di static_links.yml -> "/" (tanpa kontak vendor).
+RUN sed -i -E 's#(href:[[:space:]]*)https?://([a-z0-9.-]*\.)?(openproject\.org|openproject\.com|openproject-docs\.s3[a-z0-9.-]*\.amazonaws\.com|chargebee\.com|youtube\.com)[^[:space:]]*#\1"/"#; s#(href:[[:space:]]*)https://github\.com/opf/[^[:space:]]*#\1"/"#' /app/config/static_links.yml \
+ && ! grep -E 'href:[[:space:]]*https?://([a-z0-9.-]*\.)?(openproject|chargebee)' /app/config/static_links.yml \
+ && ruby -ryaml -e 'YAML.load_file("/app/config/static_links.yml")'
