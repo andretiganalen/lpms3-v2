@@ -1,4 +1,11 @@
 # CHANGELOG
+## 17.9.7-lpms3.1.16 — audit lintas modul MOD-00..08
+- Perbaikan: Caddy memblokir jalur trial yang salah (`/admin/enterprise/save_trial_key`); yang benar `/admin/enterprise_tokens/{save,delete}_trial_key`.
+- Perbaikan: `/panduan-internal` (tombol bantuan) 404 → halaman statis `deploy/panduan/index.html` (placeholder) lewat Caddy + mount di `docker-compose.stock.yml`.
+- Pesan log guard IDS diperjelas (login lewat IdsLogin bridge).
+- Baru: `ops/verify.sh` + `ops/audit_mod08.rb` (36 pemeriksaan); `DEPLOY_SOP.md` ditulis ulang; plan `openproject_custom_plan.md` disinkronkan (Bagian 0A status & risiko, Bagian 4, MOD-03, MOD-08).
+- Temuan terbuka: SMTP (812 job gagal ECONNREFUSED localhost:25, sudah ada sebelum MOD-01), keputusan `DROP_OLD_SESSIONS_ON_LOGOUT`, merge ke `main`, `/admin/roles?page=N` di luar rentang → 500 (bawaan OpenProject).
+
 ## 17.9.7-lpms3.1.15 — MOD-08 (audit) + perbaikan 1.14/1.15
 - **Perbaikan bug 1.8–1.13:** ikon menu "Modul Fitur Internal" `settings` tidak valid → seluruh halaman Administration HTTP 500. Diganti `gear` (1.14). Ditemukan oleh audit MOD-08.
 - 1.15: teks sambutan Homescreen (tautan pemasaran vendor) diganti teks internal; tautan `<noscript>` ke enable-javascript.com dihapus (`patch_mod07.rb`).

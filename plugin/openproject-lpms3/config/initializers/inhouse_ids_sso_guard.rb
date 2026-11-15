@@ -26,7 +26,7 @@ Rails.application.config.after_initialize do
     problems << "login_required tidak aktif" unless Setting.login_required?
 
     if problems.empty?
-      Rails.logger.info "[LPMS3] IDS SSO guard: konfigurasi IDS lengkap."
+      Rails.logger.info "[LPMS3] IDS SSO guard: variabel OIDC IDS lengkap (login pengguna berjalan lewat IdsLogin bridge; strategi OmniAuth OpenProject sendiri tidak dipakai)."
     else
       Rails.logger.warn "[LPMS3] IDS SSO guard: #{problems.join('; ')}"
     end
