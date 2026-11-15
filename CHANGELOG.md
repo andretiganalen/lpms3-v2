@@ -1,4 +1,9 @@
 # CHANGELOG
+## 17.9.7-lpms3.1.9 — MOD-04
+- Plugin `config/initializers/homescreen_hardening.rb`: blok Homescreen `community`, `upsell`, `new_features` dibuang dari daftar (sisa: welcome, favorite_projects, meetings, my_account, news, administration).
+- `deploy/Dockerfile`: `SecurityBadgeHelper#display_security_badge_graphic?` dipatch menjadi `false` (menutup juga halaman Administration → Information); build gagal bila patch tidak terpasang.
+- Berbeda dari plan: komponen tidak punya `render?` dan blok sudah difilter lewat `if` di `config/initializers/homescreen.rb`, jadi file komponen tidak diedit.
+
 ## 17.9.7-lpms3.1.8 — MOD-03 (in-house)
 - `InhouseFeatureCatalog`: 35 fitur (30 utama + 5 kompatibilitas) lengkap dengan lokasi menu, deskripsi, tujuan, output; dibangkitkan dari Bagian 3 plan. Tujuan/output klaster F ditulis tim LPMS3 (plan hanya memberi deskripsi).
 - Halaman Administration → Modul Fitur Internal (`/admin/lpms3/internal_features`, admin saja), controller `Lpms3::Admin::InternalFeaturesSettingsController`, menu di plugin, terjemahan en/id. Saklar hanya bisa dinyalakan untuk fitur berstatus implemented (saat ini 0); sisanya "Belum tersedia".
