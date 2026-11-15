@@ -3,3 +3,4 @@
 !plugin/openproject-lpms3
 !deploy/Gemfile.plugins
 !deploy/patch_gemfile_lock.rb
+!deploy/patch_mod06.rb
