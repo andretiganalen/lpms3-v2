@@ -1,4 +1,5 @@
 require "open_project/plugins"
+require "open_project/lpms3/features"
 
 module OpenProject::Lpms3
   class Engine < ::Rails::Engine
