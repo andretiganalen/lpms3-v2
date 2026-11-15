@@ -20,7 +20,8 @@ x-ids-env: &ids
   OPENPROJECT_FORCE__HELP__LINK: "/panduan-internal"
   OPENPROJECT_LOGIN__REQUIRED: "true"
   OPENPROJECT_DROP__OLD__SESSIONS__ON__LOGIN: "true"
-  OPENPROJECT_DROP__OLD__SESSIONS__ON__LOGOUT: "false"
+  OPENPROJECT_DROP__OLD__SESSIONS__ON__LOGOUT: "true"   # bawaan OpenProject; plan awal "false" ditolak (sesi lama tetap hidup setelah logout)
+  OPENPROJECT_SHOW__PRODUCT__VERSION: "false"            # menyembunyikan tautan versi/commit ke github.com di Administration > Information
   OPENPROJECT_CSP__IMG__SRC: "[\"'self'\", 'data:', 'blob:']"
   OPENPROJECT_EMAIL__DELIVERY__METHOD: "smtp"
   OPENPROJECT_SELF__REGISTRATION: "0"

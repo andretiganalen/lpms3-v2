@@ -1,4 +1,11 @@
 # CHANGELOG
+## 17.9.7-lpms3.1.17 — audit kepatuhan BOP-001 dan penutupan risiko
+- `OPENPROJECT_DROP__OLD__SESSIONS__ON__LOGOUT` dikembalikan ke `true`; `OPENPROJECT_SHOW__PRODUCT__VERSION=false` (menghilangkan tautan versi/commit ke github.com).
+- Plugin: `pagination_guard.rb` — halaman di luar rentang (mis. `/projects?page=99`) kini dialihkan ke halaman 1, bukan HTTP 500 bawaan OpenProject.
+- Baru: `ops/monitor.sh` (dipasang di cron tiap 5 menit), `ops/audit_bop001.sh` (48 PASS / 9 GAP / 1 FAIL), `docs/COMPLIANCE-BOP001.md` (dasbor, janji J1–J7, telusur §15, matriks UAT U01–U31, registri bukti, kesenjangan). Checklist D12, DEPLOY_SOP, dan plan diperbarui.
+- Temuan keamanan: `.env` di root repo berisi kredensial root StarRocks dalam teks biasa (izin 664 → 600); rotasi password diperlukan.
+- Ditunda atas keputusan pemilik: SMTP (homework).
+
 ## 17.9.7-lpms3.1.16 — audit lintas modul MOD-00..08
 - Perbaikan: Caddy memblokir jalur trial yang salah (`/admin/enterprise/save_trial_key`); yang benar `/admin/enterprise_tokens/{save,delete}_trial_key`.
 - Perbaikan: `/panduan-internal` (tombol bantuan) 404 → halaman statis `deploy/panduan/index.html` (placeholder) lewat Caddy + mount di `docker-compose.stock.yml`.
