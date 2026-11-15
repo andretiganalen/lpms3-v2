@@ -135,3 +135,6 @@ html, body, button, input, select, textarea { font-family: var(--uix-font); }
 .lpms3-table tbody tr:hover td { background: var(--uix-surface-subtle); }
 .lpms3-table details summary { cursor: pointer; color: var(--uix-primary); }
 .lpms3-table details p { margin: 6px 0 0; max-width: 60ch; color: var(--uix-text-secondary); }
+
+/* MOD-05: banner promosi Enterprise (Angular <op-enterprise-banner> dan komponen Rails) disembunyikan. */
+op-enterprise-banner, .op-enterprise-banner-container { display: none !important; }
