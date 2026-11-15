@@ -1,4 +1,9 @@
 # CHANGELOG
+## 17.9.7-lpms3.1.8 — MOD-03 (in-house)
+- `InhouseFeatureCatalog`: 35 fitur (30 utama + 5 kompatibilitas) lengkap dengan lokasi menu, deskripsi, tujuan, output; dibangkitkan dari Bagian 3 plan. Tujuan/output klaster F ditulis tim LPMS3 (plan hanya memberi deskripsi).
+- Halaman Administration → Modul Fitur Internal (`/admin/lpms3/internal_features`, admin saja), controller `Lpms3::Admin::InternalFeaturesSettingsController`, menu di plugin, terjemahan en/id. Saklar hanya bisa dinyalakan untuk fitur berstatus implemented (saat ini 0); sisanya "Belum tersedia".
+- Tidak mengubah `EnterpriseToken`. Langkah 8 plan (hapus tampilan fitur Enterprise terkunci) belum dikerjakan.
+
 ## 17.9.7-lpms3.1.7 — MOD-02 (revisi in-house)
 - Plugin: `OpenProject::Lpms3::Features` (katalog 35 kunci, klaster A-F, `IMPLEMENTED` awalnya kosong) dan setting `internal_enabled_features` (default `[]`, tabel `settings`).
 - `EnterpriseToken` tidak diubah; gerbang lisensi OpenProject tetap tertutup (diverifikasi: `allows_to?(:board_view)` tetap `false` sebelum/sesudah).
