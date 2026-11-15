@@ -1,4 +1,9 @@
 # CHANGELOG
+## 17.9.7-lpms3.1.15 — MOD-08 (audit) + perbaikan 1.14/1.15
+- **Perbaikan bug 1.8–1.13:** ikon menu "Modul Fitur Internal" `settings` tidak valid → seluruh halaman Administration HTTP 500. Diganti `gear` (1.14). Ditemukan oleh audit MOD-08.
+- 1.15: teks sambutan Homescreen (tautan pemasaran vendor) diganti teks internal; tautan `<noscript>` ke enable-javascript.com dihapus (`patch_mod07.rb`).
+- Laporan: `docs/plan/AUDIT_VERIFICATION_REPORT.md` (34/35 lulus; sisa: tautan versi GitHub di halaman Info).
+
 ## 17.9.7-lpms3.1.13 — MOD-07
 - Seed `80_settings.rb`: `organization_name` = "PT Len Industri (Persero)" (nama organisasi ini asumsi; ubah di seed bila keliru), `emails_footer` id/en tanpa tautan. `app_title` sudah "LPMS3".
 - `deploy/patch_mod07.rb` (build): default bawaan `app_title`/`organization_name` diganti, dan `text_powered_by` (en, id) menjadi teks netral tanpa `%{link}`. Override via plugin tidak berlaku (locale inti menang), jadi dipatch langsung.
