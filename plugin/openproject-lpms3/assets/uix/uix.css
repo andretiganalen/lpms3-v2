@@ -182,3 +182,17 @@ op-enterprise-banner, .op-enterprise-banner-container { display: none !important
 .lpms3-page .lpms3-actions { display: flex; align-items: center; gap: 12px; margin: 0 0 16px; }
 .lpms3-page .lpms3-table-wrap { margin-top: 4px; }
 #lpms3-lang { align-self: center; height: var(--uix-control-h); box-sizing: border-box; }
+
+/* Halaman fase BOP-001: stepper lima fase, gerbang, register (token UIx saja). */
+.lpms3-stepper { list-style: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 0 0 16px; padding: 0; }
+.lpms3-stepper__item a { display: grid; grid-template-columns: auto 1fr; gap: 0 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--uix-border); border-radius: var(--uix-radius-card); background: var(--uix-surface); box-shadow: var(--uix-shadow-xs); color: var(--uix-text-body); text-decoration: none; }
+.lpms3-stepper__item a:hover { background: var(--uix-surface-muted); }
+.lpms3-stepper__no { grid-row: span 2; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--uix-surface-muted); color: var(--uix-text-secondary); font-weight: 600; font-size: 12px; }
+.lpms3-stepper__name { font-weight: 500; color: var(--uix-text-head); line-height: 1.3; }
+.lpms3-stepper__meta { color: var(--uix-text-secondary); font-size: 12px; }
+.lpms3-stepper__item.is-current a { border-color: var(--uix-primary); }
+.lpms3-stepper__item.is-current .lpms3-stepper__no { background: var(--uix-primary); color: var(--uix-on-primary); }
+.lpms3-gates, .lpms3-registers { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.lpms3-gates li, .lpms3-registers li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 0; border-top: 1px solid var(--uix-border-subtle); }
+.lpms3-gates li:first-child, .lpms3-registers li:first-child { border-top: 0; }
+@media (max-width: 900px) { .lpms3-stepper { grid-template-columns: 1fr; } }

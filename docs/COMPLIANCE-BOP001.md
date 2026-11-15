@@ -22,7 +22,7 @@
 
 | # | Janji | Status | Bukti (perintah / lokasi) | Kekurangan |
 | :-: | :-- | :-: | :-- | :-- |
-| J1 | 5 tahap + gate yang dapat diaudit | 🟡 | 4 fase P1–P4 dengan gate G1–G4; 3 template × 4 fase (`audit_bop001` J1.1–J1.4) | Validasi kriteria penutupan gate belum ada (U03); tidak ada template **Program** (Master Plan §15 menyebut Prediktif/Hibrid/Program/Purnajual; hanya 3 yang di-seed) |
+| J1 | 5 tahap + gate yang dapat diaudit | 🟡 (rilis 1.25: menu dan halaman per fase; alur diuji `lpms3/smoke/run_fase.sh`) | 4 fase P1–P4 dengan gate G1–G4; 3 template × 4 fase (`audit_bop001` J1.1–J1.4) | Validasi kriteria penutupan gate belum ada (U03); tidak ada template **Program** (Master Plan §15 menyebut Prediktif/Hibrid/Program/Purnajual; hanya 3 yang di-seed) |
 | J2 | Semua formulir diisi di aplikasi, tabel/kolom sama, dapat dicetak resmi | 🟡 | 18 `form_definition`, skema `lpms3_form` 47 tabel (J2.1–J2.2) | **Tidak ada UI isian atau PDF resmi** di plugin (`form_instance`=0) |
 | J3 | WBS Template LPMS = satu-satunya cara isi WBS, folder bukti, dasar Kurva-S | 🟡 | 5 tabel WBS/Kurva-S/baseline (J3.1) | Tidak ada UI/impor WBS (`wbs_node`=0) |
 | J4 | RASCI & peserta rapat otomatis per proyek | ✅ data | `ref_rasci`=312, `ref_peserta_rapat`=9, organisasi 66 unit (5/18/43), pemetaan 81, grup fungsi 31 (J4.1–J4.5) | Posisi & user HC belum (D8) |

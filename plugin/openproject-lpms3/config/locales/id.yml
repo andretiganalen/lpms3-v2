@@ -72,3 +72,44 @@ id:
     sidebar:
       settings: "Pengaturan"
       my_settings: "Pengaturan saya"
+    phases:
+      stepper: "Fase proyek BOP-001"
+      progress: "%{done} dari %{total} selesai"
+      gates: "Gerbang (Gate)"
+      steps: "Langkah BOP-001"
+      registers: "Register dan dokumen"
+      no_gates: "Belum ada gerbang untuk fase ini."
+      no_steps: "Belum ada langkah. Buat project dari template LPMS3."
+      open_table: "Buka di tabel paket-penugasan"
+      unassigned: "Belum ditugaskan"
+      no_date: "Belum ada tanggal"
+      col:
+        step: "Langkah"
+        status: "Status"
+        assignee: "Penanggung jawab"
+        due: "Tenggat"
+      menu:
+        ringkasan: "Ringkasan fase"
+        gerbang: "Gerbang"
+        langkah: "Langkah"
+        register: "Register"
+      inisiasi:
+        title: "Inisiasi"
+        menu_title: "Inisiasi"
+        description: "Pembukaan kode proyek, penetapan Pimpro dan tim, serta Project Charter (BOP-001 §5.1). Ditutup oleh gerbang G1."
+      perencanaan:
+        title: "Perencanaan"
+        menu_title: "Perencanaan"
+        description: "Reviu rencana manajemen proyek, Kick-Off, dan Baseline 0 (BOP-001 §5.2). Ditutup oleh gerbang G2."
+      eksekusi:
+        title: "Eksekusi"
+        menu_title: "Eksekusi"
+        description: "Pelaksanaan pekerjaan, mutu, komunikasi, risiko, pengadaan, dan stakeholder (BOP-001 §5.3)."
+      pengawasan:
+        title: "Pengawasan & Pengendalian"
+        menu_title: "Pengawasan & Kendali"
+        description: "Pemantauan jadwal, biaya, mutu, risiko, dan kendali perubahan terintegrasi (BOP-001 §5.4). Berjalan paralel dengan Eksekusi dan ditutup oleh gerbang G3 (serah terima)."
+      penutupan:
+        title: "Penutupan"
+        menu_title: "Penutupan"
+        description: "Proyek selesai 100%, terminasi, kode purnajual, dan arsip proyek (BOP-001 §5.5). Ditutup oleh gerbang G4."
