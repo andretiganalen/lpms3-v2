@@ -12,3 +12,16 @@ COPY --chown=app:app deploy/patch_gemfile_lock.rb /tmp/patch_gemfile_lock.rb
 RUN ruby /tmp/patch_gemfile_lock.rb 0.1.0 /app/custom-plugins/openproject-lpms3 \
  && rm /tmp/patch_gemfile_lock.rb \
  && bundle exec ruby -e 'abort("plugin tidak termuat") unless Gem.loaded_specs["openproject-lpms3"]'
+# MOD-05: netralisasi tautan keluar ke openproject.*/github opf/chargebee/youtube di static_links.yml -> "/" (tanpa kontak vendor).
+RUN sed -i -E 's#(href:[[:space:]]*)https?://([a-z0-9.-]*\.)?(openproject\.org|openproject\.com|openproject-docs\.s3[a-z0-9.-]*\.amazonaws\.com|chargebee\.com|youtube\.com)[^[:space:]]*#\1"/"#; s#(href:[[:space:]]*)https://github\.com/opf/[^[:space:]]*#\1"/"#' /app/config/static_links.yml \
+ && ! grep -E 'href:[[:space:]]*https?://([a-z0-9.-]*\.)?(openproject|chargebee)' /app/config/static_links.yml \
+ && ruby -ryaml -e 'YAML.load_file("/app/config/static_links.yml")'
+# MOD-04: security badge (memuat gambar dari releases.openproject.com dan mengirim uuid/versi) tidak pernah ditampilkan.
+RUN sed -i 's#OpenProject::Configuration.security_badge_displayed? && Setting.security_badge_displayed?#false#' /app/app/helpers/security_badge_helper.rb \
+ && grep -q '^    false$' /app/app/helpers/security_badge_helper.rb
+# MOD-06: matikan Gravatar dan bersihkan domain eksternal di CSP.
+COPY --chown=app:app deploy/patch_mod06.rb /tmp/patch_mod06.rb
+RUN ruby /tmp/patch_mod06.rb && rm /tmp/patch_mod06.rb && ruby -c /app/config/initializers/content_security_policy.rb
+# MOD-07: default app_title dan organization_name = identitas portal internal.
+COPY --chown=app:app deploy/patch_mod07.rb /tmp/patch_mod07.rb
+RUN ruby /tmp/patch_mod07.rb && rm /tmp/patch_mod07.rb && ruby -c /app/config/constants/settings/definition.rb
