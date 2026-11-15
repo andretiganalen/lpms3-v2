@@ -15,6 +15,13 @@ module OpenProject::Lpms3
            if: Proc.new { User.current.admin? },
            caption: :"lpms3.organisasi.menu",
            icon: "organization"
+
+      menu :admin_menu,
+           :lpms3_internal_features,
+           { controller: "/lpms3/admin/internal_features_settings", action: :show },
+           if: Proc.new { User.current.admin? },
+           caption: :"lpms3.internal_features.menu",
+           icon: "settings"
     end
 
     config.to_prepare do

@@ -4,5 +4,7 @@ Rails.application.routes.draw do
 
   scope "admin" do
     get "lpms3/organisasi", to: "lpms3/admin/organisasi#index", as: :lpms3_admin_organisasi
+    get "lpms3/internal_features", to: "lpms3/admin/internal_features_settings#show", as: :lpms3_admin_internal_features
+    patch "lpms3/internal_features", to: "lpms3/admin/internal_features_settings#update"
   end
 end

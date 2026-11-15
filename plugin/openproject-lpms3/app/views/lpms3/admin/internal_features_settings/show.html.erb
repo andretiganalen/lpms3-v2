@@ -1,0 +1,65 @@
+<% html_title t(:label_administration), t("lpms3.internal_features.title") %>
+
+<%=
+  render(Primer::OpenProject::PageHeader.new) do |header|
+    header.with_title { t("lpms3.internal_features.title") }
+    header.with_breadcrumbs([{ href: admin_index_path, text: t("label_administration") }, t("lpms3.internal_features.title")])
+    header.with_description { t("lpms3.internal_features.description") }
+  end
+%>
+
+<%= form_with url: lpms3_admin_internal_features_path, method: :patch, local: true do %>
+  <section class="lpms3-meta">
+    <div class="lpms3-meta__main">
+      <strong><%= t("lpms3.internal_features.summary", available: @available_count, total: ::InhouseFeatureCatalog.all.size) %></strong>
+    </div>
+    <div class="lpms3-meta__sub">
+      <button type="submit" name="mode" value="all" class="button"><%= t("lpms3.internal_features.enable_all") %></button>
+      <button type="submit" name="mode" value="none" class="button"><%= t("lpms3.internal_features.disable_all") %></button>
+    </div>
+  </section>
+
+  <% @clusters.each do |cluster, cluster_title, features| %>
+    <section class="lpms3-card" aria-label="<%= cluster_title %>">
+      <h3><%= cluster_title %></h3>
+      <div class="lpms3-table-wrap">
+        <table class="lpms3-table">
+          <thead>
+            <tr>
+              <th scope="col"><%= t("lpms3.internal_features.col.switch") %></th>
+              <th scope="col"><%= t("lpms3.internal_features.col.feature") %></th>
+              <th scope="col"><%= t("lpms3.internal_features.col.menu") %></th>
+              <th scope="col"><%= t("lpms3.internal_features.col.description") %></th>
+              <th scope="col"><%= t("lpms3.internal_features.col.objective") %></th>
+              <th scope="col"><%= t("lpms3.internal_features.col.output") %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% features.each do |f| %>
+              <tr>
+                <td>
+                  <%= check_box_tag "enabled_features[]", f.key, @enabled.include?(f.key),
+                                    id: "feature_#{f.key}", disabled: !f.implemented?,
+                                    "aria-label": f.title %>
+                  <% unless f.implemented? %>
+                    <br><span class="lpms3-chip"><%= t("lpms3.internal_features.not_available") %></span>
+                  <% end %>
+                </td>
+                <th scope="row">
+                  <label for="feature_<%= f.key %>"><%= f.title %></label><br>
+                  <code><%= f.key %></code>
+                </th>
+                <td><%= f.menu_location %></td>
+                <td><%= f.description %></td>
+                <td><%= f.objective %></td>
+                <td><%= f.expected_output %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  <% end %>
+
+  <p><button type="submit" class="button -primary"><%= t("lpms3.internal_features.save") %></button></p>
+<% end %>
