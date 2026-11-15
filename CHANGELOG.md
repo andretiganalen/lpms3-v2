@@ -1,4 +1,9 @@
 # CHANGELOG
+## 17.9.7-lpms3.1.5 — MOD-05
+- `static_links.yml` di image: tautan openproject.org/.com, docs S3, chargebee, youtube, github opf → `/` (patch `sed` di `deploy/Dockerfile`, build gagal bila masih ada sisa).
+- Caddy `:5100` menutup `/admin/enterprise_trial*` dan `save/delete_trial_key` (404). Rute Rails tidak dihapus karena `enterprise_tokens_controller` dan komponen trial memakai path helper-nya (akan 500).
+- Token Enterprise dibiarkan kosong. Langkah 3 plan (template banner Angular) tidak dikerjakan: image hanya berisi bundle terkompilasi, source `frontend/` tidak ada.
+
 ## 2026-11-15 — Rilis 17.9.7-lpms3.1.4 (pilihan radio Pengguna/Admin, pembersihan data pra-go-live)
 - IdsLogin: landing memakai radio button "Pengguna" / "Admin" + satu tombol "Masuk dengan IDS" (menggantikan dua tombol).
 - Data: dihapus proyek `demo-project`, `your-scrum-project`, `demo-nvg-monocular-100` dan user `pimpro.demo` (backup `data/backup/20261115-0814`); akun `admin` bawaan dikunci; template `lpms3-tpl-*` dibuat non-publik.
