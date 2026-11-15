@@ -17,3 +17,4 @@ echo "== monitor =="; bash ops/monitor.sh 2>&1 | tail -5; echo "(kosong = semua 
 echo "== UIx lint =="; bash ops/uix_lint.sh 2>&1 | grep -E "^(FAIL|SKIP|==)"
 echo "== alur 5 fase BOP-001 =="; bash lpms3/smoke/run_fase.sh 2>&1 | grep -E "^(FAIL|RINGKASAN|sisa)"
 echo "== bahasa ID/EN dan menu induk-anak =="; bash lpms3/smoke/run_lang.sh 2>&1 | grep -E "^(FAIL|PASS)" | sort | uniq -c | sort -rn | head -3
+echo "== mata uang & kurs =="; bash lpms3/smoke/run_currency.sh 2>&1 | grep -E "^(FAIL|sisa)"; echo "(tanpa FAIL = OK)"

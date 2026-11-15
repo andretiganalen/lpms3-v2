@@ -57,7 +57,7 @@ r GAP J7.3 "sub-project purnajual otomatis saat penutupan" "N/A di smoke D10 (bu
 
 echo "-- Konfigurasi OpenProject (BOP-001 + seed)"
 ge K.1 "status WP (55 seed + bawaan)" "$(P "select count(*) from statuses")" 55
-ge K.2 "peran proyek (16 seed + bawaan)" "$(P "select count(*) from roles where type='ProjectRole'")" 16
+ge K.2 "peran proyek (16 seed + bawaan)" "$(P "select count(*) from roles where type='ProjectRole'")" 17
 ge K.3 "tipe WP (16 seed + bawaan)" "$(P "select count(*) from types")" 16
 eq K.4 "custom field proyek (5 section, 19 atribut)" "$(P "select count(*) from custom_fields where type='ProjectCustomField'")" 19
 eq K.5 "custom field WP (76)" "$(P "select count(*) from custom_fields where type='WorkPackageCustomField'")" 76

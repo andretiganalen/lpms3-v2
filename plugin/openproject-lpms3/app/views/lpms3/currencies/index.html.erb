@@ -1,0 +1,206 @@
+<% html_title t("lpms3.currencies.title") %>
+<%
+  fmt = ->(n, d = 2) { n.nil? ? "-" : number_with_precision(n, precision: d) }
+  base_code = @base&.code || "IDR"
+%>
+<%=
+  render(Primer::OpenProject::PageHeader.new) do |header|
+    header.with_title { t("lpms3.currencies.title") }
+    header.with_description { t("lpms3.currencies.description", base: base_code) }
+  end
+%>
+
+<div class="lpms3-page">
+  <section class="lpms3-card" id="konversi">
+    <h3 class="lpms3-card__title"><%= t("lpms3.currencies.convert") %></h3>
+    <%= form_with url: lpms3_currencies_index_path, method: :get, local: true, class: "lpms3-search" do %>
+      <label><%= t("lpms3.currencies.amount") %>
+        <%= text_field_tag :amount, params[:amount], class: "lpms3-input", inputmode: "decimal", placeholder: "1000" %></label>
+      <label><%= t("lpms3.currencies.from") %>
+        <%= select_tag :from, options_for_select(@currencies.map { |c| ["#{c.code} · #{c.name}", c.code] }, @c_from), class: "lpms3-input" %></label>
+      <label><%= t("lpms3.currencies.to") %>
+        <%= select_tag :to, options_for_select(@currencies.map { |c| ["#{c.code} · #{c.name}", c.code] }, @c_to), class: "lpms3-input" %></label>
+      <label><%= t("lpms3.currencies.on_date") %>
+        <%= date_field_tag :on, @c_on, class: "lpms3-input" %></label>
+      <%= submit_tag t("lpms3.currencies.convert_btn"), class: "lpms3-btn lpms3-btn--primary", name: nil %>
+    <% end %>
+    <% if @c_amount %>
+      <% if @c_missing %>
+        <p class="lpms3-hint"><%= t("lpms3.currencies.rate_missing") %></p>
+      <% else %>
+        <p class="lpms3-result"><strong><%= fmt.(@c_amount, 2) %> <%= @c_from %></strong> = <strong><%= fmt.(@c_result, (@currencies.find { _1.code == @c_to }&.minor_units || 2)) %> <%= @c_to %></strong>
+          <span class="lpms3-hint">(<%= l(@c_on) %>)</span></p>
+      <% end %>
+    <% elsif params[:amount].present? %>
+      <p class="lpms3-hint"><%= t("lpms3.currencies.amount_invalid") %></p>
+    <% end %>
+  </section>
+
+  <section class="lpms3-card" id="kurs">
+    <h3 class="lpms3-card__title"><%= t("lpms3.currencies.rates") %></h3>
+    <p class="lpms3-hint"><%= t("lpms3.currencies.rates_hint", base: base_code) %></p>
+    <div class="lpms3-table-wrap">
+      <table class="lpms3-table">
+        <thead><tr>
+          <th scope="col"><%= t("lpms3.currencies.col.currency") %></th>
+          <th scope="col"><%= t("lpms3.currencies.col.rate", base: base_code) %></th>
+          <th scope="col"><%= t("lpms3.currencies.col.valid_on") %></th>
+          <th scope="col"><%= t("lpms3.currencies.col.source") %></th>
+        </tr></thead>
+        <tbody>
+          <% @currencies.reject(&:is_base).select(&:active).each do |c| %>
+            <% r = @latest[c.code] %>
+            <tr>
+              <th scope="row"><%= c.code %> <span class="lpms3-hint"><%= c.name %></span></th>
+              <td><%= r ? fmt.(r.rate, 4) : t("lpms3.currencies.no_rate") %></td>
+              <td><%= r ? l(r.valid_on) : "-" %></td>
+              <td><%= r ? t("lpms3.currencies.source.#{r.source}") : "-" %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <% if @can_edit %>
+      <%= form_with url: lpms3_currencies_create_rate_path, method: :post, local: true, class: "lpms3-search" do %>
+        <label><%= t("lpms3.currencies.col.currency") %>
+          <%= select_tag :currency_code, options_for_select(@currencies.reject(&:is_base).select(&:active).map { |c| [c.code, c.code] }), class: "lpms3-input" %></label>
+        <label><%= t("lpms3.currencies.col.rate", base: base_code) %>
+          <%= text_field_tag :rate, nil, class: "lpms3-input", inputmode: "decimal", placeholder: "16250", required: true %></label>
+        <label><%= t("lpms3.currencies.col.valid_on") %>
+          <%= date_field_tag :valid_on, Date.current, class: "lpms3-input", required: true %></label>
+        <label><%= t("lpms3.currencies.note") %>
+          <%= text_field_tag :note, nil, class: "lpms3-input", maxlength: 200 %></label>
+        <%= submit_tag t("lpms3.currencies.save_rate"), class: "lpms3-btn lpms3-btn--primary", name: nil %>
+      <% end %>
+    <% else %>
+      <p class="lpms3-hint"><%= t("lpms3.currencies.read_only") %></p>
+    <% end %>
+  </section>
+
+  <section class="lpms3-card" id="sumber">
+    <h3 class="lpms3-card__title"><%= t("lpms3.currencies.source_title") %></h3>
+    <p class="lpms3-hint"><%= t("lpms3.currencies.source_hint") %></p>
+    <p><%= t("lpms3.currencies.source_now") %>:
+      <strong><%= @fx.source_enabled? ? @fx::SOURCES[@fx.source][:label] : t("lpms3.currencies.source_none") %></strong>
+      <% if @fx.source_enabled? %> · <%= @fx.auto? ? t("lpms3.currencies.auto_on") : t("lpms3.currencies.auto_off") %><% end %></p>
+    <% if User.current.admin? %>
+      <%= form_with url: lpms3_currencies_update_source_path, method: :patch, local: true, class: "lpms3-search" do %>
+        <label><%= t("lpms3.currencies.source_label") %>
+          <%= select_tag :source, options_for_select([[t("lpms3.currencies.source_none"), ""]] + @fx::SOURCES.map { |k, v| [v[:label], k] }, @fx.source), class: "lpms3-input" %></label>
+        <label><%= check_box_tag :auto, "1", @fx.auto? %> <%= t("lpms3.currencies.auto_label") %></label>
+        <%= submit_tag t("lpms3.currencies.save_source"), class: "lpms3-btn", name: nil %>
+      <% end %>
+    <% end %>
+    <% if @can_edit && @fx.source_enabled? %>
+      <%= button_to t("lpms3.currencies.fetch_now"), lpms3_currencies_fetch_path, method: :post, class: "lpms3-btn lpms3-btn--primary" %>
+    <% end %>
+  </section>
+
+  <section class="lpms3-card" id="mata-uang">
+    <h3 class="lpms3-card__title"><%= t("lpms3.currencies.list") %></h3>
+    <div class="lpms3-table-wrap">
+      <table class="lpms3-table">
+        <thead><tr>
+          <th scope="col"><%= t("lpms3.currencies.col.code") %></th>
+          <th scope="col"><%= t("lpms3.currencies.col.name") %></th>
+          <th scope="col"><%= t("lpms3.currencies.col.symbol") %></th>
+          <th scope="col"><%= t("lpms3.currencies.col.minor") %></th>
+          <th scope="col"><%= t("lpms3.currencies.col.active") %></th>
+          <% if @can_edit %><th scope="col"></th><% end %>
+        </tr></thead>
+        <tbody>
+          <% @currencies.each do |c| %>
+            <tr>
+              <% if @can_edit %>
+                <% fid = "cf#{c.id}" %>
+                <th scope="row"><%= c.code %><% if c.is_base %> <span class="lpms3-chip lpms3-chip--ok"><%= t("lpms3.currencies.base") %></span><% end %></th>
+                <td><%= text_field_tag :name, c.name, class: "lpms3-input", maxlength: 60, form: fid, id: "name_#{c.id}", "aria-label": t("lpms3.currencies.col.name") %></td>
+                <td><%= text_field_tag :symbol, c.symbol, class: "lpms3-input", maxlength: 6, size: 6, form: fid, id: "symbol_#{c.id}", style: "min-width:0;width:90px", "aria-label": t("lpms3.currencies.col.symbol") %></td>
+                <td><%= number_field_tag :minor_units, c.minor_units, class: "lpms3-input", min: 0, max: 4, form: fid, id: "minor_#{c.id}", style: "min-width:0;width:72px", "aria-label": t("lpms3.currencies.col.minor") %></td>
+                <td><% if c.is_base %><%= t("lpms3.currencies.always") %><% else %><%= hidden_field_tag :active, "0", id: nil, form: fid %><%= check_box_tag :active, "1", c.active, id: "active_#{c.id}", form: fid, "aria-label": t("lpms3.currencies.col.active") %><% end %></td>
+                <td><%= form_with url: lpms3_currencies_update_currency_path(c), method: :patch, local: true, id: fid do %><%= submit_tag t("lpms3.currencies.save"), class: "lpms3-btn", name: nil %><% end %></td>
+              <% else %>
+                <th scope="row"><%= c.code %><% if c.is_base %> <span class="lpms3-chip lpms3-chip--ok"><%= t("lpms3.currencies.base") %></span><% end %></th>
+                <td><%= c.name %></td><td><%= c.symbol %></td><td><%= c.minor_units %></td>
+                <td><%= c.active ? t("lpms3.currencies.yes") : t("lpms3.currencies.no") %></td>
+              <% end %>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <% if @can_edit %>
+      <%= form_with url: lpms3_currencies_create_currency_path, method: :post, local: true, class: "lpms3-search" do %>
+        <label><%= t("lpms3.currencies.col.code") %> <%= text_field_tag :code, nil, class: "lpms3-input", maxlength: 3, size: 4, placeholder: "MYR", style: "min-width:0;width:90px", required: true %></label>
+        <label><%= t("lpms3.currencies.col.name") %> <%= text_field_tag :name, nil, class: "lpms3-input", maxlength: 60, required: true %></label>
+        <label><%= t("lpms3.currencies.col.symbol") %> <%= text_field_tag :symbol, nil, class: "lpms3-input", maxlength: 6, style: "min-width:0;width:90px", required: true %></label>
+        <label><%= t("lpms3.currencies.col.minor") %> <%= number_field_tag :minor_units, 2, class: "lpms3-input", min: 0, max: 4, style: "min-width:0;width:72px" %></label>
+        <%= submit_tag t("lpms3.currencies.add"), class: "lpms3-btn lpms3-btn--primary", name: nil %>
+      <% end %>
+    <% end %>
+  </section>
+
+  <section class="lpms3-card" id="budget">
+    <h3 class="lpms3-card__title"><%= t("lpms3.currencies.budget_title") %></h3>
+    <p class="lpms3-hint"><%= t("lpms3.currencies.budget_hint", base: base_code, symbol: Setting.costs_currency) %></p>
+    <% if @can_edit && Setting.costs_currency != @base&.symbol %>
+      <%= button_to t("lpms3.currencies.apply_budget", symbol: @base&.symbol), lpms3_currencies_apply_budget_path, method: :post, class: "lpms3-btn lpms3-btn--primary" %>
+    <% end %>
+    <% if @budget_rows.empty? %>
+      <p class="lpms3-hint"><%= t("lpms3.currencies.no_budgets") %></p>
+    <% else %>
+      <div class="lpms3-table-wrap">
+        <table class="lpms3-table">
+          <thead><tr>
+            <th scope="col"><%= t("lpms3.currencies.col.budget") %></th>
+            <th scope="col"><%= t("lpms3.currencies.col.project") %></th>
+            <th scope="col"><%= base_code %></th>
+            <th scope="col"><%= @c_to %></th>
+          </tr></thead>
+          <tbody>
+            <% @budget_rows.each do |b, amount, shown| %>
+              <tr>
+                <th scope="row"><%= link_to b.subject, budget_path(b) %></th>
+                <td><%= b.project.name %></td>
+                <td><%= fmt.(amount, @base&.minor_units || 0) %></td>
+                <td><%= shown ? fmt.(shown, @currencies.find { _1.code == @c_to }&.minor_units || 2) : t("lpms3.currencies.no_rate") %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </section>
+
+  <section class="lpms3-card" id="riwayat">
+    <h3 class="lpms3-card__title"><%= t("lpms3.currencies.history") %></h3>
+    <% if @history.empty? %>
+      <p class="lpms3-hint"><%= t("lpms3.currencies.no_history") %></p>
+    <% else %>
+      <div class="lpms3-table-wrap">
+        <table class="lpms3-table">
+          <thead><tr>
+            <th scope="col"><%= t("lpms3.currencies.col.currency") %></th>
+            <th scope="col"><%= t("lpms3.currencies.col.rate", base: base_code) %></th>
+            <th scope="col"><%= t("lpms3.currencies.col.valid_on") %></th>
+            <th scope="col"><%= t("lpms3.currencies.col.source") %></th>
+            <th scope="col"><%= t("lpms3.currencies.col.by") %></th>
+            <th scope="col"><%= t("lpms3.currencies.col.at") %></th>
+          </tr></thead>
+          <tbody>
+            <% @history.each do |h| %>
+              <tr>
+                <th scope="row"><%= h.currency_code %></th>
+                <td><%= fmt.(h.rate, 4) %></td>
+                <td><%= l(h.valid_on) %></td>
+                <td><%= t("lpms3.currencies.source.#{h.source}") %><% if h.note.present? %> <span class="lpms3-hint">· <%= h.note %></span><% end %></td>
+                <td><%= h.created_by&.name || "-" %></td>
+                <td><%= l(h.created_at, format: :short) %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </section>
+</div>

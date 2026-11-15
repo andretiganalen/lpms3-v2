@@ -34,15 +34,21 @@ module Lpms3Data
               move_work_packages delete_work_packages manage_subtasks view_budgets edit_budgets
               manage_documents manage_news].freeze
 
+  # Fungsi keuangan/biaya: anggaran, biaya, tarif. Dipakai peran Keuangan & turunannya (termasuk tim proyek yang mengurus biaya).
+  COST_VIEW = %i[view_budgets view_cost_entries view_own_cost_entries view_cost_rates view_hourly_rates view_own_hourly_rate].freeze
+  COST_EDIT = %i[edit_budgets log_costs log_own_costs edit_cost_entries edit_own_cost_entries edit_hourly_rates
+                 edit_own_hourly_rate view_time_entries edit_time_entries].freeze
+
   ROLES = {
     "Project Sponsor"                     => VIEW + %i[add_work_package_comments view_budgets],
-    "Pimpro"                              => VIEW + EDIT + MANAGE,
+    "Pimpro"                              => VIEW + EDIT + MANAGE + COST_VIEW + COST_EDIT,
     "Tim Proyek"                          => VIEW + EDIT,
     "Fungsi Pelaksanaan Proyek (Struktural)" => VIEW + %i[add_work_package_comments edit_work_packages view_budgets],
     "Fungsi Pengawasan Proyek"            => VIEW + EDIT + %i[view_budgets manage_public_queries],
     "Approver CCM"                        => VIEW + %i[add_work_package_comments edit_work_packages],
     "Fungsi Perencanaan Proyek"           => VIEW + EDIT,
-    "Fungsi Pengendali Anggaran/Keuangan/Akuntansi" => VIEW + EDIT + %i[view_budgets edit_budgets],
+    "Fungsi Pengendali Anggaran/Keuangan/Akuntansi" => VIEW + EDIT + COST_VIEW + COST_EDIT,
+    "Pengelola Biaya Proyek"              => VIEW + EDIT + COST_VIEW + COST_EDIT,
     "Fungsi Penjaminan Mutu"              => VIEW + EDIT,
     "Fungsi Manajemen Risiko"             => VIEW + EDIT,
     "Fungsi K3 & Lingkungan Hidup"        => VIEW + EDIT,

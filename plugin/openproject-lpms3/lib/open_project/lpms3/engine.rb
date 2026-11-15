@@ -2,6 +2,7 @@ require "open_project/plugins"
 require "open_project/lpms3/features"
 require "open_project/lpms3/branding"
 require "open_project/lpms3/phases"
+require "open_project/lpms3/fx"
 
 module OpenProject::Lpms3
   class Engine < ::Rails::Engine
@@ -9,8 +10,37 @@ module OpenProject::Lpms3
 
     include OpenProject::Plugins::ActsAsOpEngine
 
+    # Didaftarkan di to_prepare (seperti izin inti) karena OpenProject::AccessControl baru dapat di-autoload setelah initializer plugin.
+    config.to_prepare do
+      OpenProject::AccessControl.map do |map|
+        unless OpenProject::AccessControl.permissions.any? { |pm| pm.name == :manage_currency_rates }
+          map.permission :manage_currency_rates,
+                         { "lpms3/currencies": %i[create_currency update_currency create_rate fetch apply_budget] },
+                         permissible_on: :global,
+                         require: :loggedin
+        end
+      end
+    end
+
     register "openproject-lpms3",
              author_url: "https://github.com/andretiganalen/lpms3-v2" do
+      # Mata uang & kurs: izin global untuk peran Keuangan (peran global di Administrasi -> Peran). Admin selalu boleh.
+
+      menu :admin_menu,
+           :lpms3_currencies_admin,
+           { controller: "/lpms3/currencies", action: :index },
+           if: Proc.new { User.current.admin? },
+           caption: :"lpms3.currencies.menu",
+           icon: "gear"
+
+      menu :global_menu,
+           :lpms3_currencies,
+           { controller: "/lpms3/currencies", action: :index },
+           if: Proc.new { User.current.logged? },
+           caption: :"lpms3.currencies.menu",
+           icon: "credit-card",
+           after: :projects
+
       menu :admin_menu,
            :lpms3_organisasi,
            { controller: "/lpms3/admin/organisasi", action: :index },
