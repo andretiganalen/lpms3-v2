@@ -1,4 +1,7 @@
 # CHANGELOG
+## 17.9.7-lpms3.1.10 — MOD-05 (lanjutan)
+- Banner promosi Enterprise (Angular `<op-enterprise-banner>` dan komponen Rails `.op-enterprise-banner-container`) disembunyikan lewat `uix.css` plugin. Template Angular tidak diedit karena source `frontend/` tidak ada di image (hanya bundle terkompilasi); mengunduhnya dari repo vendor ditolak pemilik.
+
 ## 17.9.7-lpms3.1.9 — MOD-04
 - Plugin `config/initializers/homescreen_hardening.rb`: blok Homescreen `community`, `upsell`, `new_features` dibuang dari daftar (sisa: welcome, favorite_projects, meetings, my_account, news, administration).
 - `deploy/Dockerfile`: `SecurityBadgeHelper#display_security_badge_graphic?` dipatch menjadi `false` (menutup juga halaman Administration → Information); build gagal bila patch tidak terpasang.
