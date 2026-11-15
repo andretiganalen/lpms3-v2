@@ -8,12 +8,19 @@
     }
     # Login wajib lewat IDS: semua pintu login/registrasi/reset password bawaan OpenProject ditutup di proxy.
     # Bridge IdsLogin login ke web:8080 langsung (tidak lewat proxy), jadi tidak terpengaruh.
+    # Panduan internal (tujuan tombol bantuan "?"): halaman statis dari deploy/panduan.
+    @panduan path /panduan-internal /panduan-internal/*
+    handle @panduan {
+        root * /srv/panduan
+        rewrite * /index.html
+        file_server
+    }
     @oplogout path /logout
     handle @oplogout {
         redir * /ids/logout 302
     }
     # MOD-05: jalur trial Enterprise (hubungi server vendor) ditutup; token Enterprise dibiarkan kosong.
-    @optrial path /admin/enterprise_trial* /admin/enterprise/save_trial_key /admin/enterprise/delete_trial_key
+    @optrial path /admin/enterprise_trial* /admin/enterprise_tokens/save_trial_key /admin/enterprise_tokens/delete_trial_key
     handle @optrial {
         respond "Tidak tersedia" 404
     }

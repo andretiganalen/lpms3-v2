@@ -67,4 +67,5 @@ services:
   proxy:
     volumes:
       - ../deploy/Caddyfile.landing:/etc/caddy/Caddyfile:ro
+      - ../deploy/panduan:/srv/panduan:ro
     depends_on: [web, idslogin]
