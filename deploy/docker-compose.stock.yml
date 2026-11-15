@@ -14,6 +14,16 @@ x-ids-env: &ids
   OPENPROJECT_OPENID__CONNECT_IDS_ATTRIBUTE__MAP_EMAIL: "email"
   OPENPROJECT_OPENID__CONNECT_IDS_ATTRIBUTE__MAP_FIRST__NAME: "given_name"
   OPENPROJECT_OPENID__CONNECT_IDS_ATTRIBUTE__MAP_LAST__NAME: "family_name"
+  # MOD-01: isolasi telemetri/komunitas/bantuan + login terpusat (self-registration mati).
+  OPENPROJECT_SECURITY__BADGE__DISPLAYED: "false"
+  OPENPROJECT_SHOW__COMMUNITY__LINKS: "false"
+  OPENPROJECT_FORCE__HELP__LINK: "/panduan-internal"
+  OPENPROJECT_LOGIN__REQUIRED: "true"
+  OPENPROJECT_DROP__OLD__SESSIONS__ON__LOGIN: "true"
+  OPENPROJECT_DROP__OLD__SESSIONS__ON__LOGOUT: "false"
+  OPENPROJECT_CSP__IMG__SRC: "[\"'self'\", 'data:', 'blob:']"
+  OPENPROJECT_EMAIL__DELIVERY__METHOD: "smtp"
+  OPENPROJECT_SELF__REGISTRATION: "0"
 # Image OpenProject + plugin LPMS3 (dibangun oleh ops/build_image.sh dari deploy/Dockerfile).
 x-lpms3-op: &lpms3op
   image: lpms3/openproject:${LPMS3_IMAGE_TAG:-local}
