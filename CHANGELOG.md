@@ -1,4 +1,9 @@
 # CHANGELOG
+## 17.9.7-lpms3.1.11 — MOD-06
+- Gravatar: sebelumnya AKTIF (`enable_gravatars=true`); kini `engine.rb` default `false` dan `AvatarManager.gravatar_enabled?` selalu `false`. Avatar lokal tetap aktif.
+- CSP dibersihkan: tanpa `*.chargebee.com`, `js.chargebee.com`, `start.openproject.com`, `releases.openproject.com` (object-src kini `'none'`), dan video onboarding. Sekaligus memperbaiki entri rusak `://` di `default-src`/`form-action`/`media-src` yang muncul sejak MOD-05.
+- Patch lewat `deploy/patch_mod06.rb` saat build (abort bila pola source berubah); `.dockerignore` mengizinkan file itu.
+
 ## 17.9.7-lpms3.1.10 — MOD-05 (lanjutan)
 - Banner promosi Enterprise (Angular `<op-enterprise-banner>` dan komponen Rails `.op-enterprise-banner-container`) disembunyikan lewat `uix.css` plugin. Template Angular tidak diedit karena source `frontend/` tidak ada di image (hanya bundle terkompilasi); mengunduhnya dari repo vendor ditolak pemilik.
 

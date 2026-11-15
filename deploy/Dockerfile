@@ -19,3 +19,6 @@ RUN sed -i -E 's#(href:[[:space:]]*)https?://([a-z0-9.-]*\.)?(openproject\.org|o
 # MOD-04: security badge (memuat gambar dari releases.openproject.com dan mengirim uuid/versi) tidak pernah ditampilkan.
 RUN sed -i 's#OpenProject::Configuration.security_badge_displayed? && Setting.security_badge_displayed?#false#' /app/app/helpers/security_badge_helper.rb \
  && grep -q '^    false$' /app/app/helpers/security_badge_helper.rb
+# MOD-06: matikan Gravatar dan bersihkan domain eksternal di CSP.
+COPY --chown=app:app deploy/patch_mod06.rb /tmp/patch_mod06.rb
+RUN ruby /tmp/patch_mod06.rb && rm /tmp/patch_mod06.rb && ruby -c /app/config/initializers/content_security_policy.rb
