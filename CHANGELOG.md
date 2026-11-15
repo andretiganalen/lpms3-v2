@@ -1,4 +1,9 @@
 # CHANGELOG
+## 2026-11-15 — Rilis 17.9.7-lpms3.1.4 (pilihan radio Pengguna/Admin, pembersihan data pra-go-live)
+- IdsLogin: landing memakai radio button "Pengguna" / "Admin" + satu tombol "Masuk dengan IDS" (menggantikan dua tombol).
+- Data: dihapus proyek `demo-project`, `your-scrum-project`, `demo-nvg-monocular-100` dan user `pimpro.demo` (backup `data/backup/20261115-0814`); akun `admin` bawaan dikunci; template `lpms3-tpl-*` dibuat non-publik.
+- Smoke: PASS=22 FAIL=0 N/A=5.
+
 ## 2026-11-15 — Rilis 17.9.7-lpms3.1.3 (halaman IdsLogin bergaya UIx, tabel, pengaturan)
 - IdsLogin: landing, "Akses ditolak", dan "Berhasil masuk" memakai token dan font Poppins dari `uix.css` (tema terang), teks tombol dirapikan. Versi rilis (`Lpms3__Release`) menjadi pemecah cache URL aset; titik diganti `-` karena segmen `:digest` di route Rails tidak menerima titik (sebelumnya 404).
 - `uix.css`: ukuran isi 13px (`--body-font-size`, `--main-menu-font-size`); kepala tabel 12px/600, warna sekunder, tanpa huruf kapital semua.
