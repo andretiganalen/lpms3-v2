@@ -1,59 +1,94 @@
 # Hierarki Approval Akun per Fungsi
 
-## 1. Dasar
+Dokumen ini mendefinisikan siapa mengerjakan, menyetujui, dan melihat apa di LPMS3, berdasarkan **Fungsi**. Lingkup aplikasi bersifat **global**: satu akun pejabat dapat menangani banyak project.
 
-- Hierarki approval mengikuti **Fungsi** (tabel `lpms3.fungsi_generik`, relasi `induk`), **bukan** struktur organisasi (`org_unit`).
-- **Pejabat Eselon 1 berkedudukan di Fungsi Eselon 1.** Pejabat Eselon 2 berkedudukan di Fungsi Eselon 2, yang berinduk ke Fungsi Eselon 1.
-- Hierarki ini berlaku untuk tabel, task list, job list, work order, halaman overview, dashboard, dan resume.
+## 1. Ruang Lingkup dan Istilah
 
-## 2. Susunan Fungsi
+| Istilah | Arti di LPMS3 |
+| :-- | :-- |
+| Tabel isian | Tabel data yang diisi dan disubmit, mis. Penetapan 9 Aspek PMP. |
+| Task list | Daftar tugas (paket-penugasan) yang ditugaskan ke sebuah akun. |
+| Job list | Daftar pekerjaan lintas project yang menjadi tanggung jawab sebuah Fungsi. |
+| Work order | Penugasan tertulis dari atasan ke bawahannya: satu tugas, satu penanggung jawab, satu tenggat. |
+| Overview | Ringkasan status satu project. |
+| Dashboard | Ringkasan status lintas project untuk satu Fungsi atau level. |
+| Resume | Ringkasan tahapan per Fungsi untuk satu periode. |
 
-| Tingkat | Fungsi | Induk Fungsi | Peran akun |
+Hierarki ini berlaku untuk seluruh objek di atas: tabel isian, task list, job list, work order, overview, dashboard, dan resume.
+
+## 2. Struktur Fungsi dan Peran
+
+| Tingkat | Fungsi | Induk | Pejabat (global) | Tim |
+| :-- | :-- | :-- | :-- | :-- |
+| P1 | Fungsi Direksi Operasi | — (puncak) | P1P | P1A (Admin Pejabat) |
+| P2 | Fungsi [Generik] Eselon 1 | Fungsi Direksi Operasi | P2P | P2A, P2S, P2F |
+| P3 | Fungsi [Generik] Eselon 2 | Fungsi Eselon 1 | P3P | P3A, P3S, P3F |
+
+- **Pejabat Eselon 1 (P2P) berkedudukan di Fungsi Eselon 1.** Satu akun P2P dapat menangani banyak project.
+- **Pejabat Eselon 2 (P3P) berkedudukan di Fungsi Eselon 2**, yang berinduk ke Fungsi Eselon 1. Lingkupnya adalah project yang ditugaskan kepada Fungsi Eselon 2-nya.
+- **"Bawahnya" berarti dari P2x ke P3x.** Tidak ada level lain di antaranya.
+- Tim di bawah Pejabat Eselon 2 (Admin, Spesialis, Staff) dan tim Eselon 1 (P2A, P2S, P2F) hanya mengerjakan **tugas yang diberikan** kepada mereka, berupa work order.
+- **Admin Pejabat (P…A)** adalah asisten pejabatnya. Admin tidak menyetujui dan tidak mengirim ke tingkat atas. Admin hanya bertindak atas nama pejabatnya (lihat §4).
+
+## 3. Alur Approval
+
+Setiap item bergerak dari tim ke pejabat, lalu ke tingkat di atasnya. Setiap langkah punya tujuan yang jelas:
+
+**Fungsi Eselon 2 (P3):**
+1. **Staff P3F → submit ke Spesialis P3S** yang memberi tugas (satu tujuan).
+2. **Spesialis P3S → submit ke Pejabat P3P.**
+3. **Pejabat P3P menyetujui** (status Disahkan di tingkat P3) lalu **submit final ke P2P** (Pejabat Eselon 1).
+
+**Fungsi Eselon 1 (P2):**
+4. **Staff P2F → submit ke Spesialis P2S** yang memberi tugas.
+5. **Spesialis P2S → submit ke P2P.**
+6. **Pejabat P2P menyetujui** lalu **submit final ke P1P** (Direksi). Hasil P3P yang diteruskan ke P2P diproses di sini.
+
+**Direksi (P1):**
+7. **P1P menyetujui** (Disahkan) atau **meminta revisi ke P2P**.
+
+Tidak ada tujuan ganda. Setiap submit punya satu penerima.
+
+## 4. Aksi dan Dampaknya
+
+| Aksi | Status | Dilakukan oleh | Tujuan (jika ada) |
 | :-- | :-- | :-- | :-- |
-| P1 | Fungsi Direksi Operasi | — (puncak) | P1P, P1A |
-| P2 | Fungsi [Generik] Eselon 1 | Fungsi Direksi Operasi | P2P, P2A, P2S, P2F |
-| P3 | Fungsi [Generik] Eselon 2 | Fungsi Eselon 1 | P3P, P3A, P3S, P3F |
+| **Submit** | Draft/Revisi → **Reviu** | Staff, Spesialis, Pejabat (submit final) | Penerima sesuai §3. Tidak ada tujuan lain. |
+| **Menyetujui** | Reviu → **Disahkan** | Hanya Pejabat (P…P) | Dicatat sebagai pengesahan di tingkatnya. Pejabat lalu submit final ke tingkat atas. |
+| **Minta revisi** | Reviu → **Revisi** | Pejabat (P…P), atau Admin atas sepengetahuan pejabatnya | Catatan wajib. Lihat tujuan revisi di bawah. |
+| **Mengetahui** | Tidak berubah | Pejabat (P…P) dan Admin (P…A) | Menandai bahwa item sudah dilihat. Tidak memblokir alur. |
+| **Komentar** | Tidak berubah | Semua peran yang dapat melihat item | Catatan tanpa perubahan status. |
 
-Setiap Fungsi Eselon 1 memiliki satu set peran P2. Setiap Fungsi Eselon 2 memiliki satu set peran P3.
+**Tujuan revisi (selalu satu, selalu ke bawah satu tingkat):**
+- **P1P → P2P.**
+- **P2P → P3P** (pejabat Eselon 2 di Fungsi bawahnya), bukan ke tim.
+- **P3P → P3S** (Spesialis yang submit), lalu P3S → P3F.
+- **P2P → P2S** (Spesialis yang submit), lalu P2S → P2F.
 
-## 3. Peran per Tingkat
+Setelah revisi, item kembali ke **Draft** di tangan penerima revisi. Penerima wajib submit ulang. Tidak ada status yang menggantung tanpa penerima.
 
-**P1 — Fungsi Direksi Operasi**
-- **P1P, Pejabat Direksi:** menerima hasil submit dari Fungsi Eselon 1 (P2P). Dapat menyetujui, mengetahui, berkomentar, dan meminta revisi.
-- **P1A, Admin Pejabat Direksi:** gerbang masuk ke akun P1P. Menerima hasil submit dari P2P, dapat berkomentar, dan dapat meminta revisi atas sepengetahuan P1P. Tidak dapat menyetujui.
+**Admin (P…A):**
+- Dapat mengetahui, berkomentar, dan meminta revisi **atas sepengetahuan pejabatnya**, untuk item di Fungsinya.
+- Tidak dapat menyetujui atau submit ke tingkat atas.
+- Setiap aksi Admin dicatat atas nama Admin dan atas sepengetahuan pejabat.
 
-**P2 — Fungsi [Generik] Eselon 1**
-- **P2P, Pejabat Eselon 1:** menyetujui, mengetahui, berkomentar, dan meminta revisi ke Fungsi Eselon 2 di bawahnya. Submit final ke P1P.
-- **P2A, Admin Pejabat Eselon 1:** mengetahui, berkomentar, dan meminta revisi ke Fungsi Eselon 2 di bawahnya atas sepengetahuan P2P. Tidak dapat menyetujui.
-- **P2S, Spesialis Pejabat Eselon 1:** menerima tugas khusus dari P2P. Submit ke P2P. Menugaskan spesialis di Fungsi Eselon 2. Mengetahui hasil dari Eselon 2, berkomentar, dan meminta revisi ke spesialis Eselon 2 atas sepengetahuan P2P.
-- **P2F, Staff Pejabat Eselon 1:** menerima tugas khusus dari P2P dan dari P2S. Submit ke P2P *dan/atau* P2S [perlu konfirmasi, lihat §5], dan berkomentar.
+## 5. Akses Lihat
 
-**P3 — Fungsi [Generik] Eselon 2**
-- **P3P, Pejabat Eselon 2:** menyetujui, mengetahui, berkomentar, dan meminta revisi ke spesialis di Fungsi Eselon 2. Submit final ke **P2P** (Pejabat Eselon 1, di Fungsi induknya).
-- **P3A, Admin Pejabat Eselon 2:** mengetahui, berkomentar, dan meminta revisi ke spesialis Eselon 2 atas sepengetahuan P3P. Tidak dapat menyetujui.
-- **P3S, Spesialis Pejabat Eselon 2:** menerima tugas khusus dari P3P. Submit ke P3P. Menugaskan staff dan admin di Fungsi Eselon 2. Mengetahui hasil dari staff, berkomentar, dan meminta revisi ke staff atas sepengetahuan P3P.
-- **P3F, Staff Pejabat Eselon 2:** menerima tugas khusus dari P3P dan dari P3S. Submit ke P3P dan P3S [perlu konfirmasi, lihat §5], dan berkomentar.
+| Yang dilihat | Siapa | Aturan |
+| :-- | :-- | :-- |
+| **Tahap** (status dan sudah sampai level mana) | Semua peran dalam rantai Fungsi | Setiap level melihat posisi item, termasuk level bawah. |
+| **Isi** (laporan, dokumen, isian tabel) | Level pemilik isi, timnya, dan peer | Level bawah dan tim melihat isi yang mereka kerjakan. |
+| **Isi di level atas** | Pejabat tingkat atas | Hanya setelah isi **disubmit** oleh level bawahnya (status Reviu atau lebih). Sebelum itu, hanya tahap yang terlihat. |
+| **Peer** | Peran setara dalam satu group (mis. P3P dengan P3P, P3S dengan P3S) | Saling melihat isi. |
+| **Tugas tim** | Admin, Spesialis, Staff | Hanya tugas (work order) yang diberikan kepada mereka. |
+| **Lingkup pejabat** | P1P, P2P, P3P | Semua project yang menjadi lingkup Fungsinya, lintas project. |
 
-## 4. Definisi Aksi
+Tahap selalu terlihat, sedangkan isi tidak naik ke atas sebelum disubmit. Dengan begitu level atas tidak melihat draft yang belum selesai.
 
-Definisi ini diusulkan supaya bisa dipetakan ke status dan journal di OpenProject. Setiap aksi tetap dicatat di riwayat.
+## 6. Keterkaitan dengan Aplikasi
 
-| Aksi | Mengubah status? | Siapa | Catatan |
-| :-- | :-- | :-- | :-- |
-| Submit | Ya, ke **Reviu** | Staff dan Spesialis | Diteruskan ke tingkat di atasnya. |
-| Menyetujui | Ya, ke **Disahkan** | Hanya P…P | Pengesahan di tingkat tersebut. |
-| Minta revisi | Ya, ke **Revisi** | P…P, P…S, P…A (atas sepengetahuan P…P) | Catatan wajib. Dikembalikan ke penanggung jawab di Fungsi bawahnya. |
-| Mengetahui | Tidak | P…P, P…A, P…S | Hanya menandai bahwa dokumen sudah dilihat. |
-| Komentar | Tidak | Semua peran | Catatan tanpa perubahan status. |
-
-Aturan tambahan:
-- **Admin (P…A) tidak dapat menyetujui**, dan tidak dapat submit ke tingkat atas. Admin hanya dapat berkomentar, mengetahui, dan meminta revisi.
-- **Submit final berjenjang:** P3P → P2P → P1P. Setiap tingkat hanya meneruskan setelah tingkatnya sendiri menyetujui.
-
-## 5. Pertanyaan Terbuka
-
-1. **Submit ganda (P2F, P3F):** apakah staff submit ke dua tujuan sekaligus, atau ke satu tujuan dengan tembusan ke yang lain?
-2. **Login Admin:** apakah Admin (P…A) login dengan akun sendiri (IDS per orang), atau menumpang akun pejabat? Keputusan ini memengaruhi gerbang Admin di IdsLogin, yang saat ini memakai `IDS_ADMIN_EMAILS` dan akun lokal hard-coded.
-3. **Pemetaan ke peran LPMS3:** apakah P1–P3 dipetakan ke `ProjectRole` per project, atau ke grup global Fungsi?
-4. **Penamaan:** "Admin Pejabat" di dokumen ini dan "Admin Teknis" di spesifikasi (U24, U25) apakah sama, atau berbeda perannya?
-5. **Revisi lintas tingkat:** apakah revisi dari P…P kembali ke pengaju langsung, atau ke penanggung jawab di Fungsi bawahnya?
+- **Status:** memakai status Dokumen Rencana yang sudah ada: **Draft, Reviu, Revisi, Disahkan**. Tidak ada status baru.
+- **Fungsi:** dipetakan ke `lpms3.fungsi_generik` (induk untuk tingkat), bukan ke `org_unit`.
+- **Peran akses:** Pejabat P…P dan P…A menjadi peran global (lintas project) di OpenProject. Tim (Spesialis, Staff, Admin tim) menjadi peran di tingkat project dan dibatasi pada WP yang diberikan.
+- **Akun Admin:** setiap Admin punya akun sendiri (IDS per orang, bukan akun pejabat). Tindakannya dicatat atas nama dirinya dan atas sepengetahuan pejabatnya di journal.
+- **Istilah:** "Admin Pejabat" (P…A) di dokumen ini adalah peran yang sama dengan "Admin Teknis" pada spesifikasi U24–U25. Spesifikasi akan diselaraskan dengan istilah ini pada revisi berikutnya.
