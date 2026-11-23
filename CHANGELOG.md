@@ -1,4 +1,17 @@
 # CHANGELOG
+## 17.9.7-lpms3.1.33 — satu pintu login IDS, rilis 1.31–1.33 masuk git (dicatat 23 Nov 2026)
+Rilis 1.31–1.33 sudah terpasang di `:5100` sejak 16–17 Nov 2026 (image dibangun dari *working tree*). Entri ini mencatatnya ke git agar rilis yang berjalan bisa dibangun ulang (temuan audit P0 #3).
+- **Satu pintu login IDS (20 Nov 2026):** akun lokal tertanam dan `/ids/local` dihapus dari `Lpms3.IdsLogin`; proxy mengalihkan `/ids/local` ke `/ids/login`. Tidak ada pilihan Pengguna/Admin. Admin dan peran ditentukan di aplikasi, tidak dari klaim IDS (`AdminRoles`/`AdminEmails` dibuang). Akun yang dikunci di LPMS3 tetap ditolak. `back_url` OpenProject dibawa lewat login (hanya jalur lokal, cegah open redirect). Halaman galat UIx dengan "Coba lagi"/"Keluar".
+- **9 Aspek PMP** di halaman fase (`aspects.rb`, `Lpms3::AspectsController`): tabel isian, bilah "Ajukan Semua Aspek", masukan pembaca per baris, unduh PDF.
+- **Persetujuan berjenjang** (`Lpms3::ApprovalTask`, menu "Tugas & Notifikasi" `/lpms3/tugas`): Staff → Pimpro → Eselon 2 → Eselon 1, bypass Eselon 2, tembusan Direksi, masukan (`Lpms3::Feedback`) tercatat di aktivitas WP. Migrasi `20261117000001..03`.
+- **Kick-Off** (`Lpms3::Kickoff`, migrasi `20261117000004`).
+- **LenO Mobile** (`/lpms3/m`): laporan harian, progres, kendala, persetujuan/tolak, notifikasi, review WO; PDF laporan harian. Migrasi `20261116000001`.
+- **Pengadaan** (`/projects/:id/lpms3/pengadaan`), **Portofolio**, **Galeri**, **PDF** (Prawn, gaya UIx).
+- **MOD-08** logo/favicon Len 2023 (`deploy/brand`), **MOD-09** hapus Edisi Enterprise dan Link Eksternal.
+- Seed: `80_persetujuan_roles.rb`, `proyek_referensi_len.rb`, `leno_mobile_demo.rb`, `wiki_fungsi_generik.rb`. Smoke: `alur_persetujuan.rb`, `procurement.rb`, `procurement_flow.rb`.
+- Tidak di-commit (di `.gitignore`): seed akun uji dengan password bersama (`akun_uji*.rb`, `tambah_akun_fungsi.rb`) dan `ops/_accts.txt`.
+- Audit 20 Nov 2026 disimpan lokal (tidak di-commit karena repo publik).
+
 ## 17.9.7-lpms3.1.30 — menu Mata uang & kurs (konversi dan budget korporasi)
 - **Menu baru** "Mata uang & kurs" (`/lpms3/mata-uang`, sidebar global dan Administrasi): konverter untuk semua pengguna login; kurs terhadap mata uang dasar **IDR**; daftar mata uang (IDR dasar, USD, EUR, SGD, JPY aktif; CNY, AUD, GBP nonaktif; dapat ditambah/diubah/dinonaktifkan).
 - **Hak akses**: izin global baru `manage_currency_rates`; seed `lpms3/seed/90_currency.rb` membuat **peran global "Keuangan"**. Admin dan akun Keuangan dapat mengubah mata uang dan kurs; pengguna lain hanya melihat dan mengonversi (403 bila mengubah). Sumber eksternal hanya dapat diatur admin.

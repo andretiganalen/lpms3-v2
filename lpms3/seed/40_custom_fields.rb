@@ -5,6 +5,7 @@ PROJ = {
     ["Kode Proyek", "string", true], ["Nama Pelanggan", "string", true],
     ["Nomor Kontrak", "string", true], ["Tanggal Kontrak", "date", true],
     ["Nilai Kontrak (IDR)", "float", true],
+    ["Judul Proyek Lengkap", "text", false],
     ["Jenis/Klasifikasi Proyek", "list", true, ["Sistem Pertahanan", "Transportasi", "Energi", "ICT", "Lainnya"]],
     ["Pendekatan Delivery", "list", true, %w[Prediktif Hibrid Adaptif]],
   ],
@@ -71,6 +72,12 @@ WP = [
   ["Severity NCR", "list", %w[NCR], %w[Minor Mayor Kritikal]], ["Tindakan korektif/preventif", "text", %w[NCR]],
   ["No. PR", "string", %w[Item\ Pengadaan]], ["No. PO", "string", %w[Item\ Pengadaan]],
   ["Rekanan", "string", %w[Item\ Pengadaan]], ["Nilai pengadaan (IDR)", "float", %w[Item\ Pengadaan]],
+  # Kontrak awal & penerimaan (monitoring pengadaan)
+  ["No. Kontrak", "string", %w[Item\ Pengadaan]], ["Tanggal kontrak", "date", %w[Item\ Pengadaan]],
+  ["Tanggal berakhir kontrak", "date", %w[Item\ Pengadaan]], ["Nilai kontrak", "float", %w[Item\ Pengadaan]],
+  ["Mata uang kontrak", "string", %w[Item\ Pengadaan]],
+  ["No. BA penagihan", "string", %w[Item\ Pengadaan]], ["Tanggal BA penagihan", "date", %w[Item\ Pengadaan]],
+  ["No. GR/SES", "string", %w[Item\ Pengadaan]], ["Tanggal GR/SES", "date", %w[Item\ Pengadaan]],
   ["Make-or-Buy", "list", %w[Item\ Pengadaan], %w[Make Buy]], ["Tanggal dibutuhkan", "date", %w[Item\ Pengadaan]],
   ["Organisasi stakeholder", "string", %w[Stakeholder]], ["Peran stakeholder", "string", %w[Stakeholder]],
   ["Pengaruh (1-5)", "int", %w[Stakeholder]], ["Kepentingan (1-5)", "int", %w[Stakeholder]],
@@ -99,9 +106,14 @@ PROJ.each do |sec_name, fields|
     cf.project_custom_field_section = sec
     cf.is_required = req
     apply_opts(cf, fmt, opts, false) if cf.new_record?
+    # Kode Proyek berformat XXX-XXXXXXXX (3 karakter, tanda hubung, 8 karakter huruf besar/angka)
+    cf.regexp = "^[A-Z0-9]{3}-[A-Z0-9]{8}$" if name == "Kode Proyek"
     cf.save!
   end
 end
+
+# Mata uang kontrak sempat dibuat sebagai list (nilai tersimpan sebagai id opsi); diganti string kode ISO.
+WorkPackageCustomField.where(name: "Mata uang kontrak", field_format: "list").destroy_all
 
 WP.each do |name, fmt, types, opts, multi|
   cf = WorkPackageCustomField.find_or_initialize_by(name: name)

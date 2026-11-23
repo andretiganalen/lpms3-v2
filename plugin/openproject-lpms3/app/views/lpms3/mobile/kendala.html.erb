@@ -1,0 +1,35 @@
+<% wp = @wp %>
+<%= render "lpms3/mobile/header", back: lpms3_m_wo_path(wp), eyebrow: "#{Lpms3::Leno.code(wp)} · Laporan", title: "Lapor Kendala" %>
+<%= form_with url: lpms3_m_buat_kendala_path(wp), method: :post, local: true, data: { turbo: false }, class: "lm-main", id: "lm-kendala" do %>
+  <section class="lm-card">
+    <div class="lm-row"><span class="lm-code" style="letter-spacing:.04em">KONTEKS</span><span class="lm-sect" style="color:var(--uix-success);font-weight:600">Terisi otomatis</span></div>
+    <div class="lm-meta" style="display:grid;grid-template-columns:96px minmax(0,1fr);row-gap:6px;font-size:14px;color:var(--uix-text-head)">
+      <span style="color:var(--uix-text-secondary)">Work order</span><span style="font-weight:500"><%= Lpms3::Leno.code(wp) %> · <%= Lpms3::Leno.title(wp) %></span>
+      <span style="color:var(--uix-text-secondary)">Proyek</span><span style="font-weight:500"><%= wp.project.name %></span>
+      <span style="color:var(--uix-text-secondary)">Progres</span><span style="font-weight:500"><%= Lpms3::Leno.progress(wp).round %>%</span>
+    </div>
+  </section>
+  <section class="lm-card">
+    <div class="lm-field"><span class="lbl">Kategori</span>
+      <div class="lm-opts">
+        <% ["Material", "Peralatan", "Tenaga kerja", "Cuaca", "Gambar/desain", "Lainnya"].each_with_index do |k, i| %>
+          <label class="lm-opt"><input type="radio" name="kategori" value="<%= k %>" <%= 'checked' if i.zero? %>><span><%= k %></span></label>
+        <% end %>
+      </div>
+    </div>
+    <div class="lm-field"><span class="lbl">Dampak ke jadwal</span>
+      <div class="lm-seg-radio">
+        <% ["Rendah", "Sedang", "Tinggi"].each do |lv| %>
+          <label><input type="radio" name="dampak" value="<%= lv %>" <%= 'checked' if lv == "Sedang" %>><span><%= lv %></span></label>
+        <% end %>
+      </div>
+    </div>
+    <div class="lm-field"><label class="lbl" for="deskripsi">Deskripsi kendala</label>
+      <textarea id="deskripsi" name="deskripsi" rows="4" placeholder="Jelaskan kendala dan kebutuhan bantuan" required></textarea>
+    </div>
+  </section>
+<% end %>
+<footer class="lm-foot">
+  <span class="lm-sect" style="text-align:center">Laporan ini dicatat sebagai Issue Log proyek</span>
+  <button type="submit" form="lm-kendala" class="lm-btn" style="background:var(--uix-warning-text);color:var(--uix-surface)">Kirim laporan</button>
+</footer>

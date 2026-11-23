@@ -29,6 +29,14 @@ end
 DOK_RENCANA = ["Manajemen Ruang Lingkup", "Manajemen Jadwal", "Manajemen Biaya", "Manajemen Mutu", "Manajemen Sumber Daya",
                "Manajemen Komunikasi", "Manajemen Risiko & K3L", "Manajemen Pengadaan", "Manajemen Stakeholder"].freeze
 GATES = ["G1 — Project Charter ditetapkan", "G2 — Kick-Off / Baseline 0", "G3 — Serah terima", "G4 — Proyek ditutup"].freeze
+# Inisiasi (BOP-001 §5.1): 9 aspek PMP ditetapkan sebelum Project Charter; Project Assumption sejajar dengan Charter.
+PMP9_DESC = "Pimpro dan tim mengisi ringkasan serta lampiran tiap aspek PMP (9 aspek) langsung di tabel Penetapan 9 Aspek PMP. " \
+            "Ajukan reviu; atasan menyetujui atau meminta revisi. Dikerjakan sebelum Penetapan Project Charter."
+ASM_DESC = "Asumsi proyek disusun dari 9 aspek PMP yang telah disahkan; sejajar dengan Penetapan Project Charter."
+# Migrasi: Project Charter bergeser dari T1-3 ke T1-4 (langkah 9 aspek mengambil T1-3). Aman diulang.
+WorkPackage.where("subject LIKE ?", "[T1-3] Penetapan Project Charter").find_each do |wp|
+  wp.update_column(:subject, "[T1-4] Penetapan Project Charter")
+end
 MODULES_COMMON = %w[work_package_tracking gantt meetings documents budgets costs news wiki calendar_view].freeze
 
 def rasci_md(r)
@@ -78,6 +86,10 @@ def build_template(name, ident, modules:, types:, rasci:, doks:, gates:, desc:, 
     add_wp(p, task, subj, admin, desc: rasci_md(r),
            assignee: group.(r["R"].first), responsible: group.(r["A"].first))
   end if rasci
+  if rasci
+    add_wp(p, task, "[T1-3] Penetapan 9 Aspek PMP", admin, desc: PMP9_DESC)
+    add_wp(p, task, "[T1-5] Penetapan Project Assumption", admin, desc: ASM_DESC)
+  end
   if doks
     dt = Type.find_by!(name: "Dokumen Rencana")
     DOK_RENCANA.each { |d| add_wp(p, dt, "Dokumen Rencana — #{d}", admin, desc: "Dokumen PMP (BOP-001 §5.2.1). Status Disahkan diperlukan untuk Gate G2.") }

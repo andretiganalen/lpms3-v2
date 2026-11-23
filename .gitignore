@@ -18,3 +18,14 @@ data/
 
 # Dokumen Nota 021 (tidak untuk repo)
 docs/021-N-UQ-VIII-2026_*.pdf
+
+# Berkas kerja lokal berisi kredensial/akun uji (password bersama) – jangan di-commit
+ops/_accts.txt
+ops/_login_probe.sh
+lpms3/seed/akun_uji.rb
+lpms3/seed/akun_uji_v2.rb
+lpms3/seed/tambah_akun_fungsi.rb
+*.swp
+
+# Laporan audit internal (repo publik) – simpan di luar git
+docs/AUDIT-*.md

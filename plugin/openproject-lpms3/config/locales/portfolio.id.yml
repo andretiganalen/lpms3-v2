@@ -1,0 +1,26 @@
+id:
+  lpms3:
+    portfolio:
+      title: "Scorecard Portofolio"
+      hint: "Satu baris per proyek yang bisa Anda lihat. Rencana % diturunkan dari jadwal work package (Kurva-S belum terisi)."
+      period_label: "Periode"
+      periods: { day: "Harian", week: "Mingguan", month: "Bulanan", quarter: "Triwulan" }
+      compare_to: "Dibandingkan dengan %{date}"
+      empty: "Tidak ada proyek yang bisa Anda lihat."
+      limit: "Batas 100%"
+      days:
+        one: "%{count} hari"
+        other: "%{count} hari"
+      status: { leading: "Leading", lagging: "Lagging" }
+      col:
+        kode: "Kode Proyek"
+        kontrak: "Nomor Kontrak"
+        amendemen: "Nomor Amendemen"
+        rencana: "Rencana %"
+        aktual: "Aktual %"
+        isu: "Jumlah Issue"
+        risiko: "Jumlah Risiko"
+        sisa: "Sisa waktu sampai deadline"
+        jalan: "Waktu berjalan (dari durasi)"
+        kenaikan: "Kenaikan dibanding periode sebelumnya"
+      note: "Leading = aktual ≥ rencana. Issue/Risiko = WP tipe Isu/Risiko yang belum tertutup. Kenaikan memakai riwayat progres WP."

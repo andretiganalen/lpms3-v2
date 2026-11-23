@@ -1,0 +1,32 @@
+<% wp = @wp %>
+<%= render "lpms3/mobile/header", back: lpms3_m_keputusan_path(wp), eyebrow: "#{Lpms3::Leno.code(wp)} · Reject", title: "Alasan Reject" %>
+<%= form_with url: lpms3_m_tolak_simpan_path(wp), method: :post, local: true, data: { turbo: false }, class: "lm-main", id: "lm-tolak" do %>
+  <section class="lm-card">
+    <h2 class="lm-h2" style="margin:0">Reject submission <%= Lpms3::Leno.code(wp) %>?</h2>
+    <p class="lm-sect" style="margin:0;font-size:14px;line-height:1.45">Aktivitas dikembalikan ke PIC (<%= wp.assigned_to&.name %>) untuk diperbaiki, lalu disubmit ulang.</p>
+  </section>
+  <section class="lm-card">
+    <span class="lm-h3">Alasan cepat</span>
+    <div class="lm-opts">
+      <% ["Foto kurang jelas", "Foto tidak sesuai", "Pekerjaan belum sesuai", "Keterangan kurang"].each do |c| %>
+        <label class="lm-opt"><input type="radio" name="cepat" value="<%= c %>"><span><%= c %></span></label>
+      <% end %>
+    </div>
+    <div class="lm-field">
+      <label class="lbl" for="alasan">Alasan reject <span style="font-weight:500;color:var(--uix-text-secondary)">· wajib</span></label>
+      <textarea id="alasan" name="alasan" rows="3" placeholder="Jelaskan apa yang perlu diperbaiki PIC" required style="<%= 'border:2px solid var(--uix-danger);background:var(--uix-danger-soft)' if flash[:error] %>"></textarea>
+    </div>
+  </section>
+<% end %>
+<footer class="lm-foot" style="flex-direction:row">
+  <%= link_to "Batal", lpms3_m_keputusan_path(wp), class: "lm-btn ghost", style: "flex:1" %>
+  <button type="submit" form="lm-tolak" class="lm-btn danger" style="flex:1.6">Reject &amp; kembalikan</button>
+</footer>
+<script nonce="<%= content_security_policy_nonce %>">
+  document.querySelectorAll('input[name=cepat]').forEach(function (r) {
+    r.addEventListener('change', function () {
+      var t = document.getElementById('alasan');
+      t.value = t.value ? t.value + '; ' + r.value : r.value;
+    });
+  });
+</script>

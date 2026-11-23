@@ -1,0 +1,83 @@
+<% wp = @wp %>
+<%= render "lpms3/mobile/header", back: lpms3_m_path, eyebrow: "#{Lpms3::Leno.code(wp)} · #{@pic ? 'Anda PIC' : 'Dilihat'}", title: "Laporan Aktivitas per Hari" %>
+<main class="lm-main">
+  <p><a href="<%= lpms3_pdf_laporan_path(wp) %>" class="lm-btn">Unduh laporan harian (PDF)</a></p>
+  <section class="lm-card">
+    <div class="lm-row">
+      <span class="lm-code"><%= Lpms3::Leno.code(wp) %></span>
+      <div style="display:flex;gap:6px">
+        <% if @review.state == "ditolak" %><span class="lm-chip lm-chip--danger">Di-reject Eselon 2</span>
+        <% elsif @review.state == "diajukan" %><span class="lm-chip lm-chip--warn">Menunggu Eselon 2</span>
+        <% elsif @review.state == "disetujui" %><span class="lm-chip lm-chip--ok">Approved · terkunci</span>
+        <% else %><span class="lm-chip lm-chip--info">Berjalan</span><% end %>
+      </div>
+    </div>
+    <span class="lm-h2"><%= Lpms3::Leno.title(wp) %></span>
+    <div style="display:flex;align-items:center;gap:10px">
+      <% draft_r = Lpms3::Leno.reports(wp).find { |x| !x.sent? } %>
+      <% draft_pct = draft_r ? [[draft_r.progress.to_f, 100].min - [@progress, 100].min, 0].max : 0 %>
+      <div class="lm-bar big"><div style="width: <%= [@progress, 100].min %>%"></div><div style="width: <%= draft_pct %>%;background:var(--uix-info-soft)"></div></div>
+      <span class="lm-pct"><%= @progress.round %>%</span>
+    </div>
+    <div class="lm-meta">
+      <% if wp.due_date %>
+        <span>Tenggat <%= Lpms3::Leno.fmt(wp.due_date, "%d %b") %></span>
+        <% days = (wp.due_date - Lpms3::Leno.today).to_i %>
+        <% if days == 7 %><span class="lm-chip sm lm-chip--warn">H-7</span><% elsif days.negative? %><span class="lm-chip sm lm-chip--solid-danger">H+<%= -days %></span><% end %>
+      <% end %>
+    </div>
+    <span class="lm-sect">Dihitung dari laporan harian terkirim.</span>
+    <% if @review.state == "ditolak" && @review.reject_reason.present? %>
+      <div class="lm-note danger">Alasan reject: <%= @review.reject_reason %></div>
+    <% end %>
+  </section>
+
+  <div class="lm-row" style="padding:4px 4px 0"><h3 class="lm-h3">Laporan harian</h3><span class="lm-sect"><%= @reports.count { |r| r.sent? } %> hari dilaporkan</span></div>
+
+  <% if @pic && @review.editable? %>
+    <% unsent_before = @reports.find { |r| !r.sent? && r.report_date < Lpms3::Leno.today } %>
+    <% today_report = @reports.find { |r| r.report_date == Lpms3::Leno.today } %>
+    <% if unsent_before %>
+      <div class="lm-note">Laporan <%= Lpms3::Leno.fmt(unsent_before.report_date, "%d %b") %> belum dikirim. Kirim dulu, baru laporan hari ini bisa diisi.</div>
+    <% end %>
+    <section class="lm-card" style="border-style:dashed">
+      <span class="lm-sect"><%= Lpms3::Leno.fmt(Lpms3::Leno.today, "%A, %d %b %Y") %> · hari ini</span>
+      <% if unsent_before %>
+        <button class="lm-btn ghost" disabled>Terkunci sampai laporan <%= Lpms3::Leno.fmt(unsent_before.report_date, "%d %b") %> dikirim</button>
+      <% else %>
+        <%= link_to today_report&.sent? ? "Lihat laporan hari ini" : "Isi laporan hari ini", lpms3_m_laporan_path(wp, tanggal: Lpms3::Leno.today), class: "lm-btn primary" %>
+      <% end %>
+    </section>
+  <% end %>
+
+  <% @reports.each do |r| %>
+    <% prev = @reports.select { |x| x.report_date < r.report_date && x.sent? }.max_by(&:report_date) %>
+    <% delta = r.progress - r.prev_progress %>
+    <%= link_to lpms3_m_laporan_path(wp, tanggal: r.report_date), class: "lm-card #{'warn' unless r.sent?}" do %>
+      <div class="lm-row">
+        <span style="font-size:14px;font-weight:600"><%= Lpms3::Leno.fmt(r.report_date, "%a, %d %b") %></span>
+        <% if r.sent? %>
+          <span style="font-size:13px;font-weight:600;color:var(--uix-success)"><%= delta >= 0 ? "+" : "" %><%= Lpms3::Leno.pct(delta) %>% → <%= Lpms3::Leno.pct(r.progress) %>%</span>
+        <% else %>
+          <span class="lm-chip lm-chip--warn">Tertunggak · draft</span>
+        <% end %>
+      </div>
+      <% if r.keterangan.present? %><span style="font-size:14px;line-height:1.4"><%= r.keterangan %></span><% end %>
+      <div class="lm-meta">
+        <span>Terkirim <%= r.sent_at ? Lpms3::Leno.fmt(r.sent_at, "%d %b") + " " + r.sent_at.strftime("%H:%M") : "belum" %></span>
+        <% if r.photo_ids.present? %><span><%= r.photo_ids.size %> foto</span><% end %>
+        <% if r.execution == "kendala" %><span class="lm-chip sm lm-chip--warn">Ada kendala</span><% end %>
+      </div>
+    <% end %>
+  <% end %>
+  <% if @reports.empty? %><p class="lm-sect">Belum ada laporan harian.</p><% end %>
+</main>
+<footer class="lm-foot">
+  <% if @pic && @review.editable? && @progress >= 100 %>
+    <%= button_to "Submit WO ke Eselon 2", lpms3_m_submit_path(wp), class: "lm-btn ok", form: { data: { turbo: false } } %>
+  <% elsif @pic && @review.editable? %>
+    <span class="lm-sect" style="text-align:center">Submit WO aktif saat progres 100%.</span>
+  <% elsif @review.state == "diajukan" %>
+    <span class="lm-sect" style="text-align:center">Menunggu keputusan Pejabat Eselon 2.</span>
+  <% end %>
+</footer>

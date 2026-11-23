@@ -410,16 +410,54 @@ input:disabled, select:disabled, textarea:disabled { opacity: .5; }
   .op-loading-indicator::after { animation: none; opacity: 1; transform: none; }
 }
 
-/* Menu fase (induk-anak) di sidebar project: induk fase yang sedang dibuka ikut tersorot, anak aktif bertanda 3px merah di garis hierarki.
-   Pola sama dengan item terpilih UIx §5: latar abu, bobot 500, ikon merah, penanda 3px (tidak ada latar merah). */
-.main-menu ul.menu_root > li.open > .main-item-wrapper a.op-menu--item-action,
-.main-menu .main-menu--children-menu-header .main-menu--parent-node { position: relative; background: var(--uix-surface-muted); color: var(--uix-text-head); font-weight: 500; border-radius: var(--uix-radius-chip); }
-.main-menu ul.menu_root > li.open > .main-item-wrapper a.op-menu--item-action::before { content: ""; position: absolute; left: -4px; top: 6px; bottom: 6px; width: 3px; border-radius: 0 3px 3px 0; background: var(--uix-primary); }
-.main-menu ul.menu_root > li.open > .main-item-wrapper a.op-menu--item-action svg { color: var(--uix-primary); }
+/* Menu fase BOP-001 di sidebar project: pola submenu inline seperti :8585 (Explore). Semua item tampil; panah membuka anak
+   di bawah fase (bukan drilldown). Fase yang memuat langkah terpilih disorot seperti item terpilih UIx §5: latar abu,
+   bobot 500, ikon merah, penanda 3px merah. */
+#main-menu ul.menu_root:has(> li[data-name^="lpms3_fase_"]) { transform: none; left: 0; width: auto; overflow: visible; }
+#main-menu ul.menu_root:has(> li[data-name^="lpms3_fase_"]) > li { display: block; transform: none; position: relative; left: 0; width: auto; height: auto; min-height: 0; max-height: none; visibility: visible; opacity: 1; }
+#main-menu ul.menu_root:has(> li[data-name^="lpms3_fase_"]) .main-item-wrapper { display: flex; }
+#main-menu .main-menu--arrow-left-to-project, #main-menu .main-menu--children-menu-header { display: none; }
+#main-menu li[data-name^="lpms3_fase_"]:not(.open) > ul.main-menu--children { display: none; }
+#main-menu li[data-name^="lpms3_fase_"].open > ul.main-menu--children { display: block; height: auto; max-height: none; }
+#main-menu li[data-name^="lpms3_fase_"] > .main-item-wrapper > .main-menu-toggler svg { transform: rotate(90deg); transition: transform .15s; }
+#main-menu li[data-name^="lpms3_fase_"].open > .main-item-wrapper > .main-menu-toggler svg { transform: rotate(-90deg); }
+#main-menu ul.menu_root > li:has(> ul.main-menu--children a.selected) > .main-item-wrapper a.op-menu--item-action { position: relative; background: var(--uix-surface-muted); color: var(--uix-text-head); font-weight: 500; }
+#main-menu ul.menu_root > li:has(> ul.main-menu--children a.selected) > .main-item-wrapper a.op-menu--item-action::before { content: ""; position: absolute; left: -4px; top: 6px; bottom: 6px; width: 3px; border-radius: 0 3px 3px 0; background: var(--uix-primary); }
+#main-menu ul.menu_root > li:has(> ul.main-menu--children a.selected) > .main-item-wrapper a.op-menu--item-action svg { color: var(--uix-primary); }
+#main-menu .main-menu--children > li > a.op-menu--item-action.selected { background: var(--uix-surface-muted); color: var(--uix-text-head); font-weight: 500; }
+#main-menu .main-menu--children > li > a.op-menu--item-action.selected svg { color: var(--uix-primary); }
+
+/* Status project (daftar project, Ikhtisar): warna dari token UIx saja, hanya menandai status; nama status tetap teks dari OpenProject. */
+.project-status--bulb.-on-track { border-color: var(--uix-success); }
+.project-status--bulb.-at-risk { border-color: var(--uix-warning-text); }
+.project-status--bulb.-off-track { border-color: var(--uix-danger); }
+.project-status--bulb.-finished { border-color: var(--uix-info); }
+.project-status--bulb.-not-started, .project-status--bulb.-not-set, .project-status--bulb.-discontinued { border-color: var(--uix-text-muted); }
+/* Kontainer status: persegi dengan latar semi-transparan sesuai status (token UIx); teks mengikuti font UIx bawaan. */
+.project-status .ng-select-container { border-radius: var(--uix-radius-control); border: 1px solid var(--uix-border-strong); }
+.project-status:has(.project-status--bulb.-on-track) .ng-select-container { background: color-mix(in srgb, var(--uix-success) 12%, transparent); }
+.project-status:has(.project-status--bulb.-at-risk) .ng-select-container { background: color-mix(in srgb, var(--uix-warning-text) 12%, transparent); }
+.project-status:has(.project-status--bulb.-off-track) .ng-select-container { background: color-mix(in srgb, var(--uix-danger) 12%, transparent); }
+.project-status:has(.project-status--bulb.-finished) .ng-select-container { background: color-mix(in srgb, var(--uix-info) 12%, transparent); }
+.project-status:has(.project-status--bulb.-not-started, .project-status--bulb.-not-set, .project-status--bulb.-discontinued) .ng-select-container { background: color-mix(in srgb, var(--uix-text-muted) 12%, transparent); }
+.project-status .ng-input input { text-transform: none; }
+/* Daftar project: status tampil sebagai kontainer persegi semi-transparan (warna status dari token UIx), teks font UIx tanpa kapital semua. */
+span.project-status--name { display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: var(--uix-radius-control); text-transform: none; font-weight: 400; color: var(--uix-text-body); }
+span.project-status--name.-on-track { background: color-mix(in srgb, var(--uix-success) 12%, transparent); }
+span.project-status--name.-at-risk { background: color-mix(in srgb, var(--uix-warning-text) 12%, transparent); }
+span.project-status--name.-off-track { background: color-mix(in srgb, var(--uix-danger) 12%, transparent); }
+span.project-status--name.-finished { background: color-mix(in srgb, var(--uix-info) 12%, transparent); }
+span.project-status--name.-not-started, span.project-status--name.-not-set, span.project-status--name.-discontinued { background: color-mix(in srgb, var(--uix-text-muted) 12%, transparent); }
+.project-status--bulb.-inline { width: 8px; height: 8px; border-width: 3px; margin-right: 6px; }
 .main-menu .main-menu--children-menu-header { border-bottom: 1px solid var(--uix-border-subtle); }
 .main-menu .main-menu--children-menu-header .main-menu--parent-node { display: block; margin: 2px 4px; padding: 8px 12px; font-weight: 600; }
 .main-menu ul.main-menu--children { position: relative; margin-left: 20px; padding-left: 0; border-left: 1px solid var(--uix-border); }
 .main-menu ul.main-menu--children > li > a.op-menu--item-action { position: relative; display: flex; align-items: center; min-height: 36px; margin: 2px 4px 2px 8px; padding: 0 12px; border-radius: var(--uix-radius-chip); color: var(--uix-text-body); font-size: var(--uix-fs-body); }
 .main-menu ul.main-menu--children > li > a.op-menu--item-action:hover { background: var(--uix-surface-muted); color: var(--uix-text-head); }
-.main-menu ul.main-menu--children > li > a.op-menu--item-action.selected { background: var(--uix-surface-muted); color: var(--uix-text-head); font-weight: 500; }
 .main-menu ul.main-menu--children > li > a.op-menu--item-action.selected::before { content: ""; position: absolute; left: -9px; top: 6px; bottom: 6px; width: 3px; border-radius: 0 3px 3px 0; background: var(--uix-primary); }
+
+/* Bilah aksi lengket: tombol pengajuan tetap terlihat saat tabel digulir. */
+.lpms3-sticky-bar { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 12px; padding: 12px 16px; background: var(--uix-surface); border: 1px solid var(--uix-border); border-top: 3px solid var(--uix-primary); border-radius: var(--uix-radius-card); box-shadow: var(--uix-shadow-md); }
+.lpms3-sticky-bar__info { font-size: var(--uix-fs-body); color: var(--uix-text-body); }
+.lpms3-sticky-bar__actions { display: inline-flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.lpms3-btn--lg { height: 44px; padding: 0 20px; font-size: 15px; font-weight: 600; }

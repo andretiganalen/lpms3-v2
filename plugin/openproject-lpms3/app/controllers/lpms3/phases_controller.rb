@@ -54,6 +54,16 @@ module Lpms3
         rel = scope.where(type_id: type.id)
         [type, rel.count, rel.joins(:status).where(statuses: { is_closed: true }).count]
       end
+
+      return unless @section == "aspek"
+
+      ap = ::OpenProject::Lpms3::Aspects
+      @aspects = ap.scope(@project, User.current).includes(:status, :attachments).order(:id).to_a
+      @can_edit = ap.editor?(User.current, @project)
+      @can_attach = User.current.allowed_in_project?(:add_work_package_attachments, @project)
+      @aspek_pending = ::Lpms3::ApprovalTask.pending.where(work_package_id: @aspects.map(&:id)).pluck(:work_package_id)
+      @aspek_ready_ids = @can_edit ? @aspects.reject { |wp| @aspek_pending.include?(wp.id) || ::OpenProject::Lpms3::Aspects.locked?(wp) }.map(&:id) : []
+      @is_approver = ap.approver?(User.current, @project)
     end
 
     private

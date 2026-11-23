@@ -1,0 +1,65 @@
+<% content_for :page_title, t("lpms3.portfolio.title") %>
+<div class="lpms3-portfolio" style="max-width:1200px;margin:0 auto;padding:16px">
+  <h1 style="margin:0 0 4px"><%= t("lpms3.portfolio.title") %></h1>
+  <p style="margin:0 0 12px;color:var(--uix-text-secondary)"><%= t("lpms3.portfolio.hint") %></p>
+
+  <nav aria-label="<%= t("lpms3.portfolio.period_label") %>" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+    <% ::Lpms3::Portfolio::PERIODS.each do |p| %>
+      <%= link_to t("lpms3.portfolio.periods.#{p}"), lpms3_portofolio_path(periode: p),
+                  class: "lpms3-btn #{'-primary' if p == @periode}", "aria-current": (p == @periode ? "page" : nil) %>
+    <% end %>
+    <span style="align-self:center;color:var(--uix-text-secondary);font-size:13px">
+      <%= t("lpms3.portfolio.compare_to", date: I18n.l(@prev, format: :long)) %>
+    </span>
+  </nav>
+
+  <% if @rows.empty? %>
+    <div style="padding:16px;border:1px solid var(--uix-border);border-radius:12px;color:var(--uix-text-secondary)"><%= t("lpms3.portfolio.empty") %></div>
+  <% end %>
+
+  <% @rows.each do |r| %>
+    <section style="border:1px solid var(--uix-border);border-radius:12px;padding:14px;margin-bottom:12px;background:var(--uix-surface)">
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:260px">
+          <div style="font-size:13px;color:var(--uix-text-secondary)"><strong style="color:var(--uix-text-head)"><%= r[:kode] %></strong></div>
+          <div style="font-size:17px;font-weight:700;line-height:1.35;overflow-wrap:anywhere"><%= r[:judul] %></div>
+          <div style="font-size:13px;color:var(--uix-text-body)">
+            <%= t("lpms3.portfolio.col.kontrak") %>: <%= r[:kontrak].presence || "—" %> ·
+            <%= t("lpms3.portfolio.col.amendemen") %>: <%= r[:amendemen].presence || "—" %>
+          </div>
+        </div>
+        <span class="lpms3-chip <%= 'lpms3-chip--ok' if r[:status] == 'Leading' %>"><%= t("lpms3.portfolio.status.#{r[:status].to_s.downcase}", default: r[:status]) %></span>
+      </div>
+
+      <%# Bar chart: rencana vs aktual, dengan batas 100% %>
+      <% [[t("lpms3.portfolio.col.rencana"), r[:rencana], "var(--uix-info-soft)"], [t("lpms3.portfolio.col.aktual"), r[:aktual], "var(--uix-primary)"]].each do |label, val, color| %>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+          <span style="width:90px;font-size:12px;color:var(--uix-text-secondary)"><%= label %></span>
+          <div style="position:relative;flex:1;height:14px;background:var(--uix-surface-muted);border-radius:6px;overflow:visible">
+            <div style="width:<%= [val.to_f, 100].min %>%;height:100%;background:<%= color %>;border-radius:6px"></div>
+            <div style="position:absolute;top:-4px;right:0;height:22px;border-right:2px dashed var(--uix-text-head)" title="<%= t("lpms3.portfolio.limit") %>"></div>
+          </div>
+          <span style="width:56px;text-align:right;font-size:13px;font-weight:600"><%= val.nil? ? "—" : "#{val}%" %></span>
+        </div>
+      <% end %>
+
+      <% if r[:galeri].present? %>
+        <div style="display:flex;gap:6px;margin-top:10px;align-items:center;flex-wrap:wrap">
+          <% r[:galeri].each do |ph| %>
+            <img src="<%= api_v3_paths.attachment_content(ph[:id]) %>" alt="<%= ph[:filename] %>" loading="lazy" style="width:64px;height:48px;object-fit:cover;border-radius:6px">
+          <% end %>
+          <%= link_to "#{t("lpms3.gallery.see_all")} (#{r[:galeri_total]})", lpms3_project_galeri_path(r[:id]), style: "font-size:13px" %>
+        </div>
+      <% end %>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:12px;font-size:13px">
+        <div><span style="color:var(--uix-text-secondary)"><%= t("lpms3.portfolio.col.isu") %></span><br><strong><%= r[:isu] %></strong></div>
+        <div><span style="color:var(--uix-text-secondary)"><%= t("lpms3.portfolio.col.risiko") %></span><br><strong><%= r[:risiko] %></strong></div>
+        <div><span style="color:var(--uix-text-secondary)"><%= t("lpms3.portfolio.col.sisa") %></span><br><strong><%= r[:sisa_hari].nil? ? "—" : t("lpms3.portfolio.days", count: r[:sisa_hari]) %></strong></div>
+        <div><span style="color:var(--uix-text-secondary)"><%= t("lpms3.portfolio.col.jalan") %></span><br><strong><%= r[:jalan_hari].nil? ? "—" : "#{t("lpms3.portfolio.days", count: r[:jalan_hari])} (#{r[:jalan_pct]}%)" %></strong></div>
+        <div><span style="color:var(--uix-text-secondary)"><%= t("lpms3.portfolio.col.kenaikan") %></span><br><strong><%= r[:kenaikan].nil? ? "—" : format("%+.1f pp", r[:kenaikan]) %></strong></div>
+      </div>
+    </section>
+  <% end %>
+
+  <p style="font-size:12px;color:var(--uix-text-secondary)"><%= t("lpms3.portfolio.note") %></p>
+</div>

@@ -1,0 +1,13 @@
+<%# Header layar LenO Mobile. Lokal: back (path|nil), eyebrow, title, right (html|nil) %>
+<header class="lm-header">
+  <div class="lm-header-row">
+    <% if local_assigns[:back] %>
+      <a href="<%= back %>" class="lm-back" aria-label="Kembali">&#8249;</a>
+    <% end %>
+    <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+      <span class="lm-eyebrow"><%= eyebrow %></span>
+      <h1 class="<%= local_assigns[:back] ? 'lm-h2' : 'lm-h1' %>"><%= title %></h1>
+    </div>
+    <%= right if local_assigns[:right] %>
+  </div>
+</header>

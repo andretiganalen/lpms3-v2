@@ -1,0 +1,7 @@
+id:
+  lpms3:
+    gallery:
+      title: "Galeri Proyek"
+      hint: "Foto bukti dari laporan harian terkirim, %{days} hari terakhir."
+      empty: "Belum ada foto bukti dari laporan harian terkirim pada periode ini."
+      see_all: "Lihat semua foto"

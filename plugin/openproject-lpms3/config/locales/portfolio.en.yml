@@ -1,0 +1,26 @@
+en:
+  lpms3:
+    portfolio:
+      title: "Portfolio Scorecard"
+      hint: "One row per project you can see. Planned % is derived from work package schedules (Kurva-S not yet loaded)."
+      period_label: "Period"
+      periods: { day: "Day", week: "Week", month: "Month", quarter: "Quarter" }
+      compare_to: "Compared with %{date}"
+      empty: "No projects visible to you."
+      limit: "100% limit"
+      days:
+        one: "%{count} day"
+        other: "%{count} days"
+      status: { leading: "Leading", lagging: "Lagging" }
+      col:
+        kode: "Project code"
+        kontrak: "Contract no."
+        amendemen: "Amendment no."
+        rencana: "Planned %"
+        aktual: "Actual %"
+        isu: "Issues"
+        risiko: "Risks"
+        sisa: "Time to deadline"
+        jalan: "Elapsed (of duration)"
+        kenaikan: "Change vs previous period"
+      note: "Leading = actual ≥ planned. Issues/risks = open work packages of types Isu/Risiko. Change uses work package progress history."

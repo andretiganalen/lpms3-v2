@@ -1,0 +1,7 @@
+en:
+  lpms3:
+    gallery:
+      title: "Project Gallery"
+      hint: "Evidence photos from sent daily reports, last %{days} days."
+      empty: "No evidence photos from sent daily reports in this period."
+      see_all: "See all photos"

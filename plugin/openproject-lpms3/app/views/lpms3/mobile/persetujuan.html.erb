@@ -1,0 +1,49 @@
+<%= render "lpms3/mobile/header", eyebrow: "LenO Mobile · Pejabat Eselon 2", title: "Persetujuan", right: content_tag(:span, "Eselon 2", class: "lm-chip", style: "background:var(--uix-text-head);color:var(--uix-surface)") %>
+<div style="padding:0 20px 14px;background:var(--uix-surface)">
+  <div class="lm-seg" role="tablist">
+    <%= link_to "Menunggu · #{@waiting.size}", lpms3_m_persetujuan_path(tab: "menunggu"), class: (@tab == "menunggu" ? "on" : nil), role: "tab" %>
+    <%= link_to "Riwayat", lpms3_m_persetujuan_path(tab: "riwayat"), class: (@tab == "riwayat" ? "on" : nil), role: "tab" %>
+  </div>
+</div>
+<main class="lm-main">
+  <%= form_tag lpms3_m_persetujuan_path, method: :get, class: "lm-card", data: { turbo: false } do %>
+    <input type="hidden" name="tab" value="<%= @tab %>">
+    <label class="lbl" for="proyek">Proyek</label>
+    <select id="proyek" name="proyek" class="lm-input">
+      <option value="">Semua proyek saya</option>
+      <% @proyek_options.each do |pr| %>
+        <option value="<%= pr.id %>" <%= "selected" if @proyek == pr.id.to_s %>><%= pr.name %></option>
+      <% end %>
+    </select>
+    <button type="submit" class="lm-btn">Terapkan</button>
+  <% end %>
+  <% if @tab == "menunggu" %>
+    <span class="lm-sect">Aktivitas yang sudah disubmit PIC (progres 100 %) · terlama di atas</span>
+    <% if @waiting.empty? %><p class="lm-sect">Tidak ada WO yang menunggu keputusan.</p><% end %>
+    <% @waiting.each do |r| %>
+      <% wp = r.work_package %>
+      <%= link_to lpms3_m_keputusan_path(wp), class: "lm-card" do %>
+        <div class="lm-row">
+          <span class="lm-code"><%= Lpms3::Leno.code(wp) %> · <%= wp.project.name %></span>
+          <span class="lm-chip lm-chip--warn">Menunggu <%= ((Lpms3::Leno.today - (r.submitted_at || Time.current).to_date).to_i) %> hari</span>
+        </div>
+        <span style="font-size:16px;font-weight:600"><%= Lpms3::Leno.title(wp) %></span>
+        <span class="lm-sect">Disubmit <%= Lpms3::Leno.fmt(r.submitted_at.to_date, "%a, %d %b") if r.submitted_at %> · PIC <%= wp.assigned_to&.name %></span>
+      <% end %>
+    <% end %>
+  <% else %>
+    <span class="lm-sect">Submission yang sudah Anda putuskan</span>
+    <% if @history.empty? %><p class="lm-sect">Belum ada riwayat keputusan.</p><% end %>
+    <% @history.each do |r| %>
+      <% wp = r.work_package %>
+      <div class="lm-card">
+        <div class="lm-row">
+          <span class="lm-code"><%= Lpms3::Leno.code(wp) %></span>
+          <% if r.state == "disetujui" %><span class="lm-chip lm-chip--ok">Approved</span><% else %><span class="lm-chip lm-chip--danger">Rejected · kembali ke PIC</span><% end %>
+        </div>
+        <span style="font-size:16px;font-weight:600"><%= Lpms3::Leno.title(wp) %></span>
+        <% if r.reject_reason.present? %><span class="lm-note danger"><%= r.reject_reason %></span><% end %>
+      </div>
+    <% end %>
+  <% end %>
+</main>

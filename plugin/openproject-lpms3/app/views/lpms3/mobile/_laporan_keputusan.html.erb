@@ -1,0 +1,12 @@
+    <% delta = r.progress - r.prev_progress %>
+    <section class="lm-card">
+      <div class="lm-row">
+        <span style="font-size:14px;font-weight:600"><%= Lpms3::Leno.fmt(r.report_date, "%a, %d %b") %></span>
+        <span style="font-size:13px;font-weight:700;color:var(--uix-success)"><%= delta >= 0 ? "+" : "" %><%= Lpms3::Leno.pct(delta) %>% → <%= Lpms3::Leno.pct(r.progress) %>%</span>
+      </div>
+      <% if r.keterangan.present? %><p style="margin:0;font-size:14px;line-height:1.45;color:var(--uix-text-body)"><%= r.keterangan %></p><% end %>
+      <% if r.execution == "kendala" && r.kendala.present? %><div class="lm-note"><%= r.kendala %></div><% end %>
+      <% if r.photo_ids.present? %>
+        <div style="display:flex;gap:6px"><% r.photo_ids.each do |id| %><div role="img" aria-label="Foto <%= Lpms3::Leno.fmt(r.report_date, "%d %b") %>" style="width:60px;height:60px;border-radius:10px;background:var(--uix-border)"></div><% end %></div>
+      <% end %>
+    </section>

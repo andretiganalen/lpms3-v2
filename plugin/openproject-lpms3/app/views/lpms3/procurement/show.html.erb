@@ -1,0 +1,157 @@
+<% pr = ::OpenProject::Lpms3::Procurement %>
+<% title = @sub ? t("lpms3.procurement.sub.#{@sub}.title") : t("lpms3.procurement.title") %>
+<% html_title title %>
+<%=
+  render(Primer::OpenProject::PageHeader.new) do |header|
+    header.with_title { title }
+    header.with_breadcrumbs([(@project ? { href: project_path(@project), text: @project.name } : { href: home_path, text: t("label_home") }), title])
+    header.with_description { @sub ? t("lpms3.procurement.sub.#{@sub}.description") : (@project ? t("lpms3.procurement.description_project") : t("lpms3.procurement.description_global")) }
+  end
+%>
+<% path = ->(**q) { @project ? lpms3_project_procurement_path(@project, **q) : lpms3_procurement_path(**q) } %>
+<% money = ->(n) { number_with_delimiter(n.round(0), delimiter: ".") } %>
+<div class="lpms3-page">
+  <section class="lpms3-card">
+    <h3 class="lpms3-card__title"><%= t("lpms3.procurement.pipeline") %></h3>
+    <ol class="lpms3-stepper" aria-label="<%= t("lpms3.procurement.pipeline") %>">
+      <li class="lpms3-stepper__item<%= ' is-current' if @sub.nil? %>">
+        <%= link_to path.call, "aria-current": (@sub.nil? ? "step" : nil) do %>
+          <span class="lpms3-stepper__no">∑</span>
+          <span class="lpms3-stepper__name"><%= t("lpms3.procurement.overview") %></span>
+          <span class="lpms3-stepper__meta"><%= t("lpms3.procurement.items_count", count: @summary[:total]) %></span>
+        <% end %>
+      </li>
+      <% pr::SUBS.each_with_index do |(key, range), i| %>
+        <% n = @items.count { range.cover?(_1.stage_index) } %>
+        <% bad = @items.count { |it| range.cover?(it.stage_index) && (it.findings & pr::SUB_FINDINGS[key]).any? } %>
+        <li class="lpms3-stepper__item<%= ' is-current' if @sub == key %>">
+          <%= link_to path.call(sub: key), "aria-current": (@sub == key ? "step" : nil) do %>
+            <span class="lpms3-stepper__no"><%= i + 1 %></span>
+            <span class="lpms3-stepper__name"><%= t("lpms3.procurement.sub.#{key}.menu") %></span>
+            <span class="lpms3-stepper__meta"><%= t("lpms3.procurement.items_count", count: n) %><%= " · #{t('lpms3.procurement.flagged_short', count: bad)}" if bad.positive? %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ol>
+    <p class="lpms3-hint">
+      <%= t("lpms3.procurement.stage_line", stages: (@sub ? pr::SUBS[@sub].map { pr::STAGES[_1] } : pr::STAGES).join(" → ")) %>
+    </p>
+    <p class="lpms3-hint">
+      <%= t("lpms3.procurement.total_line", total: @summary[:total], flagged: @summary[:flagged], value: money.call(@summary[:value_base]), cur: @base) %>
+    </p>
+  </section>
+
+  <% if @sub.nil? || @sub == "pr" %>
+  <section class="lpms3-card" id="anggaran">
+    <h3 class="lpms3-card__title"><%= t("lpms3.procurement.budget_basis") %></h3>
+    <p class="lpms3-hint"><%= t("lpms3.procurement.budget_rule") %></p>
+    <% if @budgets.empty? %>
+      <p class="lpms3-hint"><%= t("lpms3.procurement.no_budgets") %></p>
+    <% else %>
+      <div class="lpms3-table-wrap">
+        <table class="lpms3-table">
+          <thead><tr>
+            <% unless @project %><th scope="col"><%= t("lpms3.procurement.col.project") %></th><% end %>
+            <th scope="col"><%= t("lpms3.procurement.col.budget") %></th>
+            <th scope="col"><%= t("lpms3.procurement.col.plan", cur: @base) %></th>
+            <th scope="col"><%= t("lpms3.procurement.col.committed") %></th>
+            <th scope="col"><%= t("lpms3.procurement.col.remaining") %></th>
+            <th scope="col"><%= t("lpms3.procurement.col.spent") %></th>
+          </tr></thead>
+          <tbody>
+            <% @budgets.each do |r| %>
+              <tr>
+                <% unless @project %><td><%= r[:budget].project&.name %></td><% end %>
+                <td><%= link_to r[:budget].subject, budget_path(r[:budget]) %></td>
+                <td><%= money.call(r[:plan]) %></td>
+                <td><%= money.call(r[:committed]) %></td>
+                <td><span class="lpms3-chip<%= r[:over] ? '' : ' lpms3-chip--ok' %>"><%= money.call(r[:remaining]) %></span></td>
+                <td><%= money.call(r[:spent]) %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </section>
+  <% end %>
+
+  <section class="lpms3-card" id="temuan">
+    <h3 class="lpms3-card__title"><%= t("lpms3.procurement.findings") %></h3>
+    <% codes = (@sub ? pr::SUB_FINDINGS[@sub] : pr::SEVERITY.keys) %>
+    <% visible_counts = codes.map { |c| [c, @shown_all_counts&.dig(c) || @items.count { |it| it.findings.include?(c) && (@sub.nil? || pr::SUBS[@sub].cover?(it.stage_index)) }] }.reject { _2.zero? } %>
+    <% if visible_counts.empty? %>
+      <p class="lpms3-hint"><%= t("lpms3.procurement.no_findings") %></p>
+    <% else %>
+      <ul class="lpms3-gates">
+        <% visible_counts.each do |code, n| %>
+          <li>
+            <%= link_to t("lpms3.procurement.finding.#{code}"), path.call(sub: @sub, temuan: (@filter == code.to_s ? nil : code), tahap: @stage) %>
+            <span class="lpms3-chip<%= ' lpms3-chip--ok' if @filter == code.to_s %>"><%= n %></span>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+    <% if @filter || @stage %><p><%= link_to t("lpms3.procurement.reset_filter"), path.call(sub: @sub) %></p><% end %>
+  </section>
+
+  <section class="lpms3-card" id="daftar">
+    <h3 class="lpms3-card__title"><%= t("lpms3.procurement.register") %></h3>
+    <% if @shown.empty? %>
+      <p class="lpms3-hint"><%= t("lpms3.procurement.empty") %></p>
+    <% else %>
+      <% cols = { nil => %i[item stage budget numbers vendor contract value need findings],
+                  "pr" => %i[item stage budget value pr need findings],
+                  "buyer" => %i[item stage vendor numbers contract value findings],
+                  "penyelesaian" => %i[item stage milestones gr ba findings] }[@sub] %>
+      <div class="lpms3-table-wrap">
+        <table class="lpms3-table">
+          <thead>
+            <tr>
+              <% unless @project %><th scope="col"><%= t("lpms3.procurement.col.project") %></th><% end %>
+              <% cols.each do |c| %><th scope="col"><%= t("lpms3.procurement.col.#{c}", cur: @base) %></th><% end %>
+            </tr>
+          </thead>
+          <tbody>
+            <% @shown.each do |it| %>
+              <% v = it.v %>
+              <tr>
+                <% unless @project %><td><%= link_to it.wp.project.name, project_path(it.wp.project) %></td><% end %>
+                <% cols.each do |c| %>
+                  <td>
+                  <% if c == :item %><%= link_to it.wp.subject, work_package_path(it.wp) %>
+                  <% elsif c == :stage %><span class="lpms3-chip<%= ' lpms3-chip--ok' if it.stage_index >= pr::I_GR %>"><%= it.stage %></span>
+                  <% elsif c == :budget %><%= it.budget ? link_to(it.budget.subject, budget_path(it.budget)) : tag.span(t("lpms3.procurement.no_budget_short"), class: "lpms3-hint") %>
+                  <% elsif c == :vendor %><%= v[:vendor] %>
+                  <% elsif c == :pr %><%= v[:pr] %>
+                  <% elsif c == :numbers %>
+                    <% [[:pr, "PR"], [:po, "PO"]].each do |k, label| %><% if v[k].present? %><div><%= label %>: <%= v[k] %></div><% end %><% end %>
+                  <% elsif c == :contract %>
+                    <% if v[:contract].present? %><div><%= v[:contract] %></div><% end %>
+                    <% if v[:contract_end].present? %><div class="lpms3-hint"><%= t("lpms3.procurement.until") %> <%= v[:contract_end] %></div><% end %>
+                  <% elsif c == :value %>
+                    <% if it.value_base %><%= money.call(it.value_base) %><% elsif it.value_note %><span class="lpms3-hint"><%= t("lpms3.procurement.value_#{it.value_note}") %></span><% end %>
+                  <% elsif c == :need %><%= v[:need] %>
+                  <% elsif c == :milestones %>
+                    <% if it.milestones.empty? %><span class="lpms3-hint"><%= t("lpms3.procurement.no_milestones_short") %></span>
+                    <% else %>
+                      <div><%= t("lpms3.procurement.milestones_progress", done: it.milestones_done, total: it.milestones.size) %></div>
+                      <% it.milestones.each do |m| %><div><%= link_to m.subject, work_package_path(m) %> <span class="lpms3-chip<%= ' lpms3-chip--ok' if m.status&.is_closed? %>"><%= m.status&.name %></span></div><% end %>
+                    <% end %>
+                  <% elsif c == :gr %><%= v[:gr] %><%= " (#{v[:gr_date]})" if v[:gr_date].present? %>
+                  <% elsif c == :ba %><%= v[:ba] %><%= " (#{v[:ba_date]})" if v[:ba_date].present? %>
+                  <% elsif c == :findings %>
+                    <% (@sub ? it.findings & pr::SUB_FINDINGS[@sub] : it.findings).each do |c| %>
+                      <span class="lpms3-chip"><%= t("lpms3.procurement.finding.#{c}") %></span>
+                    <% end %>
+                  <% end %>
+                  </td>
+                <% end %>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </section>
+</div>

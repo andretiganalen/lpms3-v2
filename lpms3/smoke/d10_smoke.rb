@@ -59,7 +59,7 @@ begin
 
   START = { "Change Request" => "Draft", "Risiko" => "Teridentifikasi", "Bahaya K3L" => "Teridentifikasi",
             "Item Pengadaan" => "Rencana", "NCR" => "Terbuka", "Deliverable" => "Baru", "Action Item" => "Baru",
-            "Lesson Learned" => "Draft" }.freeze
+            "Lesson Learned" => "Draft", "Milestone" => "Rencana" }.freeze
   def wp_new(proj, user, type, subject, extra = {})
     t = Type.find_by!(name: type)
     start = START[type] && Status.find_by!(name: START[type])
@@ -107,7 +107,6 @@ begin
   # U08–U12, U14, U15: siklus tiap tipe dapat dibuat & dipindah status
   { "U08" => ["Risiko", "Risiko uji", %w[Dianalisis Dipantau Terjadi]],
     "U09" => ["Bahaya K3L", "Bahaya uji", %w[Dinilai Pengendalian\ Diterapkan Ditutup]],
-    "U10" => ["Item Pengadaan", "Item uji", %w[Proses\ Pengadaan PO/Kontrak Pengiriman GR/SES Selesai]],
     "U11" => ["NCR", "NCR uji", %w[Analisis\ Akar\ Masalah Koreksi Verifikasi Ditutup]],
     "U12" => ["Deliverable", "Deliverable uji", %w[Dikerjakan Verifikasi\ Internal Validasi\ Pelanggan Diterima\ Pelanggan]],
     "U14" => ["Action Item", "Action item uji", %w[Dikerjakan Selesai]],
@@ -117,6 +116,32 @@ begin
       bad = flow.reject { |s| move(w, pimpro, s) }
       [bad.empty?, bad.empty? ? nil : "gagal di: #{bad.join(',')}"]
     end
+  end
+  # U10: Item Pengadaan melewati tiga sub-fase dengan gerbang: Budget wajib dari PR, PO/Kontrak butuh rekanan+nomor, Selesai butuh milestone selesai + BA
+  safe("U10", "Item Pengadaan: gerbang Budget lalu PR→Proses Pengadaan→PO/Kontrak→Pengiriman→GR/SES→Selesai (milestone + BA)") do
+    cfid = ->(n) { "custom_field_#{WorkPackageCustomField.find_by!(name: n).id}" }
+    bud = Budget.create!(project: proj, author: pimpro, subject: "Budget uji", description: "uji", fixed_date: Date.current, base_amount: 10_000_000)
+    w = wp_new(proj, pimpro, "Item Pengadaan", "Item uji")
+    upd = ->(attrs) { WorkPackages::UpdateService.new(user: pimpro, model: w.reload).call(**attrs).success? }
+    st = ->(n) { Status.find_by!(name: n).id }
+    blocked = !upd.({ status_id: st.("PR"), cfid.("No. PR") => "PR-D10", cfid.("Nilai pengadaan (IDR)") => "1000000" })
+    steps = []
+    steps << upd.({ status_id: st.("PR"), budget_id: bud.id, cfid.("No. PR") => "PR-D10", cfid.("Nilai pengadaan (IDR)") => "1000000" })
+    steps << upd.({ status_id: st.("Proses Pengadaan") })
+    steps << upd.({ status_id: st.("PO/Kontrak"), cfid.("Rekanan") => "PT Uji", cfid.("No. PO") => "PO-D10" })
+    steps << upd.({ status_id: st.("Pengiriman") })
+    steps << upd.({ status_id: st.("GR/SES"), cfid.("No. GR/SES") => "GR-D10" })
+    blocked_done = !upd.({ status_id: st.("Selesai") })
+    ms = wp_new(proj, pimpro, "Milestone", "Milestone uji", parent_id: w.id)
+    move(ms, pimpro, "Rencana")
+    move(ms, pimpro, "Tercapai")
+    blocked_ba = !upd.({ status_id: st.("Selesai") })
+    final = WorkPackages::UpdateService.new(user: pimpro, model: w.reload).call(status_id: st.("Selesai"), cfid.("No. BA penagihan") => "BA-D10")
+    steps << final.success?
+    final_err = final.success? ? nil : final.errors.full_messages.join("; ")
+    ms_state = "milestone anak=#{w.reload.children.map { |c| "#{c.type.name}:#{c.status.name}:#{c.status.is_closed}" }.inspect}"
+    ok = blocked && blocked_done && blocked_ba && steps.all?
+    [ok, ok ? nil : "tanpa Budget ditolak=#{blocked}, langkah=#{steps.inspect} #{final_err} #{ms_state}, Selesai tanpa milestone/BA ditolak=#{blocked_done}/#{blocked_ba}"]
   end
   safe("U11", "Deliverable tak bisa 'Diterima' bila NCR kritikal terbuka") { [nil, "aturan prosedural + query kontrol; belum ada validasi sistem"] }
   safe("U12", "Lampiran BA wajib sebelum 'Diterima Pelanggan'") { [nil, "dicek di checklist; belum ada validasi sistem"] }

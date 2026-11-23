@@ -25,3 +25,10 @@ RUN ruby /tmp/patch_mod06.rb && rm /tmp/patch_mod06.rb && ruby -c /app/config/in
 # MOD-07: default app_title dan organization_name = identitas portal internal.
 COPY --chown=app:app deploy/patch_mod07.rb /tmp/patch_mod07.rb
 RUN ruby /tmp/patch_mod07.rb && rm /tmp/patch_mod07.rb && ruby -c /app/config/constants/settings/definition.rb
+# MOD-08: logo & favicon OpenProject diganti logo Len 2023 (aset di deploy/brand, ditanam ke image).
+COPY --chown=app:app deploy/brand /tmp/brand
+COPY --chown=app:app deploy/patch_mod08.sh /tmp/patch_mod08.sh
+RUN sh /tmp/patch_mod08.sh && rm -rf /tmp/brand /tmp/patch_mod08.sh
+# MOD-09: hapus Edisi Enterprise dan Link Eksternal (menu, route, dan setting capture link).
+COPY --chown=app:app deploy/patch_mod09.rb /tmp/patch_mod09.rb
+RUN ruby /tmp/patch_mod09.rb && rm /tmp/patch_mod09.rb && ruby -c /app/config/initializers/menus.rb && ruby -c /app/config/routes.rb && ruby -c /app/config/constants/settings/definition.rb

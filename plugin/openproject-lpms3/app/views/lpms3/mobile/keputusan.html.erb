@@ -1,0 +1,47 @@
+<% wp = @wp %>
+<%= render "lpms3/mobile/header", back: lpms3_m_persetujuan_path, eyebrow: "#{Lpms3::Leno.code(wp)} · versi data v#{@review.lock_version + 1}", title: "Review submission", right: content_tag(:span, "Eselon 2", class: "lm-chip", style: "background:var(--uix-text-head);color:var(--uix-surface)") %>
+<main class="lm-main">
+  <section class="lm-card">
+    <div class="lm-row">
+      <h2 class="lm-h2" style="margin:0"><%= Lpms3::Leno.title(wp) %></h2>
+      <% if @review.state == "diajukan" %><span class="lm-chip lm-chip--warn">Disubmit</span>
+      <% elsif @review.state == "disetujui" %><span class="lm-chip lm-chip--ok">Approved</span>
+      <% else %><span class="lm-chip lm-chip--danger">Rejected</span><% end %>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="lm-bar big"><div style="width: <%= [@progress, 100].min %>%"></div></div>
+      <span style="font-size:15px;font-weight:700"><%= @progress.round %>%</span>
+    </div>
+    <div class="lm-kv">
+      <div><span>PIC</span><span><%= wp.assigned_to&.name %></span></div>
+      <div><span>Aktual</span><span><%= wp.start_date ? Lpms3::Leno.fmt(wp.start_date, "%d %b") : "—" %> – <%= @reports.first&.report_date ? Lpms3::Leno.fmt(@reports.first.report_date, "%d %b") : "—" %></span></div>
+      <div><span>Tenggat</span><span><%= wp.due_date ? Lpms3::Leno.fmt(wp.due_date, "%d %b") : "—" %></span></div>
+    </div>
+  </section>
+
+  <div class="lm-row" style="padding:4px 4px 0"><h3 class="lm-h3">Laporan harian</h3><span class="lm-sect"><%= @reports.count(&:sent?) %> laporan · <%= @reports.sum { |r| r.photo_ids.size } %> foto</span></div>
+
+  <% terbaru, lama = @reports.each_with_index.partition { |_, i| i < 3 }.map { |pairs| pairs.map(&:first) } %>
+  <% terbaru.each do |r| %>
+    <%= render "lpms3/mobile/laporan_keputusan", r: r %>
+  <% end %>
+  <% if lama.any? %>
+    <details class="lm-card">
+      <summary class="lm-btn outline" style="cursor:pointer">Tampilkan <%= lama.size %> laporan sebelumnya</summary>
+      <% lama.each do |r| %>
+        <%= render "lpms3/mobile/laporan_keputusan", r: r %>
+      <% end %>
+    </details>
+  <% end %>
+  <% if @review.state == "ditolak" && @review.reject_reason.present? %>
+    <div class="lm-note danger">Alasan reject sebelumnya: <%= @review.reject_reason %></div>
+  <% end %>
+</main>
+<footer class="lm-foot" style="flex-direction:row">
+  <% if @review.state == "diajukan" %>
+    <%= link_to "Reject", lpms3_m_tolak_path(wp), class: "lm-btn outline-danger", style: "flex:1" %>
+    <%= button_to "Approve", lpms3_m_setujui_path(wp), class: "lm-btn ok", style: "flex:1.6;width:auto", form: { data: { turbo: false } }, form_class: "lm-approve", data: { turbo_confirm: "Approve #{Lpms3::Leno.code(wp)}? WO akan selesai dan terkunci." } %>
+  <% else %>
+    <span class="lm-sect" style="text-align:center;width:100%">Keputusan sudah tercatat.</span>
+  <% end %>
+</footer>

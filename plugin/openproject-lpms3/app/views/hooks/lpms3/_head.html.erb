@@ -70,6 +70,21 @@
   <% end %>
 <% end %>
 <%= javascript_tag(nonce: true) do %>
+  // Menu fase BOP-001: panah membuka/menutup anak fase di tempat (submenu inline seperti Explore di :8585), tanpa drilldown OpenProject.
+  (function () {
+    if (window.__lpms3PhaseToggle) { return; }
+    window.__lpms3PhaseToggle = true;
+    document.addEventListener('click', function (ev) {
+      var t = ev.target && ev.target.closest && ev.target.closest('#main-menu li[data-name^="lpms3_fase_"] > .main-item-wrapper > button.main-menu-toggler');
+      if (!t) { return; }
+      ev.preventDefault();
+      ev.stopImmediatePropagation();
+      var li = t.closest('li');
+      var open = !li.classList.contains('open');
+      li.classList.toggle('open', open);
+      t.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }, true);
+  })();
   // Sidebar tetap (tidak dimuat ulang) saat berpindah halaman lewat Turbo Drive, seperti sidebar :8585.
   // Elemen #main-menu ditandai data-turbo-permanent selama konteksnya sama (project atau area yang sama);
   // bila konteks berganti (mis. pindah project atau ke Administrasi), sidebar baru dipakai.
@@ -98,7 +113,7 @@
       var root = nav.querySelector('ul.menu_root');
       nav.querySelectorAll('ul.menu_root > li.open').forEach(function (li) { li.classList.remove('open'); });
       var li = best && best.closest('ul.main-menu--children') ? best.closest('ul.menu_root > li') : null;
-      if (root) { root.classList.toggle('closed', !!li); }
+      if (root) { root.classList.remove('closed'); }
       if (li) {
         li.classList.add('open');
         var head = li.querySelector('.main-item-wrapper a.op-menu--item-action');

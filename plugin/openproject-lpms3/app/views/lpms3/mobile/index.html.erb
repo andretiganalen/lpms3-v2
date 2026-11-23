@@ -1,0 +1,58 @@
+<% n = Lpms3::Leno.notifikasi(User.current).size %>
+<%= render "lpms3/mobile/header", eyebrow: "LenO Mobile · PIC", title: "Aktivitas Saya",
+      right: render("lpms3/mobile/bell", n: n) %>
+<div style="padding:0 20px 14px;background:var(--uix-surface);display:flex;flex-direction:column;gap:14px">
+  <form method="get" class="lm-search" role="search" style="margin:0">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input type="search" name="q" value="<%= params[:q] %>" placeholder="Cari aktivitas atau nomor WO" aria-label="Cari aktivitas">
+    <input type="hidden" name="f" value="<%= @filter %>">
+  </form>
+  <div class="lm-chips">
+    <% [["semua", "Semua"], ["berjalan", "Berjalan"], ["draft", "Ada draft"], ["perbaikan", "Perbaikan"]].each do |key, label| %>
+      <%= link_to label, lpms3_m_path(f: key), class: "lm-pill #{'on' if @filter == key}", "aria-pressed": (@filter == key).to_s %>
+    <% end %>
+  </div>
+</div>
+<main class="lm-main">
+  <% if n.positive? %>
+    <%= link_to lpms3_m_notifikasi_path, class: "lm-note danger", style: "display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;text-decoration:none" do %>
+      <span style="flex:1;font-size:14px;font-weight:500;line-height:1.4"><%= n %> notifikasi baru (laporan tertunggak, tenggat, atau keputusan Eselon 2)</span><span aria-hidden="true">&#8250;</span>
+    <% end %>
+  <% end %>
+
+  <% if @cards.empty? %>
+    <p class="lm-sect">Belum ada WO yang ditugaskan kepada Anda untuk filter ini.</p>
+  <% end %>
+
+  <% @cards.each do |c| %>
+    <%= link_to lpms3_m_wo_path(c.wp), class: "lm-card #{'alert' if c.state == 'ditolak'}" do %>
+      <div class="lm-row">
+        <span class="lm-code"><%= c.code %></span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+          <% if c.state == "ditolak" %>
+            <span class="lm-chip lm-chip--danger">Di-reject Eselon 2</span>
+          <% elsif c.state == "diajukan" %>
+            <span class="lm-chip lm-chip--warn">Menunggu Eselon 2</span>
+          <% elsif c.state == "disetujui" %>
+            <span class="lm-chip lm-chip--ok">Approved · terkunci</span>
+          <% else %>
+            <span class="lm-chip lm-chip--info">Berjalan</span>
+          <% end %>
+          <% if c.draft %><span class="lm-chip lm-chip--warn">Ada draft</span><% end %>
+        </div>
+      </div>
+      <span style="font-size:16px;font-weight:600;line-height:1.35"><%= c.title %></span>
+      <div class="lm-meta">
+        <% if c.due %>
+          <span>Tenggat <%= Lpms3::Leno.fmt(c.due, "%d %b") %></span>
+          <% days = (c.due - Lpms3::Leno.today).to_i %>
+          <% if days == 7 %><span class="lm-chip sm lm-chip--warn">H-7</span><% elsif days.negative? && c.state != "disetujui" %><span class="lm-chip sm lm-chip--solid-danger">H+<%= -days %></span><% end %>
+        <% end %>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="lm-bar"><div style="width: <%= [c.progress, 100].min %>%"></div></div>
+        <span class="lm-pct"><%= c.progress %>%</span>
+      </div>
+    <% end %>
+  <% end %>
+</main>

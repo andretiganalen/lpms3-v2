@@ -1,0 +1,74 @@
+<% wp = @wp %>
+<% sent = @report.persisted? && @report.sent? %>
+<%= render "lpms3/mobile/header", back: lpms3_m_wo_path(wp), eyebrow: "#{Lpms3::Leno.code(wp)} · Laporan harian", title: Lpms3::Leno.fmt(@date, "%A, %d %b %Y") %>
+<%= form_with url: lpms3_m_simpan_path(wp, tanggal: @date), method: :post, multipart: true, local: true, data: { turbo: false }, class: "lm-main", id: "lm-laporan" do %>
+  <% if @prev && !@prev.sent? %>
+    <div class="lm-note">Kirim laporan <%= Lpms3::Leno.fmt(@prev.report_date, "%d %b") %> ini dulu. Setelah terkirim, laporan hari ini terbuka.</div>
+  <% end %>
+  <% if sent %>
+    <div class="lm-note info">Laporan ini sudah terkirim dan tidak dapat diubah.</div>
+  <% end %>
+
+  <section class="lm-card">
+    <div class="lm-row"><h3 class="lm-h3">Progres hari ini</h3><span class="lm-sect">Sebelumnya <%= Lpms3::Leno.pct(@prev&.progress || 0) %>%</span></div>
+    <div class="lm-stepper">
+      <button type="button" aria-label="Kurangi 10%" onclick="lmStep(-10)" <%= 'disabled' if sent %>>−</button>
+      <div style="text-align:center">
+        <div class="lm-sect">Total menjadi</div>
+        <div style="display:flex;align-items:baseline;justify-content:center;gap:4px">
+          <input type="number" name="progress" id="lm-progress" min="0" max="100" step="0.1" value="<%= Lpms3::Leno.pct(@report.progress) %>" <%= 'readonly' if sent %> inputmode="decimal" style="width:110px;border:0;text-align:center;font:inherit;font-size:28px;font-weight:700;background:transparent">
+          <span style="font-size:20px;font-weight:700">%</span>
+        </div>
+      </div>
+      <button type="button" aria-label="Tambah 10%" onclick="lmStep(10)" <%= 'disabled' if sent %>>+</button>
+    </div>
+    <span class="lm-sect">Isi manual, boleh desimal (contoh 72,5).</span>
+  </section>
+
+  <section class="lm-card">
+    <span class="lm-h3">Pelaksanaan</span>
+    <div class="lm-seg-radio" role="radiogroup">
+      <label><input type="radio" name="execution" value="sesuai" <%= 'checked' if @report.execution != "kendala" %> <%= 'disabled' if sent %>><span>Sesuai rencana</span></label>
+      <label><input type="radio" name="execution" value="kendala" <%= 'checked' if @report.execution == "kendala" %> <%= 'disabled' if sent %>><span>Ada kendala</span></label>
+    </div>
+    <div class="lm-field">
+      <label class="lbl" for="keterangan">Keterangan</label>
+      <textarea id="keterangan" name="keterangan" rows="3" placeholder="Pekerjaan yang dilakukan hari ini" <%= 'readonly' if sent %>><%= @report.keterangan %></textarea>
+    </div>
+    <div class="lm-field">
+      <label class="lbl" for="kendala">Kendala <span style="font-weight:500;color:var(--uix-text-secondary)">· wajib bila ada kendala</span></label>
+      <textarea id="kendala" name="kendala" rows="2" placeholder="Progres turun atau ada hambatan? Jelaskan di sini." <%= 'readonly' if sent %>><%= @report.kendala %></textarea>
+    </div>
+    <% if Lpms3::Leno.reports(wp).any? { |r| r.sent? } && !sent %>
+      <%= link_to "Butuh tindak lanjut? Buat Issue Log", lpms3_m_kendala_path(wp), class: "lm-btn soft" %>
+    <% end %>
+  </section>
+
+  <section class="lm-card">
+    <div class="lm-row"><span class="lm-h3">Foto bukti</span><span class="lm-sect"><%= @report.photo_ids.size %> foto</span></div>
+    <% unless sent %>
+      <input type="file" name="foto[]" accept="image/*" multiple capture="environment" aria-label="Foto bukti" style="font-size:14px">
+    <% end %>
+  </section>
+
+  <% if @progress.to_f >= 100 || @report.progress.to_f >= 100 %>
+    <label class="lm-card" style="flex-direction:row;align-items:center;gap:10px;cursor:pointer">
+      <input type="checkbox" name="submit_wo" value="1" <%= 'disabled' if sent %>>
+      <span style="font-size:14px"><strong>Sekaligus submit ke Eselon 2.</strong> Progres 100 %. Setelah submit, Eselon 2 bisa me-review WO ini.</span>
+    </label>
+  <% end %>
+  <input type="hidden" name="tanggal" value="<%= @date %>">
+<% end %>
+<footer class="lm-foot">
+  <% unless sent %>
+    <button type="submit" form="lm-laporan" name="mode" value="draft" class="lm-btn ghost">Simpan draft</button>
+    <button type="submit" form="lm-laporan" name="mode" value="kirim" class="lm-btn primary">Kirim laporan <%= Lpms3::Leno.fmt(@date, "%d %b") %></button>
+  <% end %>
+</footer>
+<script nonce="<%= content_security_policy_nonce %>">
+  function lmStep(d) {
+    var el = document.getElementById('lm-progress');
+    var v = parseFloat(el.value || '0') + d;
+    el.value = Math.max(0, Math.min(100, Math.round(v * 10) / 10));
+  }
+</script>

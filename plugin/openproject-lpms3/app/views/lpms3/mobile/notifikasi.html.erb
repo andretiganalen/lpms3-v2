@@ -1,0 +1,18 @@
+<%= render "lpms3/mobile/header", eyebrow: "LenO Mobile", title: "Notifikasi" %>
+<main class="lm-main">
+  <% if @items.empty? %><p class="lm-sect">Tidak ada notifikasi.</p><% end %>
+  <% chip = { danger: "lm-chip--danger", warn: "lm-chip--warn", info: "lm-chip--info", ok: "lm-chip--ok" } %>
+  <% groups = { "HARI INI · perlu tindakan" => @items.reject { |i| i[:tone] == :ok }, "MINGGU INI · riwayat" => @items.select { |i| i[:tone] == :ok } } %>
+  <% groups.each do |judul, daftar| %>
+    <% next if daftar.empty? %>
+    <span class="lm-sect" style="font-weight:600"><%= judul %> (<%= daftar.size %>)</span>
+    <% daftar.each do |it| %>
+      <section class="lm-card">
+        <div class="lm-row">
+          <span class="lm-chip <%= chip[it[:tone]] %>"><%= it[:title] %></span>
+        </div>
+        <span class="lm-sect" style="font-size:14px;color:var(--uix-text-head)"><%= it[:detail] %></span>
+      </section>
+    <% end %>
+  <% end %>
+</main>

@@ -5,3 +5,6 @@
 !deploy/patch_gemfile_lock.rb
 !deploy/patch_mod06.rb
 !deploy/patch_mod07.rb
+!deploy/patch_mod08.sh
+!deploy/patch_mod09.rb
+!deploy/brand
