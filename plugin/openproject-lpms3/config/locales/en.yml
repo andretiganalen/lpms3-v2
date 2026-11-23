@@ -52,6 +52,8 @@ en:
         leno: "LenO"
         pengguna: "User"
         sistem: "System"
+    wbs:
+      menu: "WBS & Weights"
     jabatan:
       menu: "User Positions"
       title: "User Positions"

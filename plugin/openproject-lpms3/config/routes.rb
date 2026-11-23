@@ -31,6 +31,18 @@ Rails.application.routes.draw do
       constraints: { sub: /pr|buyer|penyelesaian/ }
   get "lpms3/pengadaan(/:sub)", to: "lpms3/procurement#show", as: :lpms3_procurement, constraints: { sub: /pr|buyer|penyelesaian/ }
 
+  # Editor WBS bobot cascading (1.40).
+  scope "projects/:project_id/lpms3/wbs", controller: "lpms3/wbs" do
+    get "", action: :show, as: :lpms3_project_wbs
+    post "", action: :create, as: :lpms3_project_wbs_create
+    patch ":id", action: :update, as: :lpms3_project_wbs_update
+    delete ":id", action: :destroy, as: :lpms3_project_wbs_destroy
+    post ":id/pindah", action: :move, as: :lpms3_project_wbs_move
+    post ":id/bobot", action: :weights, as: :lpms3_project_wbs_weights
+    post ":id/kurva", action: :bell_curve, as: :lpms3_project_wbs_bell
+  end
+  post "lpms3/wbs/:id/tugaskan", to: "lpms3/wbs#tugaskan", as: :lpms3_wbs_tugaskan
+
   get "projects/:project_id/lpms3/galeri", to: "lpms3/gallery#show", as: :lpms3_project_galeri
   get "lpms3/portofolio", to: "lpms3/portfolio#show", as: :lpms3_portofolio
   get "lpms3/tugas", to: "lpms3/tasks#index", as: :lpms3_tugas

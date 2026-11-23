@@ -31,3 +31,7 @@ if st
 else
   puts "[lewati] belum ada struktur organisasi aktif"
 end
+
+# 1.40: PIC WBS = assignee work package; peran kerja harus dapat ditugaskan.
+added = Lpms3::Wbs.ensure_assignable_roles!
+puts "[izin] work_package_assigned ditambahkan ke: #{added.join(', ').presence || '(tidak ada)'}"

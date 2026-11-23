@@ -41,6 +41,26 @@
     </section>
   <% end %>
 
+  <% if @wbs_pic.any? %>
+    <h2 style="margin:24px 0 4px">Penugasan PIC WBS <span style="font-size:14px;color:var(--uix-text-secondary)">(<%= @wbs_pic.size %> menunggu)</span></h2>
+    <% @wbs_pic.each do |n| %>
+      <section style="border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);padding:14px;margin-bottom:12px;background:var(--uix-surface)">
+        <strong><%= n.wbs_code %> <%= n.tasks %></strong>
+        <div style="font-size:13px;color:var(--uix-text-body);margin-top:6px">
+          <div><span style="color:var(--uix-text-secondary)">Proyek:</span> <%= link_to n.project.name, lpms3_project_wbs_path(n.project) %></div>
+          <div><span style="color:var(--uix-text-secondary)">Jadwal:</span> <%= n.date_plan_start ? l(n.date_plan_start) : "—" %> s.d. <%= n.date_plan_finish ? l(n.date_plan_finish) : "—" %></div>
+          <div><span style="color:var(--uix-text-secondary)">Harus:</span> <strong>Tugaskan anggota tim <%= n.pic_unit.name %> sebagai PIC</strong></div>
+        </div>
+        <%= form_with url: lpms3_wbs_tugaskan_path(n), method: :post, local: true, style: "margin-top:10px;display:flex;gap:8px;flex-wrap:wrap" do %>
+          <select name="user_id" required class="lpms3-input" aria-label="PIC untuk <%= n.wbs_code %>">
+            <% ::Lpms3::Wbs.unit_team(n.pic_unit).each do |u| %><option value="<%= u.id %>"><%= u.name %></option><% end %>
+          </select>
+          <button type="submit" class="lpms3-btn lpms3-btn--primary">Tugaskan</button>
+        <% end %>
+      </section>
+    <% end %>
+  <% end %>
+
   <h2 style="margin:24px 0 4px">Proyek baru dari LenO <span style="font-size:14px;color:var(--uix-text-secondary)">(<%= @pemicu.size %> menunggu)</span></h2>
   <% if @pemicu.empty? %>
     <div style="padding:16px;border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);color:var(--uix-text-secondary)">Tidak ada pemicu LenO yang menunggu tindakan Anda.</div>

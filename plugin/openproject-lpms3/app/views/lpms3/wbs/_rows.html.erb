@@ -1,0 +1,101 @@
+<%
+  pct = ->(v, d = 2) { v.nil? ? "" : format("%.#{d}f %%", v.to_f * 100) }
+  dt = ->(v) { v ? l(v, format: "%d %b %Y") : "" }
+  unit_name = @units.index_by(&:id)
+%>
+<% @rows.each do |r| %>
+  <% n = r[:node]; leaf = r[:leaf]; edit = @editable; act = leaf && !n.root? %>
+  <tr data-id="<%= n.id %>" class="<%= 'lpms3-wbs__sum' unless leaf %> <%= 'lpms3-wbs__done' if act && n.done? %>">
+    <td class="lpms3-wbs__code"><%= n.wbs_code %></td>
+    <td class="lpms3-wbs__lvl"><%= n.level %></td>
+    <td class="lpms3-wbs__task" style="--d:<%= r[:depth] %>">
+      <% if edit && !n.root? %>
+        <input class="lpms3-wbs__in" data-field="tasks" value="<%= n.tasks %>" maxlength="200" aria-label="Tasks <%= n.wbs_code %>">
+      <% else %>
+        <%= n.tasks %>
+      <% end %>
+    </td>
+    <td><% if edit %><input class="lpms3-wbs__in" data-field="notes" value="<%= n.notes %>" aria-label="Notes <%= n.wbs_code %>"><% else %><%= n.notes %><% end %></td>
+    <td class="lpms3-wbs__pic">
+      <% unless n.root? %>
+        <% if edit %>
+          <select class="lpms3-wbs__in" data-field="pic" aria-label="PIC <%= n.wbs_code %>">
+            <option value="">— PIC —</option>
+            <optgroup label="Anggota proyek">
+              <% @members.each do |u| %><option value="u:<%= u.id %>" <%= "selected" if n.pic_user_id == u.id %>><%= u.name %></option><% end %>
+            </optgroup>
+            <optgroup label="Fungsi induk (Eselon 1)">
+              <% @units.each do |u| %><option value="f:<%= u.id %>" <%= "selected" if n.pic_user_id.nil? && n.pic_unit_id == u.id %>><%= u.name %></option><% end %>
+            </optgroup>
+          </select>
+          <select class="lpms3-wbs__in" data-field="resource" aria-label="Resource <%= n.wbs_code %>">
+            <option value="">— Resource —</option>
+            <% ::Lpms3::WbsNode::RESOURCES.each do |res| %><option <%= "selected" if n.resource == res %>><%= res %></option><% end %>
+          </select>
+        <% else %>
+          <%= n.pic_user&.name || (n.pic_unit_id && "#{unit_name[n.pic_unit_id]&.name} (menunggu penugasan)") %>
+          <% if n.resource.present? %><br><small><%= n.resource %></small><% end %>
+        <% end %>
+        <% if n.pic_user_id.nil? && n.pic_unit_id %><span class="lpms3-chip lpms3-chip--warn">Menunggu Eselon 1</span><% end %>
+      <% end %>
+    </td>
+    <% %w[date_plan_start date_plan_finish date_actual_start date_actual_finish].each do |f| %>
+      <td class="lpms3-wbs__date">
+        <% if edit && act && !(n.done? && f.start_with?("date_plan")) %>
+          <input type="date" class="lpms3-wbs__in" data-field="<%= f %>" value="<%= n[f]&.iso8601 %>" aria-label="<%= f.humanize %> <%= n.wbs_code %>">
+        <% else %>
+          <%= dt.(n[f]) %>
+        <% end %>
+      </td>
+    <% end %>
+    <td class="lpms3-wbs__num">
+      <%= pct.(n.weigh_factor) %>
+      <% if edit && !leaf %>
+        <button type="button" class="lpms3-wbs__btn" data-act="weights" data-children="<%= r[:children].map { |k| { id: k.id, code: k.wbs_code, tasks: k.tasks, pct: (k.weigh_factor.to_f * 100).round(4) } }.to_json %>" title="Atur bobot sub-tugas <%= n.wbs_code %>">Bobot anak</button>
+      <% end %>
+    </td>
+    <td class="lpms3-wbs__num"><%= pct.(n.weight, 4) %></td>
+    <td class="lpms3-wbs__num">
+      <% if edit && act %>
+        <select class="lpms3-wbs__in" data-field="pct_complete" aria-label="% Complete <%= n.wbs_code %>">
+          <% ::Lpms3::WbsNode::COMPLETE_STEPS.each do |s| %><option value="<%= (s * 100).round %>" <%= "selected" if (n.pct - s).abs < 0.001 %>><%= (s * 100).round %> %</option><% end %>
+        </select>
+      <% elsif leaf %>
+        <%= pct.(n.pct, 0) %>
+      <% else %>
+        <%= n.weight.to_f.positive? ? pct.(n.pct_progress.to_f / n.weight.to_f, 1) : "" %>
+      <% end %>
+    </td>
+    <td class="lpms3-wbs__num"><%= pct.(n.pct_progress, 4) %></td>
+    <td>
+      <% if edit && !n.root? %>
+        <select class="lpms3-wbs__in" data-field="priority" aria-label="Priority <%= n.wbs_code %>">
+          <option value="">—</option>
+          <% ::Lpms3::WbsNode::PRIORITIES.each do |p| %><option <%= "selected" if n.priority == p %>><%= p %></option><% end %>
+        </select>
+      <% else %>
+        <%= n.priority %>
+      <% end %>
+    </td>
+    <td>
+      <% if n.work_package %>
+        <%= link_to "#{n.work_package.attachments.size} berkas", work_package_path(n.work_package, tab: "files"), title: n.evidence_folder, target: "_top" %>
+      <% end %>
+    </td>
+    <% if edit %>
+      <td class="lpms3-wbs__acts">
+        <% if r[:depth] < ::Lpms3::WbsNode::MAX_DEPTH && !(act && n.pct.positive?) %>
+          <button type="button" class="lpms3-wbs__btn" data-act="child" title="Tambah sub-tugas di bawah <%= n.wbs_code %>">+ Sub</button>
+        <% end %>
+        <% unless n.root? %>
+          <button type="button" class="lpms3-wbs__btn" data-act="after" data-parent="<%= n.parent_id %>" title="Tambah tugas setelah <%= n.wbs_code %>">+ Setelah</button>
+          <button type="button" class="lpms3-wbs__btn" data-act="up" aria-label="Naikkan <%= n.wbs_code %>">&uarr;</button>
+          <button type="button" class="lpms3-wbs__btn" data-act="down" aria-label="Turunkan <%= n.wbs_code %>">&darr;</button>
+          <% if leaf && !n.pct.positive? %>
+            <button type="button" class="lpms3-wbs__btn lpms3-wbs__btn--del" data-act="del" aria-label="Hapus <%= n.wbs_code %>">Hapus</button>
+          <% end %>
+        <% end %>
+      </td>
+    <% end %>
+  </tr>
+<% end %>

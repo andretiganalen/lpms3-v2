@@ -1,0 +1,155 @@
+<% html_title "WBS & Bobot", @project.name %>
+<%=
+  render(Primer::OpenProject::PageHeader.new) do |header|
+    header.with_title { "WBS & Bobot" }
+    header.with_breadcrumbs([{ href: project_overview_path(@project.id), text: @project.name }, "WBS & Bobot"])
+    header.with_description do
+      "Work Breakdown Structure mengikuti WBS Template LPMS: setiap tugas berbobot 100 % terhadap induknya (Weight = Weight induk × Weigh Factor). " \
+        "Bobot awal sub-tugas mengikuti kurva normal dan dapat diatur lewat \"Bobot anak\" (jumlah wajib 100 %). " \
+        "Setiap baris tertaut ke work package, sehingga Gantt dan Kalender ikut berubah."
+    end
+  end
+%>
+
+<div class="lpms3-wbs" id="lpms3-wbs" data-base="<%= lpms3_project_wbs_path(@project) %>">
+  <div id="lpms3-wbs-msg" class="lpms3-wbs__msg" role="alert" hidden></div>
+  <div id="lpms3-wbs-warn"><%= render partial: "lpms3/wbs/warnings" %></div>
+
+  <% if @rows.empty? %>
+    <section class="lpms3-card lpms3-empty"><p>WBS belum dibuat. Pimpro atau Project Analis dapat memulainya dari halaman ini.</p></section>
+  <% else %>
+    <div class="lpms3-wbs__wrap">
+      <table class="lpms3-table lpms3-wbs__table">
+        <thead>
+          <tr>
+            <th scope="col">WBS</th><th scope="col">Level</th><th scope="col">Tasks</th><th scope="col">Notes</th>
+            <th scope="col">PIC &amp; Resource</th><th scope="col">Date Plan Start</th><th scope="col">Date Plan Finish</th>
+            <th scope="col">Date Actual Start</th><th scope="col">Date Actual Finish</th><th scope="col">Weigh Factor</th>
+            <th scope="col">Weight</th><th scope="col">% Complete</th><th scope="col">% Progress</th><th scope="col">Priority</th>
+            <th scope="col">Evidence Files</th><% if @editable %><th scope="col"><span class="sr-only">Aksi</span></th><% end %>
+          </tr>
+        </thead>
+        <tbody id="lpms3-wbs-body"><%= render partial: "lpms3/wbs/rows" %></tbody>
+      </table>
+    </div>
+  <% end %>
+
+  <% if @editable %>
+    <dialog id="lpms3-wbs-dlg" class="lpms3-wbs__dlg" aria-labelledby="lpms3-wbs-dlg-title">
+      <form method="dialog" id="lpms3-wbs-dlg-form">
+        <h2 id="lpms3-wbs-dlg-title" class="lpms3-div__title">Bobot sub-tugas</h2>
+        <p class="lpms3-note">Jumlah wajib 100 %. "Kurva normal" mengisi ulang: tugas di tengah berbobot terbesar.</p>
+        <div id="lpms3-wbs-dlg-rows"></div>
+        <p>Jumlah: <strong id="lpms3-wbs-dlg-sum">0 %</strong></p>
+        <div class="lpms3-wbs__dlg-acts">
+          <button type="button" class="lpms3-btn" data-dlg="bell">Kurva normal</button>
+          <button type="button" class="lpms3-btn" data-dlg="cancel">Batal</button>
+          <button type="button" class="lpms3-btn lpms3-btn--primary" data-dlg="save" id="lpms3-wbs-dlg-save">Simpan bobot</button>
+        </div>
+      </form>
+    </dialog>
+
+    <%= javascript_tag(nonce: true) do %>
+      (function () {
+        var root = document.getElementById("lpms3-wbs");
+        if (!root || root.dataset.bound) return;
+        root.dataset.bound = "1";
+        var base = root.dataset.base;
+        var token = (document.querySelector("meta[name=csrf-token]") || {}).content;
+        var msg = document.getElementById("lpms3-wbs-msg");
+        var dlg = document.getElementById("lpms3-wbs-dlg");
+        var dlgParent = null;
+
+        function show(text, ok) {
+          msg.textContent = text || "";
+          msg.hidden = !text;
+          msg.className = "lpms3-wbs__msg" + (ok ? " lpms3-wbs__msg--ok" : "");
+        }
+        function send(method, url, body) {
+          root.setAttribute("aria-busy", "true");
+          return fetch(url, {
+            method: method, credentials: "same-origin",
+            headers: { "Content-Type": "application/json", "Accept": "application/json", "X-CSRF-Token": token },
+            body: body ? JSON.stringify(body) : null
+          }).then(function (res) {
+            return res.json().catch(function () { return { error: "Gagal menyimpan (" + res.status + ")." }; });
+          }).then(function (data) {
+            var tbody = document.getElementById("lpms3-wbs-body");
+            if (data.tbody != null && tbody) tbody.innerHTML = data.tbody;
+            if (data.warnings != null) document.getElementById("lpms3-wbs-warn").innerHTML = data.warnings;
+            show(data.error || "", false);
+            if (data.focus) {
+              var row = root.querySelector('tr[data-id="' + data.focus + '"] [data-field="tasks"]');
+              if (row) { row.focus(); row.select(); }
+            }
+            if (!tbody && !data.error) window.location.reload();
+            return data;
+          }).catch(function () { show("Koneksi terputus; perubahan belum tersimpan.", false); })
+            .finally(function () { root.removeAttribute("aria-busy"); });
+        }
+        function rowId(el) { var tr = el.closest("tr[data-id]"); return tr && tr.dataset.id; }
+
+        root.addEventListener("change", function (e) {
+          var el = e.target.closest("[data-field]");
+          if (!el) return;
+          send("PATCH", base + "/" + rowId(el), { field: el.dataset.field, value: el.value });
+        });
+        root.addEventListener("keydown", function (e) {
+          var el = e.target.closest("input[data-field]");
+          if (!el) return;
+          if (e.key === "Enter") { e.preventDefault(); el.blur(); }
+          if (e.key === "Escape") { el.value = el.defaultValue; el.blur(); }
+        });
+        root.addEventListener("click", function (e) {
+          var b = e.target.closest("[data-act]");
+          if (!b) return;
+          var id = rowId(b), act = b.dataset.act;
+          if (act === "child") send("POST", base, { parent_id: id });
+          if (act === "after") send("POST", base, { parent_id: b.dataset.parent, after_id: id });
+          if (act === "up" || act === "down") send("POST", base + "/" + id + "/pindah", { dir: act });
+          if (act === "del" && window.confirm("Hapus baris ini beserta work package-nya?")) send("DELETE", base + "/" + id);
+          if (act === "weights") openWeights(id, JSON.parse(b.dataset.children));
+        });
+
+        function sum() {
+          var t = 0;
+          dlg.querySelectorAll("input[data-child]").forEach(function (i) { t += parseFloat(i.value.replace(",", ".")) || 0; });
+          var ok = Math.abs(t - 100) < 0.01;
+          document.getElementById("lpms3-wbs-dlg-sum").textContent = t.toFixed(2) + " %" + (ok ? "" : " (harus 100 %)");
+          document.getElementById("lpms3-wbs-dlg-save").disabled = !ok;
+        }
+        function openWeights(id, kids) {
+          dlgParent = id;
+          var box = document.getElementById("lpms3-wbs-dlg-rows");
+          box.innerHTML = "";
+          kids.forEach(function (k) {
+            var lab = document.createElement("label");
+            lab.className = "lpms3-wbs__dlg-row";
+            var span = document.createElement("span");
+            span.textContent = k.code + " " + k.tasks;
+            var inp = document.createElement("input");
+            inp.type = "number"; inp.min = "0"; inp.max = "100"; inp.step = "0.01"; inp.className = "lpms3-input";
+            inp.value = k.pct; inp.dataset.child = k.id;
+            inp.addEventListener("input", sum);
+            lab.appendChild(span); lab.appendChild(inp);
+            box.appendChild(lab);
+          });
+          sum();
+          dlg.showModal();
+        }
+        if (dlg) dlg.addEventListener("click", function (e) {
+          var b = e.target.closest("[data-dlg]");
+          if (!b) return;
+          if (b.dataset.dlg === "cancel") dlg.close();
+          if (b.dataset.dlg === "bell") { dlg.close(); send("POST", base + "/" + dlgParent + "/kurva"); }
+          if (b.dataset.dlg === "save") {
+            var bobot = {};
+            dlg.querySelectorAll("input[data-child]").forEach(function (i) { bobot[i.dataset.child] = i.value; });
+            dlg.close();
+            send("POST", base + "/" + dlgParent + "/bobot", { bobot: bobot });
+          }
+        });
+      })();
+    <% end %>
+  <% end %>
+</div>

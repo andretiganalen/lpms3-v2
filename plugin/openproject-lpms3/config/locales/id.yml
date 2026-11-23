@@ -52,6 +52,8 @@ id:
         leno: "LenO"
         pengguna: "Pengguna"
         sistem: "Sistem"
+    wbs:
+      menu: "WBS & Bobot"
     jabatan:
       menu: "Jabatan Pengguna"
       title: "Jabatan Pengguna"

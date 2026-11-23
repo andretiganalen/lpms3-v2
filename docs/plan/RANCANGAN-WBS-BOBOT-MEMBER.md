@@ -33,9 +33,18 @@ Status: disepakati pemilik 23 Nov 2026. Lingkup hanya v2 (:5100).
   - `kepala(unit)`, `admin(unit)`: pemegang posisi aktif.
   - `unit_eselon2_of(user)`: unit posisi aktif user; naik ke induk sampai grade ES2.
   - `unit_eselon1_of_fungsi(kode)`: unit primer `fungsi_unit_map` → naik sampai ES1.
-- Peran project yang dipakai: `Direksi` (Direktur Operasi), `Fungsi Pengawasan Proyek` (para admin, sama dengan akun uji), `Pejabat Eselon 1`, `Pejabat Eselon 2`, `Pimpro`.
+- Peran project yang dipakai: `Direksi` (Direktur Operasi), `Admin Direksi`, `Pejabat Eselon 1`, `Admin Pejabat Eselon 1` (admin: izin Tim Proyek, tidak memutus persetujuan), `Pejabat Eselon 2`, `Pimpro`.
 - Pemicu: pembuatan proyek dari pemicu LenO dan perubahan atribut proyek **Pimpro** menambah member; tidak pernah menghapus member yang ditambahkan manual.
 
 ## 4. Bobot bell curve (1.40)
 
 Untuk *n* anak, `x_i = -2 + 4·(i + 0,5)/n`, `g_i = exp(-x_i²/2)`, `wf_i = g_i / Σg`, dibulatkan 4 desimal dengan sisa pembulatan ke anak tengah sehingga Σ = 1 tepat. *n* = 1 → 100 %.
+
+## 5. Editor WBS (1.40, terpasang)
+
+- Halaman `/projects/:id/lpms3/wbs` (menu Perencanaan → WBS & Bobot). Satu sel = satu permintaan; server menghitung ulang seluruh pohon (kunci advisory per proyek) dan mengembalikan `<tbody>`.
+- Level: 0–3 selalu ringkasan; mulai Level 4 baris tanpa anak = "Level n Activity". Kedalaman maks. Level 7.
+- Tanggal dan % Complete hanya di aktivitas; induk = min/maks anak, % Progress = Σ anak.
+- % Complete > 0 wajib bukti (lampiran WP). Aktivitas berprogres tidak boleh dipecah/dihapus.
+- PIC Fungsi: Kepala/Admin unit ES1 menugaskan pemegang jabatan di unit itu atau di bawahnya; orang tersebut menjadi member "Tim Proyek".
+- Work package diubah sebagai Sistem (Project Analis tidak punya `manage_subtasks`), journal mencatat nama editor.

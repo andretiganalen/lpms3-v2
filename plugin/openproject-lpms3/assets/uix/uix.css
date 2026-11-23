@@ -616,3 +616,30 @@ body[class*="controller-lpms3/"] #content { background: transparent; }
 #main-menu .main-menu--children > li > a.op-menu--item-action { padding-left: 28px; }
 /* Kotak kosong dan kartu di halaman Tugas/Pemicu berlatar putih di atas latar abu. */
 .lpms3-tugas > div[style*="border"], .lpms3-tugas section, .lpms3-pemicu section, .lpms3-pemicu details { background: var(--uix-surface); }
+
+/* ---------- Editor WBS & Bobot (1.40) ---------- */
+.lpms3-wbs__wrap { overflow-x: auto; border: 1px solid var(--uix-border); border-radius: var(--uix-radius-card); background: var(--uix-surface); }
+.lpms3-wbs__table { min-width: 1500px; font-size: 12px; margin: 0; }
+.lpms3-wbs__table thead th { position: sticky; top: 0; z-index: 1; background: var(--uix-surface); white-space: nowrap; }
+.lpms3-wbs__table td { vertical-align: middle; padding: 4px 6px; }
+.lpms3-wbs__sum td { font-weight: 600; background: var(--uix-surface-muted, var(--uix-surface)); }
+.lpms3-wbs__done td { color: var(--uix-text-secondary); }
+.lpms3-wbs__code, .lpms3-wbs__lvl, .lpms3-wbs__date { white-space: nowrap; }
+.lpms3-wbs__task { padding-left: calc(6px + var(--d, 0) * 14px) !important; min-width: 220px; }
+.lpms3-wbs__num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.lpms3-wbs__pic { min-width: 200px; }
+.lpms3-wbs__in { width: 100%; min-width: 0; font: inherit; border: 1px solid transparent; border-radius: var(--uix-radius-control); background: transparent; padding: 3px 4px; }
+.lpms3-wbs__in:hover { border-color: var(--uix-border); }
+.lpms3-wbs__in:focus { border-color: var(--uix-focus-border); outline: 2px solid var(--uix-focus-ring); background: var(--uix-surface); }
+.lpms3-wbs__pic .lpms3-wbs__in + .lpms3-wbs__in { margin-top: 2px; }
+.lpms3-wbs__acts { white-space: nowrap; }
+.lpms3-wbs__btn { font: inherit; font-size: 11px; border: 1px solid var(--uix-border); border-radius: var(--uix-radius-control); background: var(--uix-surface); color: var(--uix-text-body); padding: 2px 6px; cursor: pointer; }
+.lpms3-wbs__btn:hover { border-color: var(--uix-primary); color: var(--uix-primary); }
+.lpms3-wbs__btn--del:hover { border-color: var(--uix-danger); color: var(--uix-danger); }
+.lpms3-wbs__warn { margin: 0 0 12px; padding: 8px 12px 8px 28px; border: 1px solid var(--uix-warning-text); border-radius: var(--uix-radius-card); background: var(--uix-warning-soft); color: var(--uix-warning-text); }
+.lpms3-wbs__msg { margin: 0 0 12px; padding: 8px 12px; border: 1px solid var(--uix-danger); border-radius: var(--uix-radius-card); color: var(--uix-danger); background: var(--uix-surface); }
+.lpms3-wbs[aria-busy="true"] .lpms3-wbs__wrap { opacity: .6; }
+.lpms3-wbs__dlg { border: 1px solid var(--uix-border); border-radius: var(--uix-radius-card); padding: 16px; max-width: 560px; width: calc(100% - 32px); }
+.lpms3-wbs__dlg-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 6px 0; }
+.lpms3-wbs__dlg-row input { width: 110px; }
+.lpms3-wbs__dlg-acts { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }

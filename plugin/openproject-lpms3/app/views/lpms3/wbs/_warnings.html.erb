@@ -1,0 +1,5 @@
+<% if @warnings.any? %>
+  <ul class="lpms3-wbs__warn" role="status">
+    <% @warnings.each do |w| %><li><%= w %></li><% end %>
+  </ul>
+<% end %>

@@ -109,6 +109,11 @@ module OpenProject::Lpms3
         previous = parent
       end
 
+      # Editor WBS & Bobot (1.40) di fase Perencanaan.
+      menu :project_menu, :lpms3_fase_perencanaan_wbs, { controller: "/lpms3/wbs", action: :show },
+           caption: :"lpms3.wbs.menu", parent: OpenProject::Lpms3::Phases.menu_name(OpenProject::Lpms3::Phases.find("perencanaan")),
+           if: visible, skip_permissions_check: true
+
       # Eksekusi Item Pengadaan: ringkasan + tiga sub-fase (anak menu fase Eksekusi) + menu global lintas project.
       eks = OpenProject::Lpms3::Phases.menu_name(OpenProject::Lpms3::Phases.find("eksekusi"))
       menu :project_menu, :lpms3_fase_eksekusi_pengadaan, { controller: "/lpms3/procurement", action: :show },

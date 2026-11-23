@@ -18,6 +18,7 @@ module Lpms3
       @kickoff_tunjuk = ::Lpms3::Kickoff.pending_for(User.current).select { |k| k.state == "menunggu_analis" }
       @kickoff_undang = ::Lpms3::Kickoff.pending_for(User.current).select { |k| k.state == "menunggu_undangan" }
       @pemicu = ::Lpms3::Inbox.pemicu(User.current)
+      @wbs_pic = ::Lpms3::Inbox.wbs_pic(User.current)
     end
 
     # Pengaju mengirim dokumen (WP) untuk persetujuan. Hanya dokumen yang bisa dilihat pengguna.

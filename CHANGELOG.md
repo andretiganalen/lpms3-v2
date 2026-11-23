@@ -1,4 +1,14 @@
 # CHANGELOG
+## 17.9.7-lpms3.1.40 — editor WBS bobot cascading (23 Nov 2026)
+Tahap kedua `docs/plan/RANCANGAN-WBS-BOBOT-MEMBER.md` (baseline otomatis + snapshot Done + sinkron ringkasan di 1.41).
+- **Menu fase Perencanaan → WBS & Bobot** (`/projects/:id/lpms3/wbs`, `Lpms3::WbsController`, `Lpms3::Wbs`): tabel kolom WBS Template LPMS (WBS, Level, Tasks, Notes, PIC & Resource, Date Plan/Actual Start/Finish, Weigh Factor, Weight, % Complete, % Progress, Priority, Evidence Files). Sel disimpan langsung (Enter/keluar sel; Esc membatalkan); server mengembalikan tabel yang dihitung ulang. Tambah sub-tugas / tugas setelahnya, naik/turun, hapus. Edit: Pimpro, Project Analis, Project admin, admin; lainnya baca-saja.
+- **Bobot cascading**: Weight = Weight induk × Weigh Factor; Level 0 = 100 %. Weigh Factor awal sub-tugas mengikuti **kurva normal** (mis. 5 anak = 9,24/24,14/33,24/24,14/9,24 %) dan diatur ulang saat anak ditambah/dihapus. "Bobot anak" mengubah semua saudara sekaligus; simpan ditolak bila jumlahnya ≠ 100 %. Nomor WBS, level, tanggal induk (min/maks anak), % Progress (Σ weight × % Complete), dan folder bukti dihitung server.
+- **% Complete** hanya 0/25/50/75/100 dan hanya di aktivitas; di atas 0 wajib ada bukti (lampiran di work package). Actual Start/Finish terisi otomatis. Aktivitas berprogres tidak dapat dipecah atau dihapus.
+- **PIC**: wajib anggota proyek, atau **Fungsi induk (unit Eselon 1)**. Kepala/Admin unit Eselon 1 itu mendapat tugas "Penugasan PIC WBS" (Tugas & Notifikasi + Tasklist header) dan menugaskan anggota timnya (pemegang jabatan unit itu dan unit di bawahnya); orang itu otomatis menjadi member Tim Proyek.
+- **Gantt & Kalender**: setiap baris (kecuali Level 0) tertaut ke work package Task (subjek "kode tugas", induk WP mengikuti WBS, tanggal rencana, assignee = PIC, % Complete). Diubah sebagai Sistem dengan catatan journal "Editor WBS LPMS3 oleh …".
+- Seed `80_tim_proyek.rb`: peran kerja LPMS3 yang melihat WP diberi izin `work_package_assigned` (sebelumnya tidak ada peran LPMS3 yang bisa menjadi assignee). Migrasi `20261124000001`: kolom PIC di `lpms3.wbs_node`, cek level `Level 0–7 (Activity)`.
+- Smoke `lpms3/smoke/wbs_editor.rb` 34/34; regresi tim proyek 22/22, registrasi pemicu 33/33.
+
 ## 17.9.7-lpms3.1.39 — jabatan pengguna dan member proyek berjenjang dari Direksi (23 Nov 2026)
 Tahap pertama `docs/plan/RANCANGAN-WBS-BOBOT-MEMBER.md` (editor WBS bobot cascading 1.40, baseline otomatis 1.41 menyusul).
 - **Administrasi → Jabatan Pengguna** (`/admin/lpms3/jabatan`, admin saja): Kepala, Admin, dan Staf setiap Direktorat/Divisi/Bagian struktur aktif (`lpms3.position`, `lpms3.user_position`). Penugasan DEFINITIF/PLT/PLH/DELEGASI bermasa berlaku; Kepala definitif baru mengakhiri yang lama; "Akhiri" mengisi tanggal akhir (riwayat tidak dihapus). **Impor CSV** `email,kode_unit,jabatan,jenis,mulai,sampai` (maks. 512 KB; baris bermasalah dilewati dan dilaporkan).

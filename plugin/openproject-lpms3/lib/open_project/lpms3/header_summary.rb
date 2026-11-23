@@ -67,6 +67,10 @@ module OpenProject::Lpms3
                      text: tr.status == "diusulkan" ? "Menunggu persetujuan registrasi" : "Menunggu registrasi proyek",
                      href: routes.lpms3_pemicu_path(tr))
       end
+      inbox.wbs_pic(user).each do |n|
+        list << item(title: "#{n.wbs_code} #{n.tasks}", from: n.project.name, at: n.updated_at,
+                     text: "Tugaskan tim #{n.pic_unit&.name} sebagai PIC WBS", href: routes.lpms3_tugas_path)
+      end
       list.sort_by { |i| i[:at].to_s }.reverse
     end
 
