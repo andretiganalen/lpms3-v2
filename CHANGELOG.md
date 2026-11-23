@@ -1,4 +1,13 @@
 # CHANGELOG
+## 17.9.7-lpms3.1.39 — jabatan pengguna dan member proyek berjenjang dari Direksi (23 Nov 2026)
+Tahap pertama `docs/plan/RANCANGAN-WBS-BOBOT-MEMBER.md` (editor WBS bobot cascading 1.40, baseline otomatis 1.41 menyusul).
+- **Administrasi → Jabatan Pengguna** (`/admin/lpms3/jabatan`, admin saja): Kepala, Admin, dan Staf setiap Direktorat/Divisi/Bagian struktur aktif (`lpms3.position`, `lpms3.user_position`). Penugasan DEFINITIF/PLT/PLH/DELEGASI bermasa berlaku; Kepala definitif baru mengakhiri yang lama; "Akhiri" mengisi tanggal akhir (riwayat tidak dihapus). **Impor CSV** `email,kode_unit,jabatan,jenis,mulai,sampai` (maks. 512 KB; baris bermasalah dilewati dan dilaporkan).
+- **Tim default setiap proyek** (`Lpms3::TimProyek`, resolver `Lpms3::Hierarki`): Direktur Operasi (peran Direksi) + Admin Direksi, Pejabat Eselon 1 Fungsi Pelaksanaan Proyek (F-MPR → Divisi Project Deployment Center) + Admin Pejabat Eselon 1.
+- **Pimpro ditetapkan → Pejabat Eselon 2 atasannya otomatis member** (Kepala unit ES2 tempat Pimpro berjabatan; Plt/Plh dihitung). Dipicu peran Pimpro (MemberRole), atribut proyek Pimpro (CustomValue), dan pembuatan proyek dari pemicu LenO. Hanya menambah, tidak pernah menghapus; jejak di `lpms3_auto_members`. Galat di callback dicatat, tidak menggagalkan aksi pengguna. Tombol "Terapkan" untuk satu/semua proyek aktif beserta peringatan jabatan yang belum diisi.
+- Peran proyek baru "Admin Direksi" dan "Admin Pejabat Eselon 1" (izin Tim Proyek; tidak memutus persetujuan). Seed `80_tim_proyek.rb` membuat peran + 193 posisi unit. Migrasi `20261123000003`.
+- Smoke `lpms3/smoke/tim_proyek.rb` 22/22 (transaksi di-rollback); regresi registrasi pemicu 33/33.
+- **Belum berlaku penuh sampai jabatan diisi**: `user_position` masih kosong di :5100.
+
 ## 17.9.7-lpms3.1.38 — tampilan LenO: header Reminder/Tasklist/Notifikasi, profil, sidebar (23 Nov 2026)
 Mengikuti template `docs/image/template-uix-leno/` (10 tangkapan layar LenO).
 - **Header**: bilah merah bergradasi, blok logo putih selebar sidebar, ikon putih. Tiga panel tarik-turun dengan badge jumlah: **Reminder** (pengingat work package buatan pengguna + WP miliknya jatuh tempo ≤3 hari/terlambat), **Tasklist** (Tugas & Notifikasi LPMS3: persetujuan, Kick-Off, masukan, tembusan, pemicu LenO; "Lihat dalam grid"), **Notifikasi** (notifikasi in-app OpenProject belum dibaca; "Tandai sudah dibaca", "Lihat semua"; lonceng bawaan disembunyikan). Data dirender saat halaman dimuat dan disegarkan tiap 60 dtk / saat panel dibuka (`GET /lpms3/header/ringkasan`, `POST /lpms3/header/notifikasi/baca`; login wajib; hanya data milik pengguna). Esc menutup panel.

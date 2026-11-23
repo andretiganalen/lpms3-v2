@@ -258,6 +258,8 @@ module Lpms3
       assign_member!(proj, pimpro, PIMPRO_ROLE)
       assign_member!(proj, vp, VP_ROLE)
       fill_attributes!(proj)
+      # Tim default berjenjang + atasan Eselon 2 Pimpro (1.39). Di dalam transaksi pembuatan: gagal = batal semua.
+      ::Lpms3::TimProyek.sync!(proj)
       proj
     end
 

@@ -76,6 +76,11 @@ Rails.application.routes.draw do
   scope "admin" do
     get "lpms3/pemicu-leno", to: "lpms3/admin/pemicu_leno#index", as: :lpms3_admin_pemicu_leno
     get "lpms3/organisasi", to: "lpms3/admin/organisasi#index", as: :lpms3_admin_organisasi
+    get "lpms3/jabatan", to: "lpms3/admin/jabatan#index", as: :lpms3_admin_jabatan
+    post "lpms3/jabatan", to: "lpms3/admin/jabatan#create", as: :lpms3_admin_jabatan_create
+    post "lpms3/jabatan/impor", to: "lpms3/admin/jabatan#impor", as: :lpms3_admin_jabatan_impor
+    post "lpms3/jabatan/sinkron", to: "lpms3/admin/jabatan#sinkron", as: :lpms3_admin_jabatan_sinkron
+    post "lpms3/jabatan/:id/akhiri", to: "lpms3/admin/jabatan#akhiri", as: :lpms3_admin_jabatan_akhiri
     get "lpms3/internal_features", to: "lpms3/admin/internal_features_settings#show", as: :lpms3_admin_internal_features
     patch "lpms3/internal_features", to: "lpms3/admin/internal_features_settings#update"
     get "lpms3/branding", to: "lpms3/admin/branding#show", as: :lpms3_admin_branding

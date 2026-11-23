@@ -1,0 +1,135 @@
+<% html_title t(:label_administration), t("lpms3.jabatan.title") %>
+
+<%=
+  render(Primer::OpenProject::PageHeader.new) do |header|
+    header.with_title { t("lpms3.jabatan.title") }
+    header.with_breadcrumbs([{ href: admin_index_path, text: t("label_administration") }, t("lpms3.jabatan.title")])
+    header.with_description { t("lpms3.jabatan.description") }
+  end
+%>
+
+<% if @structure.nil? %>
+  <section class="lpms3-card lpms3-empty"><p><%= t("lpms3.organisasi.empty") %></p></section>
+<% else %>
+  <ul class="lpms3-stats" aria-label="<%= t("lpms3.jabatan.summary") %>">
+    <li class="lpms3-card lpms3-stat">
+      <span class="lpms3-stat__value"><%= @filled %>/<%= @heads %></span>
+      <span class="lpms3-stat__label"><%= t("lpms3.jabatan.heads_filled") %></span>
+    </li>
+  </ul>
+
+  <section class="lpms3-card">
+    <h2 class="lpms3-div__title"><%= t("lpms3.jabatan.default_team") %></h2>
+    <p class="lpms3-note"><%= t("lpms3.jabatan.default_team_hint") %></p>
+    <div class="lpms3-table-wrap">
+      <table class="lpms3-table">
+        <thead><tr>
+          <th scope="col"><%= t("lpms3.jabatan.col.peran") %></th>
+          <th scope="col"><%= t("lpms3.jabatan.col.unit") %></th>
+          <th scope="col"><%= t("lpms3.jabatan.col.pemegang") %></th>
+        </tr></thead>
+        <tbody>
+          <% @default_team.each do |row| %>
+            <tr>
+              <th scope="row"><%= row[:label] %></th>
+              <td><%= row[:unit]&.name || t("lpms3.jabatan.unit_missing") %></td>
+              <td>
+                <% if row[:users].any? %>
+                  <%= row[:users].map(&:name).join(", ") %>
+                <% else %>
+                  <span class="lpms3-chip lpms3-chip--warn"><%= t("lpms3.jabatan.not_filled") %></span>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <%= form_tag lpms3_admin_jabatan_sinkron_path, method: :post, class: "lpms3-search" do %>
+      <label for="lpms3-proj"><%= t("lpms3.jabatan.apply_to") %></label>
+      <select id="lpms3-proj" name="project_id" class="lpms3-input" required>
+        <option value="semua"><%= t("lpms3.jabatan.all_projects") %></option>
+        <% @projects.each do |p| %><option value="<%= p.id %>"><%= p.name %></option><% end %>
+      </select>
+      <button type="submit" class="lpms3-btn lpms3-btn--primary"><%= t("lpms3.jabatan.apply") %></button>
+    <% end %>
+  </section>
+
+  <section class="lpms3-card">
+    <h2 class="lpms3-div__title"><%= t("lpms3.jabatan.assign") %></h2>
+    <%= form_tag lpms3_admin_jabatan_create_path, method: :post, class: "lpms3-search" do %>
+      <label for="lpms3-unit"><%= t("lpms3.jabatan.col.unit") %></label>
+      <select id="lpms3-unit" name="unit_id" class="lpms3-input" required>
+        <% @all_units.each do |u| %><option value="<%= u.id %>"><%= u.code %> · <%= u.name %></option><% end %>
+      </select>
+      <label for="lpms3-kind"><%= t("lpms3.jabatan.col.jabatan") %></label>
+      <select id="lpms3-kind" name="jabatan" class="lpms3-input">
+        <% ::Lpms3::Position::KIND.each do |k| %><option value="<%= k %>"><%= t("lpms3.jabatan.kind.#{k.downcase}") %></option><% end %>
+      </select>
+      <label for="lpms3-user"><%= t("lpms3.jabatan.col.pengguna") %></label>
+      <select id="lpms3-user" name="user_id" class="lpms3-input" required>
+        <% @users.each do |u| %><option value="<%= u.id %>"><%= u.name %> (<%= u.login %>)</option><% end %>
+      </select>
+      <label for="lpms3-type"><%= t("lpms3.jabatan.col.jenis") %></label>
+      <select id="lpms3-type" name="jenis" class="lpms3-input">
+        <% ::Lpms3::UserPosition::TYPES.each do |k| %><option value="<%= k %>"><%= k %></option><% end %>
+      </select>
+      <label for="lpms3-from"><%= t("lpms3.jabatan.col.mulai") %></label>
+      <input id="lpms3-from" type="date" name="mulai" class="lpms3-input" value="<%= Date.current.iso8601 %>">
+      <label for="lpms3-to"><%= t("lpms3.jabatan.col.sampai") %></label>
+      <input id="lpms3-to" type="date" name="sampai" class="lpms3-input">
+      <button type="submit" class="lpms3-btn lpms3-btn--primary"><%= t("lpms3.jabatan.save") %></button>
+    <% end %>
+  </section>
+
+  <section class="lpms3-card">
+    <h2 class="lpms3-div__title"><%= t("lpms3.jabatan.import") %></h2>
+    <p class="lpms3-note"><%= t("lpms3.jabatan.import_hint") %> <code>email,kode_unit,jabatan,jenis,mulai,sampai</code></p>
+    <%= form_tag lpms3_admin_jabatan_impor_path, method: :post, multipart: true, class: "lpms3-search" do %>
+      <label for="lpms3-csv"><%= t("lpms3.jabatan.file") %></label>
+      <input id="lpms3-csv" type="file" name="berkas" accept=".csv,text/csv" class="lpms3-input" required>
+      <button type="submit" class="lpms3-btn lpms3-btn--primary"><%= t("lpms3.jabatan.import_button") %></button>
+    <% end %>
+  </section>
+
+  <%= form_tag lpms3_admin_jabatan_path, method: :get, class: "lpms3-search", role: "search" do %>
+    <label for="lpms3-q"><%= t("lpms3.jabatan.search_label") %></label>
+    <input id="lpms3-q" type="search" name="q" value="<%= @query %>" class="lpms3-input">
+    <button type="submit" class="lpms3-btn lpms3-btn--primary"><%= t("lpms3.organisasi.search") %></button>
+    <% if @query.present? %><%= link_to t("lpms3.organisasi.reset"), lpms3_admin_jabatan_path, class: "lpms3-btn" %><% end %>
+  <% end %>
+
+  <div class="lpms3-table-wrap">
+    <table class="lpms3-table">
+      <thead><tr>
+        <th scope="col"><%= t("lpms3.jabatan.col.unit") %></th>
+        <% ::Lpms3::Position::KIND.each do |k| %><th scope="col"><%= t("lpms3.jabatan.kind.#{k.downcase}") %></th><% end %>
+      </tr></thead>
+      <tbody>
+        <% @units.each do |unit| %>
+          <tr>
+            <th scope="row"><%= unit.name %><br><small><%= unit.code %> · <%= ::Lpms3::OrgUnit::GRADE_LABEL[unit.grade] %></small></th>
+            <% ::Lpms3::Position::KIND.each do |k| %>
+              <td>
+                <% ups = unit.positions.select { |p| p.kind == k }.flat_map(&:user_positions).select(&:active?) %>
+                <% if ups.empty? %>
+                  <span class="lpms3-note"><%= t("lpms3.jabatan.empty_cell") %></span>
+                <% end %>
+                <% ups.each do |up| %>
+                  <div>
+                    <%= up.user&.name %>
+                    <% if up.assignment_type != "DEFINITIF" %><span class="lpms3-chip"><%= up.assignment_type %></span><% end %>
+                    <small><%= l(up.valid_from) %><%= " – #{l(up.valid_to)}" if up.valid_to %></small>
+                    <%= button_to t("lpms3.jabatan.end"), lpms3_admin_jabatan_akhiri_path(up.id, q: @query.presence), method: :post,
+                                  class: "lpms3-btn", form: { style: "display:inline" },
+                                  data: { turbo_confirm: t("lpms3.jabatan.end_confirm", name: up.user&.name) } %>
+                  </div>
+                <% end %>
+              </td>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>

@@ -60,6 +60,13 @@ module OpenProject::Lpms3
            icon: "organization"
 
       menu :admin_menu,
+           :lpms3_jabatan,
+           { controller: "/lpms3/admin/jabatan", action: :index },
+           if: Proc.new { User.current.admin? },
+           caption: :"lpms3.jabatan.menu",
+           icon: "people"
+
+      menu :admin_menu,
            :lpms3_pemicu_leno,
            { controller: "/lpms3/admin/pemicu_leno", action: :index },
            if: Proc.new { User.current.admin? },
@@ -119,6 +126,23 @@ module OpenProject::Lpms3
     end
 
     config.to_prepare do
+      # Member berjenjang (1.39): saat Pimpro ditetapkan (peran Pimpro atau atribut proyek "Pimpro"), Pejabat Eselon 2
+      # atasannya dan tim default Direksi/Eselon 1 ditambahkan. Lpms3::TimProyek menahan rekursi dan menelan galat.
+      unless ::MemberRole.instance_variable_get(:@lpms3_tim_proyek)
+        ::MemberRole.instance_variable_set(:@lpms3_tim_proyek, true)
+        ::MemberRole.after_commit(on: :create) do
+          next unless role_id == ::Lpms3::TimProyek.pimpro_role_id
+
+          pid = member&.project_id
+          ::Lpms3::TimProyek.sync_later(pid) if pid
+        end
+        ::CustomValue.after_commit(on: %i[create update]) do
+          next unless customized_type == "Project" && value.present?
+          next unless custom_field_id == ::Lpms3::TimProyek.pimpro_field_id
+
+          ::Lpms3::TimProyek.sync_later(customized_id)
+        end
+      end
       OpenProject::Lpms3::Hooks
       # Gerbang Eksekusi Item Pengadaan: berlandaskan Budget, tiga sub-fase (PR, Buyer sampai kontrak, milestone sampai BA).
       unless WorkPackage.instance_variable_get(:@lpms3_procurement_gate)

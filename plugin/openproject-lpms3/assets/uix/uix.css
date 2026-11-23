@@ -132,6 +132,7 @@ html, body, button, input, select, textarea { font-family: var(--uix-font); }
 .lpms3-chip { display: inline-block; padding: 2px 8px; font-size: 12px; font-weight: 500; line-height: 20px; color: var(--uix-text-body);
   background: var(--uix-surface-muted); border: 1px solid var(--uix-border); border-radius: var(--uix-radius-chip); }
 .lpms3-chip--ok { color: var(--uix-success); background: var(--uix-surface); border-color: var(--uix-success); }
+.lpms3-chip--warn { color: var(--uix-warning-text); background: var(--uix-warning-soft); border-color: var(--uix-warning-text); }
 .lpms3-note { margin: 0 0 8px; font-size: 12px; color: var(--uix-text-secondary); }
 
 .lpms3-dir { margin: 0 0 16px; padding: 16px 20px 8px; }
