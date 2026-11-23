@@ -64,6 +64,9 @@ module Lpms3
       @aspek_pending = ::Lpms3::ApprovalTask.pending.where(work_package_id: @aspects.map(&:id)).pluck(:work_package_id)
       @aspek_ready_ids = @can_edit ? @aspects.reject { |wp| @aspek_pending.include?(wp.id) || ::OpenProject::Lpms3::Aspects.locked?(wp) }.map(&:id) : []
       @is_approver = ap.approver?(User.current, @project)
+      # Tombol Revisi hanya untuk yang berwenang memutus tugas yang sedang menunggu (tahap rantai, pemisahan tugas).
+      @aspek_revisable = ::Lpms3::ApprovalTask.pending.where(work_package_id: @aspek_pending)
+                                          .select { |t| t.actions_for(User.current).include?("revisi") }.map(&:work_package_id)
     end
 
     private

@@ -176,7 +176,7 @@
                       <%= submit_tag "Kirim masukan", class: "lpms3-btn" %>
                     <% end %>
                   <% end %>
-                  <% if @is_approver && wp.status.name == "Reviu" %>
+                  <% if @aspek_revisable.include?(wp.id) %>
                     <%= form_with url: lpms3_project_aspect_step_path(@project, wp), method: :post, local: true, data: { turbo: false } do %>
                       <%= hidden_field_tag :step, "revision" %>
                       <%= text_area_tag :note, nil, rows: 2, required: true, "aria-label": t("lpms3.pmp9.note"), placeholder: t("lpms3.pmp9.note") %>

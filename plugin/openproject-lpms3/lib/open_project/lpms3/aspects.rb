@@ -56,7 +56,10 @@ module OpenProject::Lpms3
       cfg = STEPS[step] or return false
       return false unless cfg[:from].include?(wp.status.name)
 
-      cfg[:by] == :approver ? approver?(user, project) : editor?(user, project) && !locked?(wp)
+      # Revisi: kewenangan ditentukan oleh tugas rantai yang menunggu (ApprovalTask#actions_for), dicek di controller.
+      return true if step == "revision"
+
+      editor?(user, project) && !locked?(wp)
     end
   end
 end

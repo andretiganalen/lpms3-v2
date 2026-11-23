@@ -1,4 +1,9 @@
 # CHANGELOG
+## 17.9.7-lpms3.1.34 — status keputusan hanya lewat rantai persetujuan (23 Nov 2026)
+Menutup temuan audit P0 #2 (status keputusan bisa dicapai langsung dari form OpenProject).
+- **Workflow tipe keputusan disinkron penuh** (`DECISION_FLOWS` di `seed/00_data.rb`, dipakai `50_workflows.rb`): untuk Dokumen Rencana, Top Up Anggaran, dan Deliverable hanya transisi di daftar itu yang boleh ada; sisanya dihapus. Dokumen Rencana: form hanya New/Revisi → Draft, dan Pimpro dapat menandai Diganti; Reviu, Revisi, Disahkan hanya lewat `Lpms3::ApprovalTask` (42 transisi lama dihapus). Seed idempoten.
+- **Aspek PMP**: "Ajukan" membuat tugas di rantai persetujuan (`ApprovalTask.ajukan!`), bukan mengubah status langsung. "Minta revisi" hanya untuk yang berwenang memutus tugas yang sedang menunggu (`actions_for` → `revisi`), sehingga tugas tidak tertinggal "menunggu" setelah dokumen dikembalikan.
+
 ## 17.9.7-lpms3.1.33 — satu pintu login IDS, rilis 1.31–1.33 masuk git (dicatat 23 Nov 2026)
 Rilis 1.31–1.33 sudah terpasang di `:5100` sejak 16–17 Nov 2026 (image dibangun dari *working tree*). Entri ini mencatatnya ke git agar rilis yang berjalan bisa dibangun ulang (temuan audit P0 #3).
 - **Satu pintu login IDS (20 Nov 2026):** akun lokal tertanam dan `/ids/local` dihapus dari `Lpms3.IdsLogin`; proxy mengalihkan `/ids/local` ke `/ids/login`. Tidak ada pilihan Pengguna/Admin. Admin dan peran ditentukan di aplikasi, tidak dari klaim IDS (`AdminRoles`/`AdminEmails` dibuang). Akun yang dikunci di LPMS3 tetap ditolak. `back_url` OpenProject dibawa lewat login (hanya jalur lokal, cegah open redirect). Halaman galat UIx dengan "Coba lagi"/"Keluar".

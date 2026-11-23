@@ -11,7 +11,15 @@ Lpms3Data::TYPES.each do |tname, (statuses, _c, _m)|
   # WP baru OpenProject selalu berstatus default "New"; beri transisi New -> status awal tipe
   # agar pembuat dapat memilih status awal yang benar di form (CR: hanya Pimpro).
   (tname == "Change Request" ? ["Pimpro"] : Lpms3Data::GENERAL_ROLES).each { |rn| mk.(type, role[rn], "New", statuses.first) }
-  if tname == "Change Request"
+  if (flows = Lpms3Data::DECISION_FLOWS[tname])
+    # Sinkron penuh: hanya transisi di DECISION_FLOWS yang boleh ada; sisanya (dari seed lama) dihapus.
+    keep = flows.flat_map { |rn, pairs| pairs.map { |f, t| [role[rn].id, st[f].id, st[t].id] } }
+    keep.each { |rid, o, n| Workflow.find_or_create_by!(type_variant_id: type.default_variant.id, role_id: rid, old_status_id: o, new_status_id: n) }
+    count += keep.size
+    removed = Workflow.where(type_variant_id: type.default_variant.id).reject { |w| keep.include?([w.role_id, w.old_status_id, w.new_status_id]) }
+    removed.each(&:destroy!)
+    puts "#{tname}: #{keep.size} transisi, #{removed.size} dihapus"
+  elsif tname == "Change Request"
     Lpms3Data::CR_FLOW.each { |rn, pairs| pairs.each { |f, t| mk.(type, role[rn], f, t) } }
   else
     # semua transisi antar-status untuk peran umum (sederhana; dapat diperketat PMO)

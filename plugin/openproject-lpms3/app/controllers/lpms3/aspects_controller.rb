@@ -45,10 +45,22 @@ module Lpms3
         return redirect_to_aspects
       end
 
-      @aspect.journal_notes = note if note.present?
-      status = ::Status.find_by!(name: AP::STEPS[name][:to])
-      call = ::WorkPackages::UpdateService.new(user: User.current, model: @aspect).call(status:)
-      respond(call, name.to_sym)
+      # Reviu dan Revisi hanya lewat rantai persetujuan (Lpms3::ApprovalTask): "submit" membuat tugas di Tugas,
+      # "revision" memutus tugas yang sedang menunggu. Dengan begitu status Reviu selalu punya tugas dan pemutus,
+      # dan tugas tidak pernah tertinggal "menunggu" sesudah dokumen dikembalikan.
+      if name == "submit"
+        ::Lpms3::ApprovalTask.ajukan!(@aspect, User.current, note: note)
+      else
+        task = ::Lpms3::ApprovalTask.pending.find_by(work_package_id: @aspect.id)
+        return deny_access unless task&.actions_for(User.current)&.include?("revisi")
+
+        task.act!(User.current, "revisi", note)
+      end
+      flash[:notice] = t("lpms3.pmp9.flash.#{name}")
+      redirect_to_aspects
+    rescue ::Lpms3::ApprovalTask::Error => e
+      flash[:error] = e.message
+      redirect_to_aspects
     end
 
     private

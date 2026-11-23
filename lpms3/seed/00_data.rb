@@ -67,4 +67,32 @@ module Lpms3Data
   }.freeze
   # Peran umum untuk transisi bebas maju pada tipe non-CR
   GENERAL_ROLES = ["Pimpro", "Tim Proyek", "Fungsi Pengawasan Proyek"].freeze
+
+  # Tipe dengan status keputusan: workflow form OpenProject TIDAK boleh mencapai status keputusan secara langsung
+  # (temuan audit P0 #2, ditutup 20-23 Nov 2026). Daftar ini = satu-satunya transisi form yang diizinkan; seed
+  # 50_workflows menghapus transisi lain untuk tipe ini. Peran => [[dari, ke], ...]
+  DECISION_FLOWS = {
+    # Reviu, Revisi, dan Disahkan hanya lewat rantai persetujuan di Tugas (Lpms3::ApprovalTask), yang menulis status
+    # tanpa workflow. Dokumen Disahkan terkunci; hanya Pimpro yang dapat menandainya Diganti (versi baru).
+    "Dokumen Rencana" => {
+      "Tim Proyek"               => [%w[New Draft], %w[Revisi Draft]],
+      "Fungsi Pengawasan Proyek" => [%w[New Draft], %w[Revisi Draft]],
+      "Pimpro"                   => [%w[New Draft], %w[Revisi Draft], %w[Draft Diganti], %w[Revisi Diganti], %w[Disahkan Diganti]],
+    },
+    "Top Up Anggaran" => {
+      "Tim Proyek"               => [%w[New Diajukan], %w[Ditolak Diajukan]],
+      "Fungsi Pengawasan Proyek" => [%w[New Diajukan]],
+      "Pimpro"                   => [%w[New Diajukan], %w[Ditolak Diajukan],
+                                     %w[Diverifikasi\ Pengendali\ Anggaran Disetujui], %w[Diverifikasi\ Pengendali\ Anggaran Ditolak]],
+      "Fungsi Pengendali Anggaran/Keuangan/Akuntansi" => [%w[Diajukan Diverifikasi\ Pengendali\ Anggaran], %w[Diajukan Ditolak],
+                                                          %w[Disetujui Diinput\ ERP]],
+    },
+    "Deliverable" => {
+      "Tim Proyek"               => [%w[New Baru], %w[Baru Dikerjakan], %w[Dikerjakan Baru], %w[Dikerjakan Verifikasi\ Internal], %w[Ditolak Dikerjakan]],
+      "Fungsi Pengawasan Proyek" => [%w[New Baru]],
+      "Pimpro"                   => [%w[New Baru], %w[Baru Dikerjakan], %w[Dikerjakan Baru], %w[Dikerjakan Verifikasi\ Internal], %w[Ditolak Dikerjakan],
+                                     %w[Validasi\ Pelanggan Diterima\ Pelanggan], %w[Validasi\ Pelanggan Ditolak]],
+      "Fungsi Penjaminan Mutu"   => [%w[Verifikasi\ Internal Validasi\ Pelanggan], %w[Verifikasi\ Internal Dikerjakan], %w[Verifikasi\ Internal Ditolak]],
+    },
+  }.freeze
 end

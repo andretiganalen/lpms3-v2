@@ -20,7 +20,7 @@ proj = nil
 begin
   # --- prasyarat: user uji (pw acak) ---
   pw = SecureRandom.hex(12) + "Aa1!"
-  { pimpro: "Pimpro", pengawas: "Fungsi Pengawasan Proyek", approver: "Approver CCM", pembaca: "Pembaca (Informed)" }.each do |k, role|
+  { pimpro: "Pimpro", pengawas: "Fungsi Pengawasan Proyek", approver: "Approver CCM", pembaca: "Pembaca (Informed)", mutu: "Fungsi Penjaminan Mutu" }.each do |k, role|
     u = User.new(login: "#{TAG}.#{k}", firstname: "Smoke", lastname: k.to_s, mail: "#{TAG}.#{k}@example.com", admin: false,
                  status: User.statuses[:active], language: "id", password: pw, password_confirmation: pw, force_password_change: false)
     u.save!
@@ -73,7 +73,7 @@ begin
     r = WorkPackages::UpdateService.new(user: user, model: wp.reload).call(status_id: st.id)
     r.success?
   end
-  pimpro, pengawas, approver, pembaca = %i[pimpro pengawas approver pembaca].map { |k| users[k][0] }
+  pimpro, pengawas, approver, pembaca, mutu = %i[pimpro pengawas approver pembaca mutu].map { |k| users[k][0] }
 
   # Status awal: WP dibuat dengan status default "New" (seperti form UI), lalu dipindah ke status awal tipe
   safe("U06", "WP baru (status default New) dapat dipindah ke status awal: CR→Draft, Risiko→Teridentifikasi, NCR→Terbuka") do
@@ -108,7 +108,6 @@ begin
   { "U08" => ["Risiko", "Risiko uji", %w[Dianalisis Dipantau Terjadi]],
     "U09" => ["Bahaya K3L", "Bahaya uji", %w[Dinilai Pengendalian\ Diterapkan Ditutup]],
     "U11" => ["NCR", "NCR uji", %w[Analisis\ Akar\ Masalah Koreksi Verifikasi Ditutup]],
-    "U12" => ["Deliverable", "Deliverable uji", %w[Dikerjakan Verifikasi\ Internal Validasi\ Pelanggan Diterima\ Pelanggan]],
     "U14" => ["Action Item", "Action item uji", %w[Dikerjakan Selesai]],
     "U15" => ["Lesson Learned", "LL uji", %w[Ditinjau Dipublikasikan]] }.each do |id, (type, subj, flow)|
     safe(id, "#{type}: buat & lewati status #{flow.join('→')}") do
@@ -116,6 +115,15 @@ begin
       bad = flow.reject { |s| move(w, pimpro, s) }
       [bad.empty?, bad.empty? ? nil : "gagal di: #{bad.join(',')}"]
     end
+  end
+  # U12: Deliverable dengan pemisahan tugas (DECISION_FLOWS): Pimpro tidak boleh memvalidasi sendiri; Penjaminan Mutu yang meneruskan
+  safe("U12", "Deliverable: Pimpro Dikerjakan→Verifikasi Internal; hanya Penjaminan Mutu →Validasi Pelanggan; Pimpro →Diterima Pelanggan") do
+    w = wp_new(proj, pimpro, "Deliverable", "Deliverable uji")
+    a = %w[Dikerjakan Verifikasi\ Internal].all? { |s| move(w, pimpro, s) }
+    blocked = !move(w, pimpro, "Validasi Pelanggan")
+    b = move(w, mutu, "Validasi Pelanggan")
+    c = move(w, pimpro, "Diterima Pelanggan")
+    [a && blocked && b && c, "pimpro=#{a}, pimpro→Validasi ditolak=#{blocked}, mutu→Validasi=#{b}, pimpro→Diterima=#{c}"]
   end
   # U10: Item Pengadaan melewati tiga sub-fase dengan gerbang: Budget wajib dari PR, PO/Kontrak butuh rekanan+nomor, Selesai butuh milestone selesai + BA
   safe("U10", "Item Pengadaan: gerbang Budget lalu PR→Proses Pengadaan→PO/Kontrak→Pengiriman→GR/SES→Selesai (milestone + BA)") do
