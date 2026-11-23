@@ -79,8 +79,8 @@ Jawaban:
 ### 4.3 Keamanan endpoint
 
 - Kunci di `deploy/.env` (`LPMS3_LENO_KEYS`, boleh dua nilai dipisah koma agar rotasi tanpa putus). Dibandingkan *constant-time*. Kosong = semua permintaan 401.
-- Controller tanpa sesi login, tanpa CSRF, hanya dua aksi di atas. Tidak ada `User.current` admin; aksi dicatat atas nama akun layanan `lpms3-leno` (non-admin, tanpa izin lain).
-- Caddy: hanya path `/lpms3/api/pemicu-proyek*` yang lolos tanpa login; opsional daftar IP LenO.
+- Controller tanpa sesi login, tanpa CSRF, hanya dua aksi di atas (`ActionController::API`). Tidak ada `User.current`; kejadian dari LenO dicatat dengan sumber `leno` tanpa akun pengguna (tidak ada akun layanan yang bisa disalahgunakan).
+- Caddy: tidak perlu aturan baru (path diteruskan ke web). OpenProject hanya menerima host resmi (`OPENPROJECT_HOST__NAME`), jadi LenO memanggil alamat itu. Opsional daftar IP LenO di Caddy.
 - Log mencatat waktu, alamat, kode proyek, status; **tidak** mencatat kunci atau body mentah.
 
 ## 5. Data
@@ -127,7 +127,7 @@ diterima ─► data_siap ─┐
 | 2. Persetujuan | Pejabat Eselon 1 Fungsi Pelaksanaan Proyek | "Setujui registrasi proyek {kode}" | Setujui atau kembalikan (catatan wajib). **Pengusul tidak boleh memutus** walaupun memegang dua peran. Tidak ada jalan pintas `admin?` |
 | 3. Proyek dibuat | sistem | notifikasi ke Pimpro dan VP | `Projects::CopyService` dari template, isi Kode Proyek, LPMS-2 Proyek ID, atribut kontrak, anggota (Pimpro) |
 | 4. Isi awal 9 Aspek PMP | sistem | — | Isi aspek dari snapshot bila ada sumbernya; aspek tanpa sumber diberi catatan "isi manual" (sama seperti v1). Status tetap Draft, lewat rantai persetujuan biasa (rilis 1.34) |
-| 5. Kick-Off | lihat pertanyaan terbuka #4 | — | Memakai `Lpms3::Kickoff` yang sudah ada |
+| 5. Kick-Off | sistem, lalu Admin Fungsi Pengawasan Proyek | "Tunjuk Project Analis" | **Diputuskan 23 Nov 2026:** Kick-Off dibuat setelah Dokumen Inisiasi disetujui Final, sama seperti sekarang (`Lpms3::Kickoff.ensure_for!`). Pemicu LenO tidak membuat Kick-Off dan tidak menetapkan Project Analis (berbeda dari v1) |
 
 ### 6.3 Peran global baru
 
@@ -159,7 +159,7 @@ Smoke `lpms3/smoke/pemicu_leno.rb` (data uji dihapus di akhir) dan uji Python un
 
 | Rilis | Isi | Bisa diuji tanpa LenO/LPMS-2? |
 |---|---|---|
-| 1.35 | Endpoint, tabel, status, log, kunci, batas laju; halaman daftar pemicu untuk admin | Ya (curl) |
+| 1.35 ✅ | Endpoint, tabel, status, log, kunci, batas laju; halaman daftar pemicu untuk admin (Administrasi → Pemicu LenO). Smoke `lpms3/smoke/pemicu_leno.sh` 22/22 | Ya (curl) |
 | 1.36 | Pembaca LPMS-2 di `lpms3-data` + `lpms2_mapping.yml` | Butuh akses DB LPMS-2 dev |
 | 1.37 | Peran global, tugas registrasi dan persetujuan, pembuatan proyek dari template | Ya |
 | 1.38 | Isi awal 9 Aspek, sambungan ke Kick-Off, smoke penuh | Ya |
@@ -170,6 +170,6 @@ Smoke `lpms3/smoke/pemicu_leno.rb` (data uji dihapus di akhir) dan uji Python un
 1. **Pengiriman dari LenO:** apakah tim LenO bersedia mengirim pemicu ke v2 **di samping** v1 selama masa paralel? v1 tidak boleh diubah, jadi v1 tidak bisa meneruskan.
 2. **Akses LPMS-2:** siapa yang membuat akun `lpms3_ro` dan membuka firewall dari server v2 ke DB LPMS-2? Bisakah DBA menyediakan view kontrak?
 3. **Format Kode Proyek:** custom field v2 memaksa pola `XXX-XXXXXXXX`. Apakah `kodeproyek` LPMS-1/2 selalu cocok? Kalau tidak, pola harus dilonggarkan atau kode dipetakan.
-4. **Urutan Kick-Off:** v1 menetapkan Project Analyst langsung dari pemicu. v2 saat ini membuat Kick-Off **sesudah** dokumen Inisiasi disetujui final. Ikut v1 (Project Analyst ditetapkan segera setelah proyek dibuat) atau pertahankan urutan v2?
+4. ~~**Urutan Kick-Off**~~ — **diputuskan 23 Nov 2026:** Kick-Off setelah Dokumen Inisiasi disetujui Final (urutan v2 dipertahankan).
 5. **Pemilihan template:** ditentukan Admin, atau diturunkan otomatis dari data LPMS-2 (jenis kode / kelas kontrak)?
 6. **Proyek yang sudah ada di v2** dengan Kode Proyek sama: tautkan ke pemicu atau tolak?

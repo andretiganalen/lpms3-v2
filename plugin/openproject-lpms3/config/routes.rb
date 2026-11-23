@@ -57,7 +57,13 @@ Rails.application.routes.draw do
   end
   post "lpms3/language", to: "lpms3/language#update", as: :lpms3_language
 
+  # Pemicu proyek dari LenO (API mesin-ke-mesin, kunci X-Lpms3-Key; docs/plan/RANCANGAN-PEMICU-LENO.md §4).
+  post "lpms3/api/pemicu-proyek", to: "lpms3/pemicu_leno#create", as: :lpms3_api_pemicu, format: false
+  get "lpms3/api/pemicu-proyek/:kode_proyek", to: "lpms3/pemicu_leno#show", as: :lpms3_api_pemicu_status,
+      constraints: { kode_proyek: %r{[^/]+} }, format: false
+
   scope "admin" do
+    get "lpms3/pemicu-leno", to: "lpms3/admin/pemicu_leno#index", as: :lpms3_admin_pemicu_leno
     get "lpms3/organisasi", to: "lpms3/admin/organisasi#index", as: :lpms3_admin_organisasi
     get "lpms3/internal_features", to: "lpms3/admin/internal_features_settings#show", as: :lpms3_admin_internal_features
     patch "lpms3/internal_features", to: "lpms3/admin/internal_features_settings#update"

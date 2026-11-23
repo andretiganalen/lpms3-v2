@@ -1,0 +1,90 @@
+<% html_title t(:label_administration), t("lpms3.pemicu_leno.title") %>
+
+<%=
+  render(Primer::OpenProject::PageHeader.new) do |header|
+    header.with_title { t("lpms3.pemicu_leno.title") }
+    header.with_breadcrumbs([{ href: admin_index_path, text: t("label_administration") }, t("lpms3.pemicu_leno.title")])
+    header.with_description { t("lpms3.pemicu_leno.description") }
+  end
+%>
+
+<% unless @key_configured %>
+  <section class="lpms3-card lpms3-note" role="status">
+    <p><strong><%= t("lpms3.pemicu_leno.key_missing_title") %></strong> <%= t("lpms3.pemicu_leno.key_missing") %></p>
+  </section>
+<% end %>
+
+<ul class="lpms3-stats" aria-label="<%= t("lpms3.pemicu_leno.summary") %>">
+  <li class="lpms3-card lpms3-stat">
+    <span class="lpms3-stat__value"><%= @counts.values.sum %></span>
+    <span class="lpms3-stat__label"><%= t("lpms3.pemicu_leno.total") %></span>
+  </li>
+  <% @counts.sort.each do |st, n| %>
+    <li class="lpms3-card lpms3-stat">
+      <span class="lpms3-stat__value"><%= n %></span>
+      <span class="lpms3-stat__label"><%= t("lpms3.pemicu_leno.status.#{st}") %></span>
+    </li>
+  <% end %>
+</ul>
+
+<%= form_tag lpms3_admin_pemicu_leno_path, method: :get, class: "lpms3-search", role: "search" do %>
+  <label for="lpms3-status"><%= t("lpms3.pemicu_leno.filter") %></label>
+  <select id="lpms3-status" name="status" class="lpms3-input">
+    <option value=""><%= t("lpms3.pemicu_leno.all") %></option>
+    <% ::Lpms3::ProjectTrigger::STATUSES.each do |st| %>
+      <option value="<%= st %>" <%= "selected" if st == @status %>><%= t("lpms3.pemicu_leno.status.#{st}") %></option>
+    <% end %>
+  </select>
+  <button type="submit" class="lpms3-btn lpms3-btn--primary"><%= t("lpms3.pemicu_leno.apply") %></button>
+<% end %>
+
+<% if @triggers.empty? %>
+  <section class="lpms3-card lpms3-empty">
+    <p><%= t("lpms3.pemicu_leno.empty") %></p>
+  </section>
+<% else %>
+  <div class="lpms3-table-wrap">
+    <table class="lpms3-table">
+      <thead>
+        <tr>
+          <th scope="col"><%= t("lpms3.pemicu_leno.col.kode") %></th>
+          <th scope="col"><%= t("lpms3.pemicu_leno.col.status") %></th>
+          <th scope="col"><%= t("lpms3.pemicu_leno.col.lpms2") %></th>
+          <th scope="col"><%= t("lpms3.pemicu_leno.col.nota") %></th>
+          <th scope="col"><%= t("lpms3.pemicu_leno.col.diterima") %></th>
+          <th scope="col"><%= t("lpms3.pemicu_leno.col.terakhir") %></th>
+          <th scope="col"><%= t("lpms3.pemicu_leno.col.riwayat") %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @triggers.each do |tr| %>
+          <tr>
+            <td>
+              <strong><%= tr.kode_proyek %></strong>
+              <% if tr.project %><br><%= link_to tr.project.name, project_path(tr.project) %><% end %>
+            </td>
+            <td><span class="lpms3-chip"><%= t("lpms3.pemicu_leno.status.#{tr.status}") %></span></td>
+            <td><%= tr.lpms2_proyek_id || "—" %></td>
+            <td><%= [tr.nota["nomor"], tr.nota["tanggal"]].compact.join(" · ").presence || "—" %></td>
+            <td><%= format_time(tr.diterima_pada) %></td>
+            <td><%= format_time(tr.kiriman_terakhir_pada) %><br><small><%= t("lpms3.pemicu_leno.sends", count: tr.jumlah_kiriman) %></small></td>
+            <td>
+              <details>
+                <summary><%= t("lpms3.pemicu_leno.events", count: tr.events.size) %></summary>
+                <ol>
+                  <% tr.events.last(20).each do |ev| %>
+                    <li>
+                      <%= format_time(ev.created_at) %> · <%= t("lpms3.pemicu_leno.kind.#{ev.kind}", default: ev.kind) %>
+                      · <%= ev.actor&.name || t("lpms3.pemicu_leno.source.#{ev.sumber}", default: ev.sumber) %>
+                      <% if ev.note.present? %><br><small><%= ev.note %></small><% end %>
+                    </li>
+                  <% end %>
+                </ol>
+              </details>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>

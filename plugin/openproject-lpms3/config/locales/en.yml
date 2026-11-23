@@ -1,6 +1,50 @@
 en:
   permission_manage_currency_rates: "Manage currencies and exchange rates"
   lpms3:
+    pemicu_leno:
+      menu: "LenO triggers"
+      title: "Project triggers from LenO"
+      description: "Project-opening triggers sent by LenO. Each project code is recorded once; resends and status changes go to the history. Registration and approval follow in a later release."
+      key_missing_title: "Key not configured."
+      key_missing: "LPMS3_LENO_KEYS in deploy/.env is empty or shorter than 32 characters, so every LenO request is rejected (401)."
+      summary: "Trigger summary"
+      total: "All triggers"
+      filter: "Status"
+      all: "All statuses"
+      apply: "Apply"
+      empty: "No triggers received yet."
+      sends:
+        one: "1 send"
+        other: "%{count} sends"
+      events:
+        one: "1 event"
+        other: "%{count} events"
+      col:
+        kode: "Project code"
+        status: "Status"
+        lpms2: "LPMS-2 ID"
+        nota: "Memo"
+        diterima: "Received"
+        terakhir: "Last send"
+        riwayat: "History"
+      status:
+        diterima: "Received"
+        data_siap: "LPMS-2 data ready"
+        data_gagal: "LPMS-2 data failed"
+        diusulkan: "Proposed"
+        dikembalikan: "Returned"
+        disetujui: "Approved"
+        proyek_dibuat: "Project created"
+        selesai: "Done"
+        dibatalkan: "Cancelled"
+      kind:
+        diterima: "Received"
+        kiriman_ulang: "Resent"
+        konflik: "LPMS-2 ID conflict"
+      source:
+        leno: "LenO"
+        pengguna: "User"
+        sistem: "System"
     organisasi:
       menu: "Organization & Functions"
       title: "Organization & Functions"

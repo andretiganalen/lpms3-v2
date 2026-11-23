@@ -1,4 +1,13 @@
 # CHANGELOG
+## 17.9.7-lpms3.1.35 — penerima pemicu proyek dari LenO (23 Nov 2026)
+Tahap pertama `docs/plan/RANCANGAN-PEMICU-LENO.md`: menerima dan mencatat; pembaca LPMS-2 (1.36) dan registrasi/persetujuan (1.37) menyusul.
+- **API** `POST /lpms3/api/pemicu-proyek` dan `GET /lpms3/api/pemicu-proyek/:kode_proyek` (`Lpms3::PemicuLenoController`, `ActionController::API`: tanpa sesi/login/CSRF). Kunci bersama di header `X-Lpms3-Key`, dibandingkan constant-time dengan `LPMS3_LENO_KEYS` (min. 32 karakter, boleh dua nilai untuk rotasi; kosong = 401). Batas 60/menit per alamat (429), body maks. 16 KB (413), validasi isian (400), `lpms2_proyek_id` berbeda (409). Log hanya metadata, tanpa kunci.
+- **Idempoten**: satu baris per kode proyek (`lpms3_project_triggers`, unik; kode dinormalkan huruf besar); `id_kiriman` sama tidak dihitung ulang; kiriman bersamaan tetap satu baris; klaim pembaca yang macet > 10 menit dilepas oleh kiriman ulang.
+- **Riwayat append-only** `lpms3_project_trigger_events` (tidak bisa diubah/dihapus). Migrasi `20261123000001`.
+- **Administrasi → Pemicu LenO** (`/admin/lpms3/pemicu-leno`, admin saja): ringkasan per status, saring status, riwayat per pemicu, peringatan bila kunci belum diatur.
+- Env baru `LPMS3_LENO_KEYS` (compose web/worker/cron/seeder, `.env.example`). Smoke `lpms3/smoke/pemicu_leno.sh` (22 skenario, data uji dihapus).
+- Keputusan 23 Nov 2026: Kick-Off tetap dibuat setelah Dokumen Inisiasi disetujui Final; pemicu LenO tidak membuat Kick-Off.
+
 ## 17.9.7-lpms3.1.34 — status keputusan hanya lewat rantai persetujuan (23 Nov 2026)
 Menutup temuan audit P0 #2 (status keputusan bisa dicapai langsung dari form OpenProject).
 - **Workflow tipe keputusan disinkron penuh** (`DECISION_FLOWS` di `seed/00_data.rb`, dipakai `50_workflows.rb`): untuk Dokumen Rencana, Top Up Anggaran, dan Deliverable hanya transisi di daftar itu yang boleh ada; sisanya dihapus. Dokumen Rencana: form hanya New/Revisi → Draft, dan Pimpro dapat menandai Diganti; Reviu, Revisi, Disahkan hanya lewat `Lpms3::ApprovalTask` (42 transisi lama dihapus). Seed idempoten.

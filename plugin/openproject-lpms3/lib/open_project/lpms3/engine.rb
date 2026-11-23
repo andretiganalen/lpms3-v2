@@ -52,6 +52,13 @@ module OpenProject::Lpms3
            icon: "organization"
 
       menu :admin_menu,
+           :lpms3_pemicu_leno,
+           { controller: "/lpms3/admin/pemicu_leno", action: :index },
+           if: Proc.new { User.current.admin? },
+           caption: :"lpms3.pemicu_leno.menu",
+           icon: "inbox"
+
+      menu :admin_menu,
            :lpms3_internal_features,
            { controller: "/lpms3/admin/internal_features_settings", action: :show },
            if: Proc.new { User.current.admin? },

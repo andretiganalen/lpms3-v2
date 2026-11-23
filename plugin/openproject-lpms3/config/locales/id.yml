@@ -1,6 +1,50 @@
 id:
   permission_manage_currency_rates: "Kelola mata uang dan kurs"
   lpms3:
+    pemicu_leno:
+      menu: "Pemicu LenO"
+      title: "Pemicu proyek dari LenO"
+      description: "Pemicu pembukaan proyek yang dikirim LenO. Setiap kode proyek tercatat sekali; kiriman ulang dan perubahan status masuk riwayat. Registrasi dan persetujuan menyusul di rilis berikutnya."
+      key_missing_title: "Kunci belum diatur."
+      key_missing: "LPMS3_LENO_KEYS di deploy/.env kosong atau kurang dari 32 karakter, sehingga semua kiriman LenO ditolak (401)."
+      summary: "Ringkasan pemicu"
+      total: "Semua pemicu"
+      filter: "Status"
+      all: "Semua status"
+      apply: "Terapkan"
+      empty: "Belum ada pemicu yang diterima."
+      sends:
+        one: "1 kiriman"
+        other: "%{count} kiriman"
+      events:
+        one: "1 kejadian"
+        other: "%{count} kejadian"
+      col:
+        kode: "Kode proyek"
+        status: "Status"
+        lpms2: "ID LPMS-2"
+        nota: "Nota"
+        diterima: "Diterima"
+        terakhir: "Kiriman terakhir"
+        riwayat: "Riwayat"
+      status:
+        diterima: "Diterima"
+        data_siap: "Data LPMS-2 siap"
+        data_gagal: "Data LPMS-2 gagal"
+        diusulkan: "Diusulkan"
+        dikembalikan: "Dikembalikan"
+        disetujui: "Disetujui"
+        proyek_dibuat: "Proyek dibuat"
+        selesai: "Selesai"
+        dibatalkan: "Dibatalkan"
+      kind:
+        diterima: "Diterima"
+        kiriman_ulang: "Kiriman ulang"
+        konflik: "Konflik ID LPMS-2"
+      source:
+        leno: "LenO"
+        pengguna: "Pengguna"
+        sistem: "Sistem"
     organisasi:
       menu: "Organisasi & Fungsi"
       title: "Organisasi & Fungsi"
