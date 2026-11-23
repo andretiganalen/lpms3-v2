@@ -1,4 +1,11 @@
-// Lpms3.IdsLogin — hanya Login IDS (OIDC code + PKCE), tidak ada fitur lain.
+// Lpms3.IdsLogin — satu pintu login LPMS3 lewat IDS Len (OIDC code + PKCE).
+//
+// Prinsip (keputusan pemilik 20 Nov 2026):
+//  - Hanya ada SATU login untuk semua orang. Tidak ada pilihan "Pengguna/Admin" dan tidak ada akun lokal.
+//  - Hak akses ditentukan di dalam aplikasi sebagai Role Akun (Administrasi › Pengguna, peran proyek, grup fungsi),
+//    bukan oleh klaim IDS dan bukan oleh pilihan di halaman login. Bridge tidak pernah mengubah bendera admin.
+//  - Akun yang dikunci di LPMS3 tetap terkunci: login IDS tidak mengaktifkannya kembali.
+using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -57,95 +64,16 @@ var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/health", () => Results.Ok("OK"));
-app.MapGet("/ids/login", (string? @as) =>
-    Results.Challenge(new AuthenticationProperties { RedirectUri = @as == "admin" ? "/ids/admin" : "/ids/enter" }));
-// Logout tunggal: hapus sesi OpenProject (cookie dibuat bridge) lalu keluar dari IDS.
-// Tanpa ini, '/' akan menyambung ulang sesi OpenProject dari sesi IDS yang masih aktif.
-app.MapGet("/ids/logout", (HttpContext c) =>
-{
-    c.Response.Cookies.Delete("_open_project_session", new CookieOptions { Path = "/" });
-    return Results.SignOut(new AuthenticationProperties { RedirectUri = "/" },
-        new[] { CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme });
-});
-var adminRoles = (builder.Configuration["AdminRoles"] ?? "administrator").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+const string OpSessionCookie = "_open_project_session";
+const string LoopCookie = "lpms3.enter";
+var cfg = app.Configuration;
+var opBase = cfg["OpenProject:BaseUrl"] ?? "http://web:8080";
+string OpHost(HttpContext c) => cfg["OpenProject:PublicHost"] ?? c.Request.Host.Value ?? "";
 
-var adminEmails = (builder.Configuration["AdminEmails"] ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-bool IsAdmin(System.Security.Claims.ClaimsPrincipal u) =>
-    u.FindAll("role").Any(r => adminRoles.Contains(r.Value, StringComparer.OrdinalIgnoreCase))
-    || (u.FindFirst("email")?.Value is { } m && adminEmails.Contains(m, StringComparer.OrdinalIgnoreCase));
-
-// Jembatan: setelah login IDS, buat/sinkronkan akun OpenProject lalu masuk atas nama pengguna.
-app.MapGet("/ids/enter", async (HttpContext c, IHttpClientFactory f, IConfiguration cfg) =>
-{
-    if (c.User.Identity?.IsAuthenticated != true) return Results.Redirect("/ids/login");
-    var baseUrl = cfg["OpenProject:BaseUrl"] ?? "http://web:8080";
-    var host = cfg["OpenProject:PublicHost"] ?? c.Request.Host.Value;
-    var key = cfg["OpenProject:BridgeApiKey"];
-    if (string.IsNullOrEmpty(key)) return Results.Problem("OpenProject:BridgeApiKey belum diatur.");
-    var email = c.User.FindFirst("email")?.Value;
-    if (string.IsNullOrEmpty(email)) return Results.Problem("Akun IDS tanpa email.");
-    var isAdmin = IsAdmin(c.User);
-    app.Logger.LogInformation("ENTER email={Email} roles=[{Roles}] isAdmin={IsAdmin}", email, string.Join(",", c.User.FindAll("role").Select(r => r.Value)), isAdmin);
-    var http = f.CreateClient("op");
-    HttpRequestMessage Api(HttpMethod m, string path, object? body = null)
-    {
-        var r = new HttpRequestMessage(m, baseUrl + path);
-        r.Headers.Host = host;
-        r.Headers.Authorization = new("Basic", Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes("apikey:" + key)));
-        if (body != null) r.Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(body), System.Text.Encoding.UTF8, "application/json");
-        return r;
-    }
-    var pwd = Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(24)) + "aA1!";
-    var filter = Uri.EscapeDataString("[{\"login\":{\"operator\":\"=\",\"values\":[\"" + email.Replace("\"", "") + "\"]}}]");
-    using var found = await http.SendAsync(Api(HttpMethod.Get, "/api/v3/users?filters=" + filter));
-    var doc = System.Text.Json.JsonDocument.Parse(await found.Content.ReadAsStringAsync());
-    var els = doc.RootElement.GetProperty("_embedded").GetProperty("elements");
-    // IDS dapat mengirim klaim sebagai array JSON (mis. ["username","Nama Lengkap"]); ambil nilai terpanjang.
-    string Pick(string t)
-    {
-        var vs = c.User.FindAll(t).Select(x => x.Value?.Trim() ?? "").Where(x => x.Length > 0)
-            .SelectMany(v => { if (v.StartsWith("[")) { try { return System.Text.Json.JsonSerializer.Deserialize<string[]>(v) ?? new string[0]; } catch { } } return new[] { v }; })
-            .Select(x => x.Trim()).Where(x => x.Length > 0).ToList();
-        return vs.Count == 0 ? "" : vs.OrderByDescending(x => x.Length).First();
-    }
-    var fullName = Pick("given_name"); if (fullName == "") fullName = Pick("name"); if (fullName == "") fullName = email;
-    var familyRaw = Pick("family_name");
-    string given, family;
-    if (familyRaw != "" && familyRaw != "-") { given = fullName; family = familyRaw; }
-    else { var parts = fullName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries); given = parts[0]; family = parts.Length > 1 ? parts[1] : "-"; }
-    if (els.GetArrayLength() == 0)
-    {
-        using var cr = await http.SendAsync(Api(HttpMethod.Post, "/api/v3/users", new { login = email, email, firstName = given, lastName = family, admin = isAdmin, status = "active", password = pwd }));
-        if (!cr.IsSuccessStatusCode) return Results.Problem("Gagal membuat akun OpenProject (" + (int)cr.StatusCode + ").");
-    }
-    else
-    {
-        var id = els[0].GetProperty("id").GetInt32();
-        using var up = await http.SendAsync(Api(HttpMethod.Patch, "/api/v3/users/" + id, new { admin = isAdmin, status = "active", password = pwd }));
-        if (!up.IsSuccessStatusCode) return Results.Problem("Gagal menyinkronkan akun OpenProject (" + (int)up.StatusCode + ").");
-    }
-    // Login form OpenProject atas nama pengguna
-    HttpRequestMessage Web(HttpMethod m, string path, string? cookie = null)
-    { var r = new HttpRequestMessage(m, baseUrl + path); r.Headers.Host = host; if (cookie != null) r.Headers.Add("Cookie", cookie); return r; }
-    using var form = await http.SendAsync(Web(HttpMethod.Get, "/login"));
-    var html = await form.Content.ReadAsStringAsync();
-    var m1 = System.Text.RegularExpressions.Regex.Match(html, "name=\"authenticity_token\"[^>]*value=\"([^\"]+)\"");
-    if (!m1.Success) m1 = System.Text.RegularExpressions.Regex.Match(html, "name=\"csrf-token\"[^>]*content=\"([^\"]+)\"");
-    var sess = string.Join("; ", form.Headers.TryGetValues("Set-Cookie", out var sc) ? sc.Select(x => x.Split(';')[0]) : Array.Empty<string>());
-    var post = Web(HttpMethod.Post, "/login", sess);
-    post.Content = new FormUrlEncodedContent(new Dictionary<string, string> { ["authenticity_token"] = m1.Groups[1].Value, ["username"] = email, ["password"] = pwd });
-    using var res = await http.SendAsync(post);
-    if ((int)res.StatusCode != 302) return Results.Problem("Login OpenProject gagal (" + (int)res.StatusCode + ").");
-    app.Logger.LogInformation("OP-LOGIN status={S} location={L} cookies={N}", (int)res.StatusCode, res.Headers.Location, res.Headers.TryGetValues("Set-Cookie", out var dbg) ? dbg.Count() : 0);
-    if (!res.Headers.TryGetValues("Set-Cookie", out var cks)) return Results.Problem("Login OpenProject tidak mengembalikan sesi (redirect ke " + res.Headers.Location + ").");
-    foreach (var ck in cks) c.Response.Headers.Append("Set-Cookie", ck);
-    return Results.Redirect("/projects");
-});
-// Halaman UIx untuk landing & pesan IdsLogin: token dan font Poppins dari uix.css plugin (dilayani OpenProject),
-// versi rilis di URL sebagai pemecah cache. Tema terang saja (UIx), tanpa nilai warna liar.
-// Titik dibuang: segmen :digest di route Rails tidak menerima titik (akan 404). Nilainya hanya pemecah cache.
-var uixRelease = Uri.EscapeDataString((builder.Configuration["Lpms3:Release"] ?? "local").Replace('.', '-'));
+// ---------- Halaman (UIx) ----------
+// Token dan font Poppins dari uix.css plugin (dilayani OpenProject); versi rilis di URL sebagai pemecah cache.
+// Titik dibuang: segmen :digest di route Rails tidak menerima titik (akan 404).
+var uixRelease = Uri.EscapeDataString((cfg["Lpms3:Release"] ?? "local").Replace('.', '-'));
 string UixPage(string title, string body) =>
     "<!doctype html><html lang=\"id\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
     + "<title>" + title + " · LPMS3</title>"
@@ -158,39 +86,219 @@ string UixPage(string title, string body) =>
     + "a.btn{display:flex;align-items:center;justify-content:center;height:38px;box-sizing:border-box;border-radius:var(--uix-radius-control);font-weight:500;text-decoration:none;box-shadow:var(--uix-shadow-xs);background:var(--uix-primary);color:var(--uix-on-primary);border:1px solid var(--uix-primary)}"
     + "a.btn:hover{background:var(--uix-primary-strong);border-color:var(--uix-primary-strong)}"
     + "a.btn.o{background:var(--uix-surface);color:var(--uix-text-body);border-color:var(--uix-border-strong)}a.btn.o:hover{background:var(--uix-surface-muted)}"
-    + "button.btn{width:100%;cursor:pointer;font:inherit;font-weight:500;display:flex;align-items:center;justify-content:center;height:38px;border-radius:var(--uix-radius-control);box-shadow:var(--uix-shadow-xs);background:var(--uix-primary);color:var(--uix-on-primary);border:1px solid var(--uix-primary)}button.btn:hover{background:var(--uix-primary-strong)}"
-    + "fieldset{border:0;margin:0 0 20px;padding:0;display:grid;gap:8px}legend{padding:0;margin-bottom:8px;color:var(--uix-text-secondary)}"
-    + "label.rd{display:flex;align-items:center;gap:10px;height:38px;box-sizing:border-box;padding:0 12px;border:1px solid var(--uix-border-strong);border-radius:var(--uix-radius-control);cursor:pointer;color:var(--uix-text-body)}"
-    + "label.rd:has(input:checked){border-color:var(--uix-primary);background:var(--uix-surface-muted)}label.rd input{accent-color:var(--uix-primary);margin:0}"
     + ".sp{height:12px}small{display:block;margin-top:20px;font-size:12px;color:var(--uix-text-secondary);text-align:center}"
-    + "dl{margin:0 0 24px;display:grid;grid-template-columns:auto 1fr;gap:8px 16px}dt{color:var(--uix-text-secondary)}dd{margin:0;word-break:break-all;color:var(--uix-text-head)}"
     + "</style></head><body><main>" + body + "</main></body></html>";
 
-app.MapGet("/ids/admin", (HttpContext c) =>
+static string E(string? v) => System.Net.WebUtility.HtmlEncode(v ?? "");
+
+IResult Page(string title, string body, int status = 200) =>
+    Results.Content(UixPage(E(title), body), "text/html; charset=utf-8", statusCode: status);
+
+// Halaman galat: selalu ada jalan keluar (coba lagi / keluar), tidak pernah JSON mentah.
+IResult Fail(string title, string message, int status, bool retry = true) =>
+    Page(title, "<h1>" + E(title) + "</h1><p>" + E(message) + "</p>"
+        + (retry ? "<a class=\"btn\" href=\"/ids/enter\">Coba lagi</a><div class=\"sp\"></div>" : "")
+        + "<a class=\"btn o\" href=\"/ids/logout\">Keluar</a>", status);
+
+// ---------- Tujuan sesudah login (deep link) ----------
+// OpenProject mengalihkan sesi kedaluwarsa ke /login?back_url=<URL absolut>; proxy meneruskannya ke /ids/login.
+// Hanya jalur lokal di host aplikasi yang diterima (cegah open redirect); jalur login/logout ditolak agar tidak berputar.
+string? SafeBack(string? raw, HttpContext c)
 {
-    if (c.User.Identity?.IsAuthenticated != true) return Results.Redirect("/ids/login?as=admin");
-    var ok = IsAdmin(c.User);
-    app.Logger.LogInformation("ADMIN-GATE email={Email} roles=[{Roles}] ok={Ok}", c.User.FindFirst("email")?.Value, string.Join(",", c.User.FindAll("role").Select(r => r.Value)), ok);
-    return ok ? Results.Redirect("/ids/enter")
-              : Results.Content(UixPage("Akses ditolak", "<h1>Akses ditolak</h1><p>Akun IDS ini tidak memiliki peran Admin LPMS3. Masuk sebagai pengguna, atau hubungi administrator untuk meminta akses.</p>"
-                  + "<a class=\"btn\" href=\"/ids/enter\">Masuk sebagai pengguna</a><div class=\"sp\"></div><a class=\"btn o\" href=\"/ids/logout\">Keluar</a>"), "text/html; charset=utf-8", statusCode: 403);
+    if (string.IsNullOrWhiteSpace(raw) || raw.Length > 2000) return null;
+    string path;
+    if (raw.StartsWith('/'))
+    {
+        if (raw.StartsWith("//") || raw.StartsWith("/\\")) return null;
+        path = raw;
+    }
+    else if (Uri.TryCreate(raw, UriKind.Absolute, out var u) && (u.Scheme == Uri.UriSchemeHttp || u.Scheme == Uri.UriSchemeHttps)
+             && string.Equals(u.IsDefaultPort ? u.Host : u.Host + ":" + u.Port, OpHost(c), StringComparison.OrdinalIgnoreCase))
+        path = u.PathAndQuery;
+    else return null;
+    if (path.Contains('\\') || path.Any(char.IsControl)) return null;
+    var p = path.Split('?', 2)[0].ToLowerInvariant();
+    string[] blocked = { "/ids", "/login", "/logout", "/signin-oidc", "/signout-callback-oidc", "/auth", "/account" };
+    if (p == "/" || blocked.Any(b => p == b || p.StartsWith(b + "/"))) return null;
+    return path;
+}
+
+string EnterUrl(string? back) => back is null ? "/ids/enter" : "/ids/enter?back=" + Uri.EscapeDataString(back);
+
+// ---------- Rute ----------
+app.MapGet("/health", () => Results.Ok("OK"));
+
+// Satu-satunya pintu masuk. Parameter lama "as" (Pengguna/Admin) diabaikan: hak akses ditentukan di aplikasi.
+app.MapGet("/ids/login", (HttpContext c) =>
+{
+    var enter = EnterUrl(SafeBack(c.Request.Query["back_url"].FirstOrDefault() ?? c.Request.Query["back"].FirstOrDefault(), c));
+    if (c.User.Identity?.IsAuthenticated == true) return Results.Redirect(enter);
+    return Results.Challenge(new AuthenticationProperties { RedirectUri = enter });
 });
+
+// Tautan lama gerbang Admin: tidak ada lagi gerbang terpisah.
+app.MapGet("/ids/admin", () => Results.Redirect("/"));
+
+// Logout tunggal: akhiri sesi OpenProject di server (bukan hanya hapus cookie), lalu keluar dari IDS.
+// Tanpa ini, '/' akan menyambung ulang sesi OpenProject dari sesi IDS yang masih aktif.
+app.MapGet("/ids/logout", async (HttpContext c, IHttpClientFactory f) =>
+{
+    var raw = c.Request.Headers.Cookie.ToString();
+    var opCookie = raw.Split(';').Select(x => x.Trim()).FirstOrDefault(x => x.StartsWith(OpSessionCookie + "="));
+    if (opCookie != null)
+    {
+        try
+        {
+            using var req = new HttpRequestMessage(HttpMethod.Get, opBase + "/logout");
+            req.Headers.Host = OpHost(c);
+            req.Headers.Add("Cookie", opCookie);
+            using var res = await f.CreateClient("op").SendAsync(req);
+            app.Logger.LogInformation("LOGOUT op-session status={S}", (int)res.StatusCode);
+        }
+        catch (Exception ex) { app.Logger.LogWarning(ex, "LOGOUT gagal mengakhiri sesi OpenProject di server; cookie tetap dihapus."); }
+    }
+    c.Response.Cookies.Delete(OpSessionCookie, new CookieOptions { Path = "/" });
+    c.Response.Cookies.Delete(LoopCookie, new CookieOptions { Path = "/ids" });
+    return Results.SignOut(new AuthenticationProperties { RedirectUri = "/" },
+        new[] { CookieAuthenticationDefaults.AuthenticationScheme, OpenIdConnectDefaults.AuthenticationScheme });
+});
+
+// Jembatan: sesudah login IDS, cari/buat akun OpenProject lalu masuk atas nama pengguna.
+// Bendera admin dan status kunci TIDAK diubah di sini: keduanya milik aplikasi (Role Akun).
+app.MapGet("/ids/enter", async (HttpContext c, IHttpClientFactory f) =>
+{
+    var back = SafeBack(c.Request.Query["back"].FirstOrDefault(), c);
+    if (c.User.Identity?.IsAuthenticated != true) return Results.Redirect(back is null ? "/ids/login" : "/ids/login?back=" + Uri.EscapeDataString(back));
+
+    // Penjaga loop: 5 kali masuk ke sini dalam 10 detik berarti sesi aplikasi terus ditolak dan pengguna dipantulkan balik.
+    var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+    var (n, since) = (0, now);
+    if (c.Request.Cookies.TryGetValue(LoopCookie, out var lc) && lc.Split(':') is [var a, var b]
+        && int.TryParse(a, out var na) && long.TryParse(b, out var nb) && now - nb < 10) (n, since) = (na, nb);
+    if (n >= 5)
+    {
+        c.Response.Cookies.Delete(LoopCookie, new CookieOptions { Path = "/ids" });
+        app.Logger.LogWarning("ENTER loop terdeteksi email={Email}", c.User.FindFirst("email")?.Value);
+        return Fail("Sesi tidak dapat dibuat", "Aplikasi berulang kali menolak sesi Anda. Silakan keluar lalu masuk kembali; bila tetap terjadi, hubungi administrator.", 500, retry: false);
+    }
+    c.Response.Cookies.Append(LoopCookie, (n + 1) + ":" + since, new CookieOptions { Path = "/ids", HttpOnly = true, SameSite = SameSiteMode.Lax, MaxAge = TimeSpan.FromSeconds(10) });
+
+    var key = cfg["OpenProject:BridgeApiKey"];
+    if (string.IsNullOrEmpty(key)) { app.Logger.LogError("OpenProject:BridgeApiKey belum diatur."); return Fail("Layanan belum siap", "Konfigurasi login aplikasi belum lengkap. Hubungi administrator.", 503); }
+
+    var email = (c.User.FindFirst("email")?.Value
+                 ?? c.User.FindAll("preferred_username").Select(x => x.Value).FirstOrDefault(v => v.Contains('@')))?.Trim().ToLowerInvariant();
+    if (string.IsNullOrEmpty(email) || email.Length > 254 || !System.Text.RegularExpressions.Regex.IsMatch(email, @"^[^@\s""]+@[^@\s""]+\.[^@\s""]+$"))
+        return Fail("Akun IDS tanpa email", "Akun IDS Anda tidak menyertakan alamat email yang valid, sehingga tidak dapat dicocokkan dengan akun LPMS3.", 403, retry: false);
+
+    var http = f.CreateClient("op");
+    var host = OpHost(c);
+    HttpRequestMessage Api(HttpMethod m, string path, object? body = null)
+    {
+        var r = new HttpRequestMessage(m, opBase + path);
+        r.Headers.Host = host;
+        r.Headers.Authorization = new("Basic", Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes("apikey:" + key)));
+        if (body != null) r.Content = new StringContent(JsonSerializer.Serialize(body), System.Text.Encoding.UTF8, "application/json");
+        return r;
+    }
+    try
+    {
+        var filter = JsonSerializer.Serialize(new[] { new Dictionary<string, object> { ["login"] = new Dictionary<string, object> { ["operator"] = "=", ["values"] = new[] { email } } } });
+        using var found = await http.SendAsync(Api(HttpMethod.Get, "/api/v3/users?filters=" + Uri.EscapeDataString(filter)));
+        if (!found.IsSuccessStatusCode)
+        {
+            app.Logger.LogError("ENTER cari akun gagal status={S}", (int)found.StatusCode);
+            return Fail("Gagal masuk", "Akun LPMS3 tidak dapat diperiksa saat ini. Coba lagi beberapa saat lagi.", 502);
+        }
+        using var doc = JsonDocument.Parse(await found.Content.ReadAsStringAsync());
+        var els = doc.RootElement.GetProperty("_embedded").GetProperty("elements");
+        var pwd = Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(24)) + "aA1!";
+
+        if (els.GetArrayLength() == 0)
+        {
+            // IDS dapat mengirim klaim sebagai array JSON (mis. ["username","Nama Lengkap"]); ambil nilai terpanjang.
+            string Pick(string t)
+            {
+                var vs = c.User.FindAll(t).Select(x => x.Value?.Trim() ?? "").Where(x => x.Length > 0)
+                    .SelectMany(v => { if (v.StartsWith('[')) { try { return JsonSerializer.Deserialize<string[]>(v) ?? Array.Empty<string>(); } catch (JsonException) { } } return new[] { v }; })
+                    .Select(x => x.Trim()).Where(x => x.Length > 0).ToList();
+                return vs.Count == 0 ? "" : vs.OrderByDescending(x => x.Length).First();
+            }
+            var fullName = Pick("given_name"); if (fullName == "") fullName = Pick("name"); if (fullName == "") fullName = email;
+            var familyRaw = Pick("family_name");
+            string given, family;
+            if (familyRaw != "" && familyRaw != "-") { given = fullName; family = familyRaw; }
+            else { var parts = fullName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries); given = parts[0]; family = parts.Length > 1 ? parts[1] : "-"; }
+            // Akun baru selalu pengguna biasa. Admin diberikan oleh administrator di dalam aplikasi.
+            using var cr = await http.SendAsync(Api(HttpMethod.Post, "/api/v3/users", new { login = email, email, firstName = given, lastName = family, admin = false, status = "active", password = pwd }));
+            if (!cr.IsSuccessStatusCode)
+            {
+                app.Logger.LogError("ENTER buat akun gagal email={Email} status={S}", email, (int)cr.StatusCode);
+                return Fail("Gagal masuk", "Akun LPMS3 Anda tidak dapat dibuat. Hubungi administrator.", 502);
+            }
+            app.Logger.LogInformation("ENTER akun baru email={Email} admin=false", email);
+        }
+        else
+        {
+            var el = els[0];
+            var id = el.GetProperty("id").GetInt32();
+            var status = el.TryGetProperty("status", out var st) ? st.GetString() : null;
+            var admin = el.TryGetProperty("admin", out var ad) && ad.ValueKind == JsonValueKind.True;
+            if (status == "locked")
+            {
+                app.Logger.LogWarning("ENTER ditolak: akun terkunci email={Email}", email);
+                return Fail("Akun dinonaktifkan", "Akun LPMS3 Anda sedang dinonaktifkan. Hubungi administrator aplikasi untuk mengaktifkannya kembali.", 403, retry: false);
+            }
+            // Hanya kata sandi sesi bridge yang diperbarui; status diaktifkan hanya untuk akun undangan/terdaftar yang belum aktif.
+            object patch = status == "active" ? new { password = pwd } : new { status = "active", password = pwd };
+            using var up = await http.SendAsync(Api(HttpMethod.Patch, "/api/v3/users/" + id, patch));
+            if (!up.IsSuccessStatusCode)
+            {
+                app.Logger.LogError("ENTER sinkron akun gagal email={Email} status={S}", email, (int)up.StatusCode);
+                return Fail("Gagal masuk", "Akun LPMS3 Anda tidak dapat disiapkan. Coba lagi, atau hubungi administrator.", 502);
+            }
+            app.Logger.LogInformation("ENTER email={Email} admin={Admin} status={Status}", email, admin, status);
+        }
+
+        // Login form OpenProject atas nama pengguna.
+        HttpRequestMessage Web(HttpMethod m, string path, string? cookie = null)
+        { var r = new HttpRequestMessage(m, opBase + path); r.Headers.Host = host; if (cookie != null) r.Headers.Add("Cookie", cookie); return r; }
+        using var form = await http.SendAsync(Web(HttpMethod.Get, "/login"));
+        var html = await form.Content.ReadAsStringAsync();
+        var m1 = System.Text.RegularExpressions.Regex.Match(html, "name=\"authenticity_token\"[^>]*value=\"([^\"]+)\"");
+        if (!m1.Success) m1 = System.Text.RegularExpressions.Regex.Match(html, "name=\"csrf-token\"[^>]*content=\"([^\"]+)\"");
+        if (!m1.Success) { app.Logger.LogError("ENTER token CSRF login OpenProject tidak ditemukan (status {S}).", (int)form.StatusCode); return Fail("Gagal masuk", "Aplikasi belum siap menerima login. Coba lagi beberapa saat lagi.", 502); }
+        var sess = string.Join("; ", form.Headers.TryGetValues("Set-Cookie", out var sc) ? sc.Select(x => x.Split(';')[0]) : Array.Empty<string>());
+        var post = Web(HttpMethod.Post, "/login", sess);
+        post.Content = new FormUrlEncodedContent(new Dictionary<string, string> { ["authenticity_token"] = m1.Groups[1].Value, ["username"] = email, ["password"] = pwd });
+        using var res = await http.SendAsync(post);
+        var loc = res.Headers.Location?.ToString() ?? "";
+        if ((int)res.StatusCode != 302 || loc.Contains("/login"))
+        {
+            app.Logger.LogError("ENTER login OpenProject gagal email={Email} status={S} location={L}", email, (int)res.StatusCode, loc);
+            return Fail("Gagal masuk", "Sesi aplikasi tidak dapat dibuat untuk akun Anda. Coba lagi, atau hubungi administrator.", 502);
+        }
+        if (!res.Headers.TryGetValues("Set-Cookie", out var cks) || !cks.Any(x => x.StartsWith(OpSessionCookie + "=")))
+        {
+            app.Logger.LogError("ENTER login OpenProject tanpa cookie sesi email={Email} location={L}", email, loc);
+            return Fail("Gagal masuk", "Sesi aplikasi tidak dapat dibuat untuk akun Anda. Coba lagi, atau hubungi administrator.", 502);
+        }
+        foreach (var ck in cks) c.Response.Headers.Append("Set-Cookie", ck);
+        return Results.Redirect(back ?? "/projects");
+    }
+    catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException or KeyNotFoundException or InvalidOperationException)
+    {
+        app.Logger.LogError(ex, "ENTER galat jembatan email={Email}", email);
+        return Fail("Gagal masuk", "Aplikasi tidak dapat dihubungi saat ini. Coba lagi beberapa saat lagi.", 502);
+    }
+});
+
+// Halaman depan: satu tombol untuk semua orang. Bila sesi IDS masih ada, langsung sambung ke aplikasi.
 app.MapGet("/", (HttpContext c) =>
-{
-    static string E(string? v) => System.Net.WebUtility.HtmlEncode(v ?? "");
-    string page(string body) => UixPage("Masuk", body);
-    // Sudah login IDS: '/' (mis. klik logo) menyambung ulang sesi aplikasi lalu masuk ke daftar proyek.
-    if (c.User.Identity?.IsAuthenticated == true) return Results.Redirect("/ids/enter");
-    if (c.User.Identity?.IsAuthenticated != true)
-        return Results.Content(page("<h1>LPMS3</h1><p>Masuk menggunakan akun IDS Len.</p>"
-            + "<form method=\"get\" action=\"/ids/login\"><fieldset><legend>Masuk sebagai</legend>"
-            + "<label class=\"rd\"><input type=\"radio\" name=\"as\" value=\"user\" checked><span>Pengguna</span></label>"
-            + "<label class=\"rd\"><input type=\"radio\" name=\"as\" value=\"admin\"><span>Admin</span></label></fieldset>"
-            + "<button class=\"btn\" type=\"submit\">Masuk dengan IDS</button></form>"
-            + "<small>Keduanya memakai IDS Len. Hak akses ditentukan oleh peran akun.</small>"), "text/html; charset=utf-8");
-    string Claim(params string[] t) => t.Select(x => c.User.FindFirst(x)?.Value).FirstOrDefault(v => v != null) ?? "-";
-    var roles = string.Join(", ", c.User.FindAll("role").Select(x => x.Value).DefaultIfEmpty("-"));
-    var body = "<h1>Berhasil masuk</h1><p>Login IDS berhasil" + (c.Request.Query.ContainsKey("admin") ? " (Admin)." : ".") + "</p><dl><dt>Nama</dt><dd>" + E(c.User.Identity.Name) + "</dd><dt>Nama pengguna</dt><dd>" + E(Claim("preferred_username", "username")) + "</dd><dt>Email</dt><dd>" + E(Claim("email")) + "</dd><dt>Peran</dt><dd>" + E(roles) + "</dd></dl><a class=\"btn o\" href=\"/ids/logout\">Keluar</a>";
-    return Results.Content(page(body), "text/html; charset=utf-8");
-});
+    c.User.Identity?.IsAuthenticated == true
+        ? Results.Redirect("/ids/enter")
+        : Page("Masuk", "<h1>LPMS3</h1><p>Masuk menggunakan akun IDS Len.</p>"
+            + "<a class=\"btn\" href=\"/ids/login\">Masuk dengan IDS</a>"
+            + "<small>Satu pintu masuk untuk semua pengguna. Hak akses ditentukan oleh peran akun Anda di LPMS3.</small>"));
+
 app.Run();

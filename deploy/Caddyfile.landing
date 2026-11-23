@@ -1,5 +1,10 @@
 # Landing page IDS di :5100; selebihnya ke OpenProject.
 :80 {
+    # Akun lokal sudah dihapus dari IdsLogin (20 Nov 2026); blok ini menjaga tautan lama tetap ke satu pintu login IDS.
+    @idslocal path /ids/local /ids/local/*
+    handle @idslocal {
+        redir * /ids/login 302
+    }
     @ids {
         path / /ids/* /signin-oidc /signout-callback-oidc /health-ids
     }
@@ -24,7 +29,8 @@
     }
     @oplogin path /login /login/* /auth/* /account/lost_password* /account/password_recovery* /account/set_recovered_password* /account/register* /account/activate*
     handle @oplogin {
-        redir * /ids/login 302
+        # {query} membawa back_url OpenProject agar pengguna kembali ke halaman yang dituju sesudah login.
+        redir * /ids/login?{query} 302
     }
     handle {
         reverse_proxy /hocuspocus* hocuspocus:1234

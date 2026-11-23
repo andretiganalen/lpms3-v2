@@ -129,7 +129,7 @@ Legenda: ✅ lulus penuh · 🟡 lulus sebagian (alur status lulus, aturan tamba
 | :-- | :-- |
 | `hariyadi.maramis@len.co.id`, `ilham.nugraha@len.co.id`, `kristian@len.co.id`, `andre.tigana@len.co.id` | **Belum terdaftar di IDS** — IDS (`dev-ids-intern.len.co.id`) bukan bagian repo ini dan agen tidak memiliki akses admin IDS (hanya `client_id/secret` untuk login OIDC). Perlu didaftarkan oleh admin IDS. |
 
-- Di sisi LPMS3 tidak ada yang perlu dibuat: IdsLogin membuat akun OpenProject otomatis pada login IDS pertama (non-admin; admin hanya bila peran IDS ∈ `AdminRoles` atau email ∈ `AdminEmails`). Password lokal OpenProject diacak dan tidak dipakai.
+- Di sisi LPMS3 tidak ada yang perlu dibuat: IdsLogin membuat akun OpenProject otomatis pada login IDS pertama (selalu non-admin). Sejak 20 Nov 2026 hanya ada satu pintu login (tanpa pilihan Pengguna/Admin, tanpa akun lokal); admin dan peran ditentukan di aplikasi (Administrasi › Pengguna) dan tidak pernah diubah oleh klaim IDS; akun yang dikunci di aplikasi ditolak saat login. Password lokal OpenProject diacak dan tidak dipakai.
 - Kata sandi awal bersama tidak dicatat di repo. Disarankan memaksa ganti saat login pertama di IDS.
 - `andre.tigana@len.co.id` (akun baru) berbeda dari admin `andre.tigana.k@len.co.id`; pastikan peruntukannya jelas agar tidak membingungkan.
 - Penempatan posisi/fungsi (`lpms3.position`, `lpms3.user_position`; saat ini kosong) ditentukan admin `andre.tigana.k@len.co.id`.
