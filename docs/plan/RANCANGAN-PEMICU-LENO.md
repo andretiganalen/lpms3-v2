@@ -161,7 +161,7 @@ Smoke `lpms3/smoke/pemicu_leno.rb` (data uji dihapus di akhir) dan uji Python un
 |---|---|---|
 | 1.35 ✅ | Endpoint, tabel, status, log, kunci, batas laju; halaman daftar pemicu untuk admin (Administrasi → Pemicu LenO). Smoke `lpms3/smoke/pemicu_leno.sh` 22/22 | Ya (curl) |
 | 1.36 | Pembaca LPMS-2 di `lpms3-data` + `lpms2_mapping.yml` | Butuh akses DB LPMS-2 dev |
-| 1.37 | Peran global, tugas registrasi dan persetujuan, pembuatan proyek dari template | Ya |
+| 1.37 ✅ | Peran global, tugas registrasi dan persetujuan, pembuatan proyek dari template (`/lpms3/pemicu/:id`). Smoke `pemicu_registrasi.rb` 33/33 | Ya |
 | 1.38 | Isi awal 9 Aspek, sambungan ke Kick-Off, smoke penuh | Ya |
 | Go-live | LenO menambahkan v2 sebagai tujuan kedua; jalan paralel dengan v1 | Butuh tim LenO |
 
@@ -171,5 +171,5 @@ Smoke `lpms3/smoke/pemicu_leno.rb` (data uji dihapus di akhir) dan uji Python un
 2. **Akses LPMS-2:** siapa yang membuat akun `lpms3_ro` dan membuka firewall dari server v2 ke DB LPMS-2? Bisakah DBA menyediakan view kontrak?
 3. **Format Kode Proyek:** custom field v2 memaksa pola `XXX-XXXXXXXX`. Apakah `kodeproyek` LPMS-1/2 selalu cocok? Kalau tidak, pola harus dilonggarkan atau kode dipetakan.
 4. ~~**Urutan Kick-Off**~~ — **diputuskan 23 Nov 2026:** Kick-Off setelah Dokumen Inisiasi disetujui Final (urutan v2 dipertahankan).
-5. **Pemilihan template:** ditentukan Admin, atau diturunkan otomatis dari data LPMS-2 (jenis kode / kelas kontrak)?
+5. ~~**Pemilihan template**~~ — **diputuskan 23 Nov 2026:** dipilih Admin Fungsi Pelaksanaan Proyek saat registrasi.
 6. **Proyek yang sudah ada di v2** dengan Kode Proyek sama: tautkan ke pemicu atau tolak?

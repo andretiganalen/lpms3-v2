@@ -41,6 +41,13 @@ id:
         diterima: "Diterima"
         kiriman_ulang: "Kiriman ulang"
         konflik: "Konflik ID LPMS-2"
+        diusulkan: "Registrasi diusulkan"
+        disetujui: "Registrasi disetujui"
+        dikembalikan: "Registrasi dikembalikan"
+        dibatalkan: "Dibatalkan"
+        proyek_dibuat: "Proyek dibuat"
+        gagal_buat_proyek: "Pembuatan proyek gagal"
+        buat_ulang: "Pembuatan proyek diulang"
       source:
         leno: "LenO"
         pengguna: "Pengguna"

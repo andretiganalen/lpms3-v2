@@ -1,16 +1,16 @@
 <% content_for :page_title, "Tugas & Notifikasi" %>
 <div class="lpms3-tugas" style="max-width:960px;margin:0 auto;padding:16px">
-  <h1 style="margin:0 0 4px">Tugas &amp; Notifikasi</h1>
+  <h1 style="margin:0 0 4px;font-weight:400;font-size:22px;color:var(--leno-title)">Tugas &amp; Notifikasi</h1>
   <p style="margin:0 0 16px;color:var(--uix-text-secondary)">
     Tugas persetujuan yang menunggu tindakan Anda: <strong data-testid="tugas-count"><%= @count %></strong> tugas.
   </p>
 
   <% if @tasks.empty? %>
-    <div style="padding:16px;border:1px solid var(--uix-border);border-radius:12px;color:var(--uix-text-secondary)">Tidak ada tugas yang menunggu.</div>
+    <div style="padding:16px;border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);color:var(--uix-text-secondary)">Tidak ada tugas yang menunggu.</div>
   <% end %>
 
   <% @tasks.each do |task| %>
-    <section style="border:1px solid var(--uix-border);border-radius:12px;padding:14px;margin-bottom:12px;background:var(--uix-surface)">
+    <section style="border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);padding:14px;margin-bottom:12px;background:var(--uix-surface)">
       <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
         <strong><%= task.work_package.subject %></strong>
         <span style="font-size:12px;padding:3px 8px;border-radius:6px;background:var(--uix-info-soft);color:var(--uix-info)">
@@ -28,11 +28,11 @@
       </div>
 
       <%= form_with url: lpms3_tugas_langkah_path(task), method: :post, local: true, style: "margin-top:10px" do %>
-        <textarea name="catatan" rows="2" placeholder="Catatan (wajib untuk revisi)" style="width:100%;border:1px solid var(--uix-border-strong);border-radius:8px;padding:8px"></textarea>
+        <textarea name="catatan" rows="2" placeholder="Catatan (wajib untuk revisi)" style="width:100%;border:1px solid var(--uix-border-strong);border-radius:var(--uix-radius-control);padding:8px"></textarea>
         <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
           <% task.actions_for(User.current).each do |aksi| %>
             <button type="submit" name="tindakan" value="<%= aksi %>"
-                    style="height:40px;padding:0 14px;border-radius:10px;border:0;font-weight:600;color:var(--uix-surface);background:<%= { "teruskan" => "var(--uix-info)", "setujui" => "var(--uix-success)", "revisi" => "var(--uix-danger)" }[aksi] %>">
+                    style="height:40px;padding:0 14px;border-radius:var(--uix-radius-control);border:0;font-weight:600;color:var(--uix-surface);background:<%= { "teruskan" => "var(--uix-info)", "setujui" => "var(--uix-success)", "revisi" => "var(--uix-danger)" }[aksi] %>">
               <%= { "teruskan" => "Teruskan ke Pejabat Eselon 2", "setujui" => "Setujui", "revisi" => "Minta revisi" }[aksi] %>
             </button>
           <% end %>
@@ -41,13 +41,32 @@
     </section>
   <% end %>
 
+  <h2 style="margin:24px 0 4px">Proyek baru dari LenO <span style="font-size:14px;color:var(--uix-text-secondary)">(<%= @pemicu.size %> menunggu)</span></h2>
+  <% if @pemicu.empty? %>
+    <div style="padding:16px;border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);color:var(--uix-text-secondary)">Tidak ada pemicu LenO yang menunggu tindakan Anda.</div>
+  <% end %>
+  <% @pemicu.each do |tr| %>
+    <section style="border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);padding:14px;margin-bottom:12px;background:var(--uix-surface)">
+      <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+        <strong><%= tr.nama_proyek.presence || tr.kode_proyek %></strong>
+        <span style="font-size:12px;padding:3px 8px;border-radius:6px;background:var(--uix-info-soft);color:var(--uix-info)"><%= t("lpms3.pemicu_leno.status.#{tr.status}") %></span>
+      </div>
+      <div style="font-size:13px;color:var(--uix-text-body);margin-top:6px">
+        <div><span style="color:var(--uix-text-secondary)">Dari:</span> <%= tr.status == "diusulkan" ? tr.diusulkan_oleh&.name : "LenO" %></div>
+        <div><span style="color:var(--uix-text-secondary)">Kapan:</span> <%= I18n.l(tr.status == "diusulkan" ? tr.diusulkan_pada : tr.kiriman_terakhir_pada, format: "%d %b %Y %H:%M") %></div>
+        <div><span style="color:var(--uix-text-secondary)">Harus:</span> <strong><%= { "diusulkan" => "Setujui atau kembalikan registrasi", "disetujui" => "Periksa pembuatan proyek" }.fetch(tr.status, "Registrasi proyek (template, Pimpro, VP)") %></strong></div>
+      </div>
+      <%= link_to "Buka", lpms3_pemicu_path(tr), style: "display:inline-flex;align-items:center;margin-top:10px;height:40px;padding:0 14px;border-radius:var(--uix-radius-control);font-weight:600;color:var(--uix-surface);background:var(--uix-primary);text-decoration:none" %>
+    </section>
+  <% end %>
+
   <h2 style="margin:24px 0 4px">Masukan untuk Anda <span style="font-size:14px;color:var(--uix-text-secondary)">(<%= @masukan.size %> terbuka)</span></h2>
   <p style="margin:0 0 12px;color:var(--uix-text-secondary)">Perbaiki sesuai masukan (misalnya typo setelah disetujui), lalu tandai selesai. Tidak perlu reviu ulang.</p>
   <% if @masukan.empty? %>
-    <div style="padding:16px;border:1px solid var(--uix-border);border-radius:12px;color:var(--uix-text-secondary)">Tidak ada masukan terbuka.</div>
+    <div style="padding:16px;border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);color:var(--uix-text-secondary)">Tidak ada masukan terbuka.</div>
   <% end %>
   <% @masukan.each do |fb| %>
-    <section style="border:1px solid var(--uix-border);border-radius:12px;padding:14px;margin-bottom:12px;background:var(--uix-surface)">
+    <section style="border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);padding:14px;margin-bottom:12px;background:var(--uix-surface)">
       <strong><%= fb.work_package.subject %></strong>
       <div style="font-size:13px;color:var(--uix-text-body);margin-top:6px">
         <div><span style="color:var(--uix-text-secondary)">Dari:</span> <%= fb.given_by.name %></div>
@@ -55,8 +74,8 @@
         <div><span style="color:var(--uix-text-secondary)">Masukan:</span> <%= fb.body %></div>
       </div>
       <%= form_with url: lpms3_masukan_selesai_path(fb), method: :post, local: true, style: "margin-top:10px" do %>
-        <input name="catatan" placeholder="Catatan perbaikan (opsional)" style="width:100%;border:1px solid var(--uix-border-strong);border-radius:8px;padding:8px">
-        <button type="submit" style="margin-top:8px;height:40px;padding:0 14px;border-radius:10px;border:0;font-weight:600;color:var(--uix-surface);background:var(--uix-success)">Tandai sudah diperbaiki</button>
+        <input name="catatan" placeholder="Catatan perbaikan (opsional)" style="width:100%;border:1px solid var(--uix-border-strong);border-radius:var(--uix-radius-control);padding:8px">
+        <button type="submit" style="margin-top:8px;height:40px;padding:0 14px;border-radius:var(--uix-radius-control);border:0;font-weight:600;color:var(--uix-surface);background:var(--uix-success)">Tandai sudah diperbaiki</button>
       <% end %>
     </section>
   <% end %>
@@ -65,23 +84,23 @@
   <% if @tembusan_candidates.any? %>
     <p style="margin:0 0 12px;color:var(--uix-text-secondary)">Dokumen final (sudah disetujui Eselon 1) yang bisa Anda tembuskan ke Direksi.</p>
     <% @tembusan_candidates.each do |t| %>
-      <section style="border:1px solid var(--uix-border);border-radius:12px;padding:14px;margin-bottom:12px;background:var(--uix-surface)">
+      <section style="border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);padding:14px;margin-bottom:12px;background:var(--uix-surface)">
         <strong><%= t.work_package.subject %></strong>
         <div style="font-size:13px;color:var(--uix-text-body);margin-top:6px">
           <div><span style="color:var(--uix-text-secondary)">Proyek:</span> <%= t.project.name %></div>
           <div><span style="color:var(--uix-text-secondary)">Disetujui:</span> <%= I18n.l(t.decided_at, format: "%d %b %Y %H:%M") %></div>
         </div>
         <%= form_with url: lpms3_tugas_tembusan_path(t), method: :post, local: true, style: "margin-top:10px" do %>
-          <button type="submit" style="height:40px;padding:0 14px;border-radius:10px;border:0;font-weight:600;color:var(--uix-surface);background:var(--uix-info)">Laporkan ke Direksi</button>
+          <button type="submit" style="height:40px;padding:0 14px;border-radius:var(--uix-radius-control);border:0;font-weight:600;color:var(--uix-surface);background:var(--uix-primary)">Laporkan ke Direksi</button>
         <% end %>
       </section>
     <% end %>
   <% end %>
   <% if @tembusan_list.empty? %>
-    <div style="padding:16px;border:1px solid var(--uix-border);border-radius:12px;color:var(--uix-text-secondary)">Belum ada tembusan yang diterima.</div>
+    <div style="padding:16px;border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);color:var(--uix-text-secondary)">Belum ada tembusan yang diterima.</div>
   <% end %>
   <% @tembusan_list.each do |t| %>
-    <section style="border:1px solid var(--uix-border);border-radius:12px;padding:14px;margin-bottom:12px;background:var(--uix-surface)">
+    <section style="border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);padding:14px;margin-bottom:12px;background:var(--uix-surface)">
       <strong><%= t.work_package.subject %></strong>
       <div style="font-size:13px;color:var(--uix-text-body);margin-top:6px">
         <div><span style="color:var(--uix-text-secondary)">Dari:</span> <%= t.tembusan_by&.name %> (Eselon 1)</div>
@@ -93,33 +112,33 @@
 
   <h2 style="margin:24px 0 4px">Kick-Off Proyek <span style="font-size:14px;color:var(--uix-text-secondary)">(BOP-001 §5.2.2)</span></h2>
   <% if @kickoff_tunjuk.empty? && @kickoff_undang.empty? %>
-    <div style="padding:16px;border:1px solid var(--uix-border);border-radius:12px;color:var(--uix-text-secondary)">Tidak ada Kick-Off yang menunggu tindakan Anda.</div>
+    <div style="padding:16px;border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);color:var(--uix-text-secondary)">Tidak ada Kick-Off yang menunggu tindakan Anda.</div>
   <% end %>
   <% @kickoff_tunjuk.each do |k| %>
-    <section style="border:1px solid var(--uix-border);border-radius:12px;padding:14px;margin-bottom:12px;background:var(--uix-surface)">
+    <section style="border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);padding:14px;margin-bottom:12px;background:var(--uix-surface)">
       <strong><%= k.project.name %></strong>
       <p style="font-size:13px;color:var(--uix-text-secondary);margin:6px 0">Dari: Dokumen Inisiasi telah disetujui final. Harus: tunjuk Project Analis (peran "Project Analis" di proyek ini).</p>
       <% if k.analis_candidates.empty? %>
         <div style="font-size:13px;color:var(--uix-danger)">Belum ada anggota proyek dengan peran Project Analis.</div>
       <% else %>
         <%= form_with url: lpms3_kickoff_tunjuk_path(k), method: :post, local: true do %>
-          <select name="analis_id" style="border:1px solid var(--uix-border-strong);border-radius:8px;padding:8px"><% k.analis_candidates.each do |u| %><option value="<%= u.id %>"><%= u.name %></option><% end %></select>
-          <button type="submit" style="height:40px;padding:0 14px;border-radius:10px;border:0;font-weight:600;color:var(--uix-surface);background:var(--uix-info)">Tunjuk Project Analis</button>
+          <select name="analis_id" style="border:1px solid var(--uix-border-strong);border-radius:var(--uix-radius-control);padding:8px"><% k.analis_candidates.each do |u| %><option value="<%= u.id %>"><%= u.name %></option><% end %></select>
+          <button type="submit" style="height:40px;padding:0 14px;border-radius:var(--uix-radius-control);border:0;font-weight:600;color:var(--uix-surface);background:var(--uix-primary)">Tunjuk Project Analis</button>
         <% end %>
       <% end %>
     </section>
   <% end %>
   <% @kickoff_undang.each do |k| %>
-    <section style="border:1px solid var(--uix-border);border-radius:12px;padding:14px;margin-bottom:12px;background:var(--uix-surface)">
+    <section style="border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);padding:14px;margin-bottom:12px;background:var(--uix-surface)">
       <strong><%= k.project.name %></strong>
       <p style="font-size:13px;color:var(--uix-text-secondary);margin:6px 0">Dari: <%= k.assigned_by&.name %> (Fungsi Pengawasan Proyek). Harus: kirim undangan Kick-Off ke seluruh stakeholder.</p>
       <% k.roster.each do |_, r| %>
         <div style="font-size:13px;color:<%= r[:users].any? ? 'var(--uix-success)' : 'var(--uix-danger)' %>"><%= r[:label] %>: <%= r[:users].any? ? r[:users].map(&:name).join(', ') : 'BELUM TERISI (wajib)' %></div>
       <% end %>
       <%= form_with url: lpms3_kickoff_undang_path(k), method: :post, local: true, style: "margin-top:10px" do %>
-        <input type="datetime-local" name="waktu" required style="border:1px solid var(--uix-border-strong);border-radius:8px;padding:8px">
-        <textarea name="agenda" rows="2" placeholder="Agenda rapat" style="width:100%;border:1px solid var(--uix-border-strong);border-radius:8px;padding:8px;margin-top:6px"></textarea>
-        <button type="submit" style="margin-top:8px;height:40px;padding:0 14px;border-radius:10px;border:0;font-weight:600;color:var(--uix-surface);background:var(--uix-success)">Kirim undangan Kick-Off</button>
+        <input type="datetime-local" name="waktu" required style="border:1px solid var(--uix-border-strong);border-radius:var(--uix-radius-control);padding:8px">
+        <textarea name="agenda" rows="2" placeholder="Agenda rapat" style="width:100%;border:1px solid var(--uix-border-strong);border-radius:var(--uix-radius-control);padding:8px;margin-top:6px"></textarea>
+        <button type="submit" style="margin-top:8px;height:40px;padding:0 14px;border-radius:var(--uix-radius-control);border:0;font-weight:600;color:var(--uix-surface);background:var(--uix-success)">Kirim undangan Kick-Off</button>
       <% end %>
     </section>
   <% end %>

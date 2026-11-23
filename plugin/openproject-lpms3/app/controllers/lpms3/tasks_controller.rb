@@ -3,6 +3,7 @@
 module Lpms3
   # Tugas persetujuan berjenjang: daftar tugas (jumlah + dari siapa, kapan, harus apa) dan langkah keputusan.
   class TasksController < ::ApplicationController
+    layout "global" # sidebar global seperti LenO
     AT = ::Lpms3::ApprovalTask
 
     before_action :require_login
@@ -16,6 +17,7 @@ module Lpms3
       @tembusan_list = AT.tembusan_for(User.current)
       @kickoff_tunjuk = ::Lpms3::Kickoff.pending_for(User.current).select { |k| k.state == "menunggu_analis" }
       @kickoff_undang = ::Lpms3::Kickoff.pending_for(User.current).select { |k| k.state == "menunggu_undangan" }
+      @pemicu = ::Lpms3::Inbox.pemicu(User.current)
     end
 
     # Pengaju mengirim dokumen (WP) untuk persetujuan. Hanya dokumen yang bisa dilihat pengguna.

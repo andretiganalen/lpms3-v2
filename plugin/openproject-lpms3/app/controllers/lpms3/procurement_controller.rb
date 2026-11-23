@@ -13,7 +13,7 @@ module Lpms3
 
       sub ? :"lpms3_fase_eksekusi_pengadaan_#{sub}" : :lpms3_fase_eksekusi_pengadaan
     end
-    layout "base"
+    layout -> { @project ? "base" : "global" } # sidebar project atau global
 
     def show
       scope = ::WorkPackage.visible(User.current)

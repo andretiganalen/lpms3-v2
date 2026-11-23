@@ -6,7 +6,7 @@ module Lpms3
   class GuideController < ::ApplicationController
     no_authorization_required! :show
     skip_before_action :check_if_login_required
-    layout "base"
+    layout "global" # sidebar global seperti LenO
 
     def show; end
   end

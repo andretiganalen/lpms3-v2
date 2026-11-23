@@ -8,7 +8,7 @@ module Lpms3
     before_action :require_finance, except: %i[index]
     before_action :require_admin_only, only: %i[update_source]
     no_authorization_required! :index, :create_currency, :update_currency, :create_rate, :fetch, :update_source, :apply_budget
-    layout "base"
+    layout "global" # sidebar global seperti LenO
 
     def index
       @fx = ::OpenProject::Lpms3::Fx

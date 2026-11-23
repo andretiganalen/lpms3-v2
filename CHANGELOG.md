@@ -1,4 +1,20 @@
 # CHANGELOG
+## 17.9.7-lpms3.1.38 — tampilan LenO: header Reminder/Tasklist/Notifikasi, profil, sidebar (23 Nov 2026)
+Mengikuti template `docs/image/template-uix-leno/` (10 tangkapan layar LenO).
+- **Header**: bilah merah bergradasi, blok logo putih selebar sidebar, ikon putih. Tiga panel tarik-turun dengan badge jumlah: **Reminder** (pengingat work package buatan pengguna + WP miliknya jatuh tempo ≤3 hari/terlambat), **Tasklist** (Tugas & Notifikasi LPMS3: persetujuan, Kick-Off, masukan, tembusan, pemicu LenO; "Lihat dalam grid"), **Notifikasi** (notifikasi in-app OpenProject belum dibaca; "Tandai sudah dibaca", "Lihat semua"; lonceng bawaan disembunyikan). Data dirender saat halaman dimuat dan disegarkan tiap 60 dtk / saat panel dibuka (`GET /lpms3/header/ringkasan`, `POST /lpms3/header/notifikasi/baca`; login wajib; hanya data milik pengguna). Esc menutup panel.
+- **Profil**: nama tebal + jabatan kecil (grup Fungsi pengguna, lalu peran global) di kiri avatar.
+- **Sidebar** putih selebar penuh, teks 12px, item aktif merah muda + teks merah + penanda kanan merah, submenu berbulatan. Halaman global LPMS3 (Tugas, Pemicu, Mata uang, Portofolio, Panduan, Pengadaan lintas project) memakai layout `global` sehingga sidebar selalu tampil.
+- **Halaman**: latar abu muda, kartu putih bersudut 4px, judul halaman 22px tipis, tombol aksi merah. Komponen untuk halaman berikutnya: `.lpms3-searchbar`, `.lpms3-fchips`/`.lpms3-fchip`, `.lpms3-seg`, `.lpms3-panel` (header merah), `.lpms3-tag`.
+- Modul `OpenProject::Lpms3::HeaderSummary`, `Lpms3::HeaderController`; token warna `--leno-*` di `uix.css`. Regresi: smoke pemicu 22/22, registrasi 33/33.
+
+## 17.9.7-lpms3.1.37 — registrasi dan persetujuan proyek dari pemicu LenO (23 Nov 2026)
+Tahap ketiga `docs/plan/RANCANGAN-PEMICU-LENO.md` (1.36, pembaca LPMS-2, menunggu akses DB). Keputusan: template dipilih Admin.
+- **Peran global baru** (seed `80_pemicu_roles.rb`): "Admin Fungsi Pelaksanaan Proyek" (`lpms3_register_project_trigger`) dan "Pejabat Eselon 1 Fungsi Pelaksanaan Proyek" (`lpms3_approve_project_trigger`). Wewenang dibaca dari keanggotaan peran global (langsung atau lewat grup); **admin OpenProject tidak otomatis berwenang**.
+- **Halaman pemicu** `/lpms3/pemicu/:id`: Admin memilih template (Prediktif/Hibrid/Purnajual), nama proyek, Kode Proyek LPMS3 (format atribut Kode Proyek, unik terhadap proyek dan pemicu lain), Pimpro, VP Fungsi Pelaksanaan Proyek. Pejabat Eselon 1 menyetujui atau mengembalikan (catatan wajib); **pengusul tidak dapat memutus usulannya sendiri** walau memegang dua peran. Admin dapat membatalkan pemicu (alasan wajib). Semua langkah masuk riwayat append-only.
+- **Proyek dibuat di job** `Lpms3::BuatProyekDariPemicuJob` (±7 dtk): salin template (anggota, WP, wiki), Pimpro dan VP menjadi anggota (peran Pimpro / Fungsi Pelaksanaan Proyek (Struktural)), semua atribut proyek diaktifkan, diisi Kode Proyek, LPMS-2 Proyek ID (atribut baru), Pimpro, Fungsi Pelaksanaan Proyek, Pendekatan Delivery. Idempoten (tidak pernah ganda); gagal = dibatalkan seluruhnya, galat tercatat, Admin dapat "Coba buat proyek lagi". Kick-Off **tidak** dibuat di sini (tetap setelah Dokumen Inisiasi disetujui Final).
+- **Tugas & Notifikasi**: bagian "Proyek baru dari LenO" (dari, kapan, harus apa) dan jumlahnya ikut di badge. Administrasi → Pemicu LenO menautkan ke halaman pemicu.
+- Migrasi `20261123000002`. Smoke `lpms3/smoke/pemicu_registrasi.rb` (33 skenario, dalam transaksi yang di-rollback).
+
 ## 17.9.7-lpms3.1.35 — penerima pemicu proyek dari LenO (23 Nov 2026)
 Tahap pertama `docs/plan/RANCANGAN-PEMICU-LENO.md`: menerima dan mencatat; pembaca LPMS-2 (1.36) dan registrasi/persetujuan (1.37) menyusul.
 - **API** `POST /lpms3/api/pemicu-proyek` dan `GET /lpms3/api/pemicu-proyek/:kode_proyek` (`Lpms3::PemicuLenoController`, `ActionController::API`: tanpa sesi/login/CSRF). Kunci bersama di header `X-Lpms3-Key`, dibandingkan constant-time dengan `LPMS3_LENO_KEYS` (min. 32 karakter, boleh dua nilai untuk rotasi; kosong = 401). Batas 60/menit per alamat (429), body maks. 16 KB (413), validasi isian (400), `lpms2_proyek_id` berbeda (409). Log hanya metadata, tanpa kunci.

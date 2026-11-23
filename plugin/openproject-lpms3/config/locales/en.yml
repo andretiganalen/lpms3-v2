@@ -41,6 +41,13 @@ en:
         diterima: "Received"
         kiriman_ulang: "Resent"
         konflik: "LPMS-2 ID conflict"
+        diusulkan: "Registration proposed"
+        disetujui: "Registration approved"
+        dikembalikan: "Registration returned"
+        dibatalkan: "Cancelled"
+        proyek_dibuat: "Project created"
+        gagal_buat_proyek: "Project creation failed"
+        buat_ulang: "Project creation retried"
       source:
         leno: "LenO"
         pengguna: "User"

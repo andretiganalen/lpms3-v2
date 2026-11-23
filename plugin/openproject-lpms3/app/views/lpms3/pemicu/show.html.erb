@@ -1,0 +1,134 @@
+<% tr = @trigger; me = User.current %>
+<% content_for :page_title, "Pemicu LenO #{tr.kode_proyek}" %>
+<% box = "border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);padding:14px;margin-bottom:12px;background:var(--uix-surface)" %>
+<% field = "width:100%;border:1px solid var(--uix-border-strong);border-radius:var(--uix-radius-control);padding:8px" %>
+<% muted = "color:var(--uix-text-secondary)" %>
+<div class="lpms3-pemicu" style="max-width:960px;margin:0 auto;padding:16px">
+  <p style="margin:0 0 4px;font-size:13px"><%= link_to "← Tugas & Notifikasi", lpms3_tugas_path %></p>
+  <h1 style="margin:0 0 4px">Pemicu proyek dari LenO: <%= tr.kode_proyek %></h1>
+  <p style="margin:0 0 16px;<%= muted %>">
+    Status: <strong data-testid="pemicu-status"><%= t("lpms3.pemicu_leno.status.#{tr.status}") %></strong>
+    · diterima <%= format_time(tr.diterima_pada) %> · <%= tr.jumlah_kiriman %> kiriman
+  </p>
+
+  <section style="<%= box %>" aria-labelledby="pemicu-data">
+    <h2 id="pemicu-data" style="margin:0 0 8px;font-size:16px">Data dari LenO</h2>
+    <div style="font-size:13px">
+      <div><span style="<%= muted %>">Kode proyek LPMS-1/2:</span> <%= tr.kode_proyek %></div>
+      <div><span style="<%= muted %>">ID LPMS-2:</span> <%= tr.lpms2_proyek_id || "—" %></div>
+      <div><span style="<%= muted %>">Nota:</span> <%= [tr.nota["nomor"], tr.nota["tanggal"]].compact.join(" · ").presence || "—" %></div>
+      <div><span style="<%= muted %>">Data LPMS-2:</span> belum dibaca otomatis (rilis 1.36). Isi data registrasi secara manual.</div>
+    </div>
+  </section>
+
+  <% if tr.status.in?(%w[diusulkan disetujui proyek_dibuat dikembalikan]) && tr.diusulkan_oleh %>
+    <section style="<%= box %>" aria-labelledby="pemicu-usulan">
+      <h2 id="pemicu-usulan" style="margin:0 0 8px;font-size:16px">Usulan registrasi</h2>
+      <div style="font-size:13px">
+        <div><span style="<%= muted %>">Dari:</span> <%= tr.diusulkan_oleh.name %> · <%= format_time(tr.diusulkan_pada) %></div>
+        <div><span style="<%= muted %>">Nama proyek:</span> <%= tr.nama_proyek %></div>
+        <div><span style="<%= muted %>">Kode Proyek LPMS3:</span> <%= tr.kode_proyek_lpms3 %></div>
+        <div><span style="<%= muted %>">Template:</span> <%= tr.template_identifier %></div>
+        <div><span style="<%= muted %>">Pimpro:</span> <%= tr.pimpro&.name %></div>
+        <div><span style="<%= muted %>">VP Fungsi Pelaksanaan Proyek:</span> <%= tr.vp&.name %></div>
+        <% if tr.catatan_usulan.present? %><div><span style="<%= muted %>">Catatan:</span> <%= tr.catatan_usulan %></div><% end %>
+        <% if tr.diputus_oleh %>
+          <div><span style="<%= muted %>">Keputusan:</span> <%= tr.diputus_oleh.name %> · <%= format_time(tr.diputus_pada) %><%= " · #{tr.catatan_keputusan}" if tr.catatan_keputusan.present? %></div>
+        <% end %>
+        <% if tr.project %><div><span style="<%= muted %>">Proyek:</span> <%= link_to tr.project.name, project_path(tr.project) %></div><% end %>
+        <% if tr.pembuatan_galat.present? && tr.project.nil? %>
+          <div style="color:var(--uix-danger)">Pembuatan proyek gagal: <%= tr.pembuatan_galat %></div>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
+  <% if tr.can_register?(me) %>
+    <section style="<%= box %>" aria-labelledby="pemicu-registrasi">
+      <h2 id="pemicu-registrasi" style="margin:0 0 4px;font-size:16px">Registrasi proyek</h2>
+      <p style="margin:0 0 10px;font-size:13px;<%= muted %>">Harus: pilih template, isi nama dan Kode Proyek LPMS3, tetapkan Pimpro dan VP, lalu ajukan ke Pejabat Eselon 1 Fungsi Pelaksanaan Proyek.</p>
+      <%= form_with url: lpms3_pemicu_usulkan_path(tr), method: :post, local: true do %>
+        <div style="display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+          <label>Template proyek
+            <select name="template" required style="<%= field %>">
+              <option value="">— pilih —</option>
+              <% @templates.each do |p| %><option value="<%= p.identifier %>" <%= "selected" if p.identifier == tr.template_identifier %>><%= p.name %></option><% end %>
+            </select>
+          </label>
+          <label>Nama proyek
+            <input name="nama_proyek" required maxlength="255" value="<%= tr.nama_proyek %>" style="<%= field %>">
+          </label>
+          <label>Kode Proyek LPMS3
+            <input name="kode_proyek_lpms3" required value="<%= tr.kode_proyek_lpms3 || tr.kode_proyek %>" style="<%= field %>"
+                   <% if @kode_re %>pattern="<%= @kode_re.source.delete_prefix('^').delete_suffix('$') %>" title="Format <%= @kode_re.source %>"<% end %>>
+            <% if @kode_re %><small style="<%= muted %>">Format: <%= @kode_re.source %></small><% end %>
+          </label>
+          <label>Pimpro
+            <select name="pimpro_id" required style="<%= field %>">
+              <option value="">— pilih —</option>
+              <% @users.each do |u| %><option value="<%= u.id %>" <%= "selected" if u.id == tr.pimpro_id %>><%= u.name %></option><% end %>
+            </select>
+          </label>
+          <label>VP Fungsi Pelaksanaan Proyek
+            <select name="vp_id" required style="<%= field %>">
+              <option value="">— pilih —</option>
+              <% @users.each do |u| %><option value="<%= u.id %>" <%= "selected" if u.id == tr.vp_id %>><%= u.name %></option><% end %>
+            </select>
+          </label>
+        </div>
+        <label style="display:block;margin-top:10px">Catatan (opsional)
+          <textarea name="catatan" rows="2" style="<%= field %>"><%= tr.catatan_usulan %></textarea>
+        </label>
+        <button type="submit" style="margin-top:10px;height:40px;padding:0 14px;border-radius:var(--uix-radius-control);border:0;font-weight:600;color:var(--uix-surface);background:var(--uix-primary)">Ajukan registrasi</button>
+      <% end %>
+    </section>
+  <% end %>
+
+  <% if tr.can_decide?(me) %>
+    <section style="<%= box %>" aria-labelledby="pemicu-keputusan">
+      <h2 id="pemicu-keputusan" style="margin:0 0 4px;font-size:16px">Keputusan registrasi</h2>
+      <p style="margin:0 0 10px;font-size:13px;<%= muted %>">Harus: setujui (proyek dibuat dari template) atau kembalikan ke Admin dengan catatan.</p>
+      <%= form_with url: lpms3_pemicu_putuskan_path(tr), method: :post, local: true do %>
+        <textarea name="catatan" rows="2" placeholder="Catatan (wajib bila dikembalikan)" style="<%= field %>"></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+          <button type="submit" name="keputusan" value="setujui" style="height:40px;padding:0 14px;border-radius:var(--uix-radius-control);border:0;font-weight:600;color:var(--uix-surface);background:var(--uix-success)">Setujui</button>
+          <button type="submit" name="keputusan" value="kembalikan" style="height:40px;padding:0 14px;border-radius:var(--uix-radius-control);border:0;font-weight:600;color:var(--uix-surface);background:var(--uix-danger)">Kembalikan</button>
+        </div>
+      <% end %>
+    </section>
+  <% elsif tr.status == "diusulkan" && tr.diusulkan_oleh_id == me.id %>
+    <section style="<%= box %>"><p style="margin:0;font-size:13px;<%= muted %>">Anda mengusulkan registrasi ini. Keputusan diambil Pejabat Eselon 1 Fungsi Pelaksanaan Proyek lain.</p></section>
+  <% end %>
+
+  <% if tr.can_retry_creation?(me) %>
+    <section style="<%= box %>">
+      <%= form_with url: lpms3_pemicu_buat_ulang_path(tr), method: :post, local: true do %>
+        <p style="margin:0 0 8px;font-size:13px"><%= tr.pembuatan_galat.present? ? "Pembuatan proyek gagal." : "Proyek sedang dibuat. Muat ulang halaman ini beberapa saat lagi." %></p>
+        <button type="submit" style="height:40px;padding:0 14px;border-radius:var(--uix-radius-control);border:0;font-weight:600;color:var(--uix-surface);background:var(--uix-primary)">Coba buat proyek lagi</button>
+      <% end %>
+    </section>
+  <% end %>
+
+  <% if tr.can_cancel?(me) %>
+    <details style="<%= box %>">
+      <summary>Batalkan pemicu</summary>
+      <%= form_with url: lpms3_pemicu_batalkan_path(tr), method: :post, local: true, style: "margin-top:8px" do %>
+        <textarea name="alasan" rows="2" required placeholder="Alasan pembatalan (wajib)" style="<%= field %>"></textarea>
+        <button type="submit" style="margin-top:8px;height:40px;padding:0 14px;border-radius:var(--uix-radius-control);border:0;font-weight:600;color:var(--uix-surface);background:var(--uix-danger)">Batalkan pemicu</button>
+      <% end %>
+    </details>
+  <% end %>
+
+  <section style="<%= box %>" aria-labelledby="pemicu-riwayat">
+    <h2 id="pemicu-riwayat" style="margin:0 0 8px;font-size:16px">Riwayat</h2>
+    <ol style="margin:0;padding-left:20px;font-size:13px">
+      <% tr.events.each do |ev| %>
+        <li style="margin-bottom:6px">
+          <%= format_time(ev.created_at) %> · <strong><%= t("lpms3.pemicu_leno.kind.#{ev.kind}", default: ev.kind) %></strong>
+          · <%= ev.actor&.name || t("lpms3.pemicu_leno.source.#{ev.sumber}", default: ev.sumber) %>
+          <% if ev.note.present? %><br><span style="<%= muted %>"><%= ev.note %></span><% end %>
+        </li>
+      <% end %>
+    </ol>
+  </section>
+</div>

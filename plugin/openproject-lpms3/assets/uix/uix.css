@@ -461,3 +461,157 @@ span.project-status--name.-not-started, span.project-status--name.-not-set, span
 .lpms3-sticky-bar__info { font-size: var(--uix-fs-body); color: var(--uix-text-body); }
 .lpms3-sticky-bar__actions { display: inline-flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .lpms3-btn--lg { height: 44px; padding: 0 20px; font-size: 15px; font-weight: 600; }
+
+/* =====================================================================================================
+   LenO skin (template docs/image/template-uix-leno): header merah bergradasi, blok logo putih di atas sidebar,
+   sidebar putih dengan item aktif merah muda + penanda kanan merah, latar halaman abu muda, kartu bersudut 4px,
+   panel header Reminder/Tasklist/Notifikasi, blok profil nama + jabatan + avatar.
+   ===================================================================================================== */
+:root {
+  --leno-header-from: #7a1b1b;
+  --leno-header-to: #a12422;
+  --leno-on-header: #ffffff;
+  --leno-header-hover: rgba(255, 255, 255, .14);
+  --leno-page: #e9ecf1;
+  --leno-menu-active-bg: #fbd5d8;
+  --leno-menu-active-fg: #d32027;
+  --leno-panel-head: #b31e23;
+  --leno-border: #dfe3e8;
+  --leno-title: #3d4451;
+  --leno-unread: #eef0f3;
+  --leno-badge: #e3262d;
+  --uix-radius-card: 4px;
+  --uix-radius-control: 4px;
+  --uix-surface-page: var(--leno-page);
+}
+html:root:root:root {
+  --header-bg-color: transparent;
+  --header-item-font-color: var(--leno-on-header);
+  --header-item-font-hover-color: var(--leno-on-header);
+  --header-item-bg-hover-color: var(--leno-header-hover);
+  --header-border-bottom-width: 0;
+  --header-border-bottom-color: transparent;
+  --body-background: var(--leno-page);
+  --main-menu-bg-color: var(--uix-surface);
+  --main-menu-bg-selected-background: var(--leno-menu-active-bg);
+  --main-menu-font-size: 12px;
+}
+
+/* Header */
+.op-app-header { background: linear-gradient(90deg, var(--leno-header-from), var(--leno-header-to)); color: var(--leno-on-header); box-shadow: 0 1px 2px rgba(16, 24, 40, .2); }
+.op-app-header .op-app-header--primer-button, .op-app-header .op-app-header--primer-button svg,
+.op-app-header .Button--invisible, .op-app-header .Button--invisible svg { color: var(--leno-on-header); }
+.op-app-header .Button--invisible:hover, .op-app-header .op-app-header--primer-button:hover { background: var(--leno-header-hover); }
+/* Blok logo putih selebar sidebar; tombol modul (hamburger) di sebelah kanannya, di atas latar merah. */
+.op-app-header--start { padding-left: 0; }
+.op-app-header--start .op-app-menu { display: flex; align-items: center; height: 100%; }
+.op-app-header--start .op-logo:not(.op-logo--icon) { order: -1; align-self: stretch; display: flex; align-items: center;
+  width: var(--main-menu-width, 260px); min-width: 180px; margin: 0 8px 0 0; padding: 0 16px; background: var(--uix-surface); }
+#lpms3-lang { border-color: rgba(255, 255, 255, .35); background: transparent; }
+#lpms3-lang .lpms3-lang__btn { color: var(--leno-on-header); }
+#lpms3-lang .lpms3-lang__btn:hover { background: var(--leno-header-hover); }
+#lpms3-lang .lpms3-lang__btn.is-active { background: var(--uix-surface); color: var(--uix-primary); }
+.op-app-header .op-app-search input, .op-app-header .op-app-search .ng-select-container { background: rgba(255, 255, 255, .14); border-color: transparent; color: var(--leno-on-header); }
+.op-app-header .op-app-search input::placeholder { color: rgba(255, 255, 255, .75); }
+/* Lonceng bawaan OpenProject digantikan panel Notifikasi LPMS3 (data sama: notifikasi in-app yang belum dibaca). */
+.op-app-header--end .op-app-menu--item:has(> .op-ian-bell) { display: none; }
+
+/* Panel header: Reminder, Tasklist, Notifikasi */
+.lpms3-hdr { display: inline-flex; align-items: center; gap: 2px; margin-right: 4px; }
+.lpms3-hdr__item { position: relative; }
+.lpms3-hdr__btn { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: 0; border-radius: var(--uix-radius-control); background: transparent; color: var(--leno-on-header); cursor: pointer; }
+.lpms3-hdr__btn:hover, .lpms3-hdr__item.is-open .lpms3-hdr__btn { background: var(--leno-header-hover); }
+.lpms3-hdr__btn svg { width: 18px; height: 18px; }
+.lpms3-hdr__btn:focus-visible { outline: 3px solid rgba(255, 255, 255, .6); outline-offset: 0; }
+.lpms3-hdr__badge { position: absolute; top: 2px; right: 1px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; border: 1.5px solid var(--leno-on-header); background: var(--leno-badge); color: var(--leno-on-header); font: 600 10px/13px var(--uix-font); text-align: center; }
+.lpms3-hdr__badge[hidden] { display: none; }
+.lpms3-hdr__panel { position: absolute; right: -8px; top: calc(100% + 8px); z-index: 1000; width: 440px; max-width: calc(100vw - 24px); max-height: 70vh; overflow: auto;
+  background: var(--uix-surface); color: var(--uix-text-body); border: 1px solid var(--leno-border); border-radius: var(--uix-radius-card); box-shadow: var(--uix-shadow-lg); text-align: left; }
+.lpms3-hdr__panel[hidden] { display: none; }
+.lpms3-hdr__head { position: sticky; top: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; background: var(--uix-surface); border-bottom: 1px solid var(--leno-border); }
+.lpms3-hdr__label { display: inline-flex; align-items: center; gap: 8px; color: var(--uix-primary); font: 500 15px/1.2 var(--uix-font); }
+.lpms3-hdr__refresh { display: inline-flex; width: 24px; height: 24px; align-items: center; justify-content: center; border: 0; border-radius: var(--uix-radius-control); background: transparent; color: var(--uix-text-secondary); cursor: pointer; }
+.lpms3-hdr__refresh:hover { background: var(--uix-surface-muted); }
+.lpms3-hdr__refresh svg { width: 14px; height: 14px; }
+.lpms3-hdr__refresh.is-busy svg { animation: lpms3-spin .8s linear infinite; }
+@keyframes lpms3-spin { to { transform: rotate(360deg); } }
+.lpms3-hdr__links { display: inline-flex; gap: 12px; }
+.lpms3-hdr__link { border: 0; background: none; padding: 0; color: var(--uix-text-secondary); font: 400 12px/1.4 var(--uix-font); text-decoration: underline; cursor: pointer; }
+.lpms3-hdr__link:hover { color: var(--uix-primary); }
+.lpms3-hdr__list { list-style: none; margin: 0; padding: 0; }
+.lpms3-hdr__entry a { display: block; padding: 10px 14px; border-bottom: 1px solid var(--leno-border); background: var(--leno-unread); color: var(--uix-text-body); text-decoration: none; }
+.lpms3-hdr__entry a:hover { background: var(--uix-surface-muted); }
+.lpms3-hdr__top { display: flex; justify-content: space-between; gap: 8px; }
+.lpms3-hdr__who { color: var(--uix-text-head); font-weight: 500; font-size: 13px; }
+.lpms3-hdr__time { flex: none; color: var(--uix-text-secondary); font-size: 11px; font-style: italic; }
+.lpms3-hdr__title, .lpms3-hdr__text { display: block; font-size: 12px; line-height: 1.45; }
+.lpms3-hdr__title { color: var(--uix-text-body); }
+.lpms3-hdr__text { color: var(--uix-text-secondary); }
+.lpms3-hdr__entry.is-danger .lpms3-hdr__text { color: var(--uix-danger); }
+.lpms3-hdr__entry.is-warning .lpms3-hdr__text { color: var(--uix-warning-text); }
+.lpms3-hdr__empty { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 22px 14px; color: var(--uix-text-secondary); font-size: 12px; }
+.lpms3-hdr__empty strong { color: var(--uix-text-head); font-weight: 500; font-size: 13px; }
+/* Blok profil: nama tebal putih + jabatan kecil, avatar di kanan. */
+.lpms3-hdr__userbtn .Button-label { display: inline-flex; align-items: center; gap: 10px; }
+.lpms3-hdr__user { display: inline-flex; flex-direction: column; align-items: flex-end; line-height: 1.2; max-width: 260px; }
+.lpms3-hdr__user strong { color: var(--leno-on-header); font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.lpms3-hdr__user small { color: rgba(255, 255, 255, .85); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+@media (max-width: 900px) { .lpms3-hdr__user { display: none; } }
+
+/* Halaman */
+body, #content-wrapper, #main, .content-overlay ~ #content-wrapper { background: var(--leno-page); }
+#content-wrapper h1, .PageHeader-title { color: var(--leno-title); font-weight: 400; font-size: 22px; }
+.PageHeader-description { font-size: 11px; color: var(--uix-text-secondary); }
+
+/* Sidebar putih: ikon + label 12px, chevron, item aktif merah muda + teks merah + penanda kanan merah, submenu berbulatan. */
+#main-menu, #menu-sidebar { background: var(--uix-surface); }
+#main-menu { box-shadow: 1px 0 0 var(--leno-border); }
+#main-menu a.op-menu--item-action { position: relative; min-height: 38px; font-size: 12px; color: var(--uix-text-body); border-radius: 0; }
+#main-menu a.op-menu--item-action:hover { background: var(--uix-surface-muted); color: var(--uix-text-head); }
+#main-menu a.op-menu--item-action.selected,
+#main-menu ul.menu_root > li:has(> ul.main-menu--children a.selected) > .main-item-wrapper a.op-menu--item-action,
+#main-menu .main-menu--children > li > a.op-menu--item-action.selected { background: var(--leno-menu-active-bg); color: var(--leno-menu-active-fg); font-weight: 500; }
+#main-menu a.op-menu--item-action.selected svg,
+#main-menu ul.menu_root > li:has(> ul.main-menu--children a.selected) > .main-item-wrapper a.op-menu--item-action svg { color: var(--leno-menu-active-fg); }
+#main-menu a.op-menu--item-action.selected::before,
+#main-menu ul.menu_root > li:has(> ul.main-menu--children a.selected) > .main-item-wrapper a.op-menu--item-action::before { content: none; }
+#main-menu a.op-menu--item-action.selected::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 3px; background: var(--leno-menu-active-fg); }
+#main-menu ul.menu_root > li.open > .main-item-wrapper a.op-menu--item-action { color: var(--leno-menu-active-fg); }
+#main-menu .main-menu--children > li > a.op-menu--item-action { padding-left: 24px; }
+#main-menu .main-menu--children > li > a.op-menu--item-action .op-menu--item-title::before { content: ""; display: inline-block; width: 9px; height: 9px; margin-right: 12px; border: 1.5px solid currentColor; border-radius: 50%; vertical-align: -1px; opacity: .8; }
+#lpms3-bottom-menu a[aria-current="page"] { background: var(--leno-menu-active-bg); color: var(--leno-menu-active-fg); }
+#lpms3-bottom-menu a[aria-current="page"]::before { content: none; }
+
+/* Kartu dan panel bergaya LenO */
+.lpms3-card, .lpms3-tugas section, .lpms3-pemicu section { border-radius: var(--uix-radius-card); border-color: var(--leno-border); }
+.lpms3-panel { background: var(--uix-surface); border: 1px solid var(--leno-border); border-radius: var(--uix-radius-card); overflow: hidden; }
+.lpms3-panel__head { padding: 10px 16px; background: var(--leno-panel-head); color: var(--leno-on-header); font-size: 14px; font-weight: 400; }
+.lpms3-panel__head--plain { background: var(--uix-surface); color: var(--leno-title); border-bottom: 1px solid var(--leno-border); }
+
+/* Bilah pencarian + chip filter (Pencarian Dokumen LenO) */
+.lpms3-searchbar { position: relative; display: flex; gap: 8px; align-items: center; }
+.lpms3-searchbar input[type="search"], .lpms3-searchbar input[type="text"] { flex: 1; height: 36px; padding: 0 12px 0 36px; border: 1px solid var(--uix-border-strong); border-radius: var(--uix-radius-control); background: var(--uix-surface); font-size: 13px; }
+.lpms3-searchbar::before { content: ""; position: absolute; left: 12px; top: 50%; width: 14px; height: 14px; transform: translateY(-50%); pointer-events: none; opacity: .55;
+  background: no-repeat center / contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23364153' d='M10.68 11.74a6 6 0 1 1 1.06-1.06l3.04 3.04a.75.75 0 1 1-1.06 1.06ZM11.5 7a4.5 4.5 0 1 0-9 0 4.5 4.5 0 0 0 9 0Z'/%3E%3C/svg%3E"); }
+.lpms3-btn--outline-primary { border: 1px solid var(--uix-primary); color: var(--uix-primary); background: var(--uix-surface); }
+.lpms3-btn--outline-primary:hover { background: var(--uix-primary-soft); }
+.lpms3-fchips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.lpms3-fchip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 12px; border: 1px solid var(--uix-border-strong); border-radius: 999px; background: var(--uix-surface); color: var(--uix-text-secondary); font-size: 12px; text-decoration: none; }
+.lpms3-fchip b { font-weight: 600; color: var(--uix-text-body); font-size: 10px; }
+.lpms3-fchip:hover { border-color: var(--uix-primary); color: var(--uix-primary); }
+.lpms3-fchip.is-active { background: var(--uix-primary-strong); border-color: var(--uix-primary-strong); color: var(--uix-on-primary); }
+.lpms3-fchip.is-active b { color: var(--uix-on-primary); }
+.lpms3-seg { display: inline-flex; padding: 3px; gap: 2px; border-radius: var(--uix-radius-control); background: var(--uix-surface); border: 1px solid var(--leno-border); }
+.lpms3-seg a, .lpms3-seg button { padding: 6px 14px; border: 0; border-radius: var(--uix-radius-control); background: transparent; color: var(--uix-primary); font-size: 13px; text-decoration: none; cursor: pointer; }
+.lpms3-seg .is-active { background: var(--uix-primary-strong); color: var(--uix-on-primary); }
+.lpms3-tag { display: inline-flex; align-items: center; height: 18px; padding: 0 7px; border: 1px solid var(--uix-primary); border-radius: 999px; color: var(--uix-primary); font-size: 10px; background: var(--uix-surface); }
+/* Halaman LPMS3: isi di atas latar abu dengan kartu putih (LenO). Halaman bawaan OpenProject tetap di panel putih. */
+body[class*="controller-lpms3/"] #content { background: transparent; }
+/* Sidebar selebar penuh: item menu tanpa sisipan kiri/kanan; pemilih project tetap bersisip. */
+#main-menu #menu-sidebar { padding: 0 0 12px; }
+#menu-sidebar .main-menu--top-container { padding: 0 12px; }
+#main-menu .main-item-wrapper { margin: 0; }
+#main-menu a.op-menu--item-action { padding-left: 20px; }
+#main-menu .main-menu--children > li > a.op-menu--item-action { padding-left: 28px; }
+/* Kotak kosong dan kartu di halaman Tugas/Pemicu berlatar putih di atas latar abu. */
+.lpms3-tugas > div[style*="border"], .lpms3-tugas section, .lpms3-pemicu section, .lpms3-pemicu details { background: var(--uix-surface); }

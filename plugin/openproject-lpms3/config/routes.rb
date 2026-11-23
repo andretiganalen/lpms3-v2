@@ -45,6 +45,10 @@ Rails.application.routes.draw do
   post "projects/:project_id/lpms3/ajukan-semua", to: "lpms3/tasks#ajukan_semua", as: :lpms3_project_ajukan_semua
   post "projects/:project_id/lpms3/ajukan/:wp_id", to: "lpms3/tasks#ajukan", as: :lpms3_project_ajukan
 
+  # Panel header gaya LenO (Reminder, Tasklist, Notifikasi): penyegaran berkala dan tandai notifikasi dibaca.
+  get "lpms3/header/ringkasan", to: "lpms3/header#ringkasan", as: :lpms3_header_ringkasan, defaults: { format: :json }
+  post "lpms3/header/notifikasi/baca", to: "lpms3/header#baca_notifikasi", as: :lpms3_header_baca, defaults: { format: :json }
+
   get "lpms3/panduan", to: "lpms3/guide#show", as: :lpms3_guide
   scope "lpms3/mata-uang", as: :lpms3_currencies do
     get "/", to: "lpms3/currencies#index", as: :index
@@ -61,6 +65,13 @@ Rails.application.routes.draw do
   post "lpms3/api/pemicu-proyek", to: "lpms3/pemicu_leno#create", as: :lpms3_api_pemicu, format: false
   get "lpms3/api/pemicu-proyek/:kode_proyek", to: "lpms3/pemicu_leno#show", as: :lpms3_api_pemicu_status,
       constraints: { kode_proyek: %r{[^/]+} }, format: false
+
+  # Registrasi dan persetujuan proyek dari pemicu LenO (1.37).
+  get "lpms3/pemicu/:id", to: "lpms3/pemicu#show", as: :lpms3_pemicu
+  post "lpms3/pemicu/:id/usulkan", to: "lpms3/pemicu#usulkan", as: :lpms3_pemicu_usulkan
+  post "lpms3/pemicu/:id/putuskan", to: "lpms3/pemicu#putuskan", as: :lpms3_pemicu_putuskan
+  post "lpms3/pemicu/:id/batalkan", to: "lpms3/pemicu#batalkan", as: :lpms3_pemicu_batalkan
+  post "lpms3/pemicu/:id/buat-ulang", to: "lpms3/pemicu#buat_ulang", as: :lpms3_pemicu_buat_ulang
 
   scope "admin" do
     get "lpms3/pemicu-leno", to: "lpms3/admin/pemicu_leno#index", as: :lpms3_admin_pemicu_leno

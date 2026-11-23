@@ -6,6 +6,7 @@ require "open_project/lpms3/aspects"
 require "open_project/lpms3/fx"
 require "open_project/lpms3/procurement"
 require "open_project/lpms3/pdf"
+require "open_project/lpms3/header_summary"
 
 module OpenProject::Lpms3
   class Engine < ::Rails::Engine
@@ -21,6 +22,13 @@ module OpenProject::Lpms3
                          { "lpms3/currencies": %i[create_currency update_currency create_rate fetch apply_budget] },
                          permissible_on: :global,
                          require: :loggedin
+        end
+        # Pemicu LenO (1.37): registrasi dan persetujuan proyek baru. Diperiksa lewat keanggotaan peran global
+        # (Lpms3::ProjectTrigger.holds_global_permission?), bukan allowed_globally?, agar admin tidak otomatis lolos.
+        %i[lpms3_register_project_trigger lpms3_approve_project_trigger].each do |perm|
+          next if OpenProject::AccessControl.permissions.any? { |pm| pm.name == perm }
+
+          map.permission perm, { "lpms3/pemicu": [] }, permissible_on: :global, require: :loggedin
         end
       end
     end

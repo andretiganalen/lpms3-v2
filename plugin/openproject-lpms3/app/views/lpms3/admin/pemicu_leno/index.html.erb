@@ -60,7 +60,7 @@
         <% @triggers.each do |tr| %>
           <tr>
             <td>
-              <strong><%= tr.kode_proyek %></strong>
+              <strong><%= link_to tr.kode_proyek, lpms3_pemicu_path(tr) %></strong>
               <% if tr.project %><br><%= link_to tr.project.name, project_path(tr.project) %><% end %>
             </td>
             <td><span class="lpms3-chip"><%= t("lpms3.pemicu_leno.status.#{tr.status}") %></span></td>

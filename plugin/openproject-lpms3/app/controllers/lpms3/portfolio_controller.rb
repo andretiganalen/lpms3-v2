@@ -3,6 +3,7 @@
 module Lpms3
   # Halaman Portofolio LPMS3: scorecard satu baris per proyek, periode Day / Week / Month / Quarter.
   class PortfolioController < ::ApplicationController
+    layout "global" # sidebar global seperti LenO
     before_action :require_login
     no_authorization_required! :show
 
