@@ -153,6 +153,25 @@ module OpenProject::Lpms3
     end
 
     config.to_prepare do
+      # Kode Proyek = identifier (1.48): saat Kode Proyek disimpan, atau proyek baru/diganti judulnya tanpa kode,
+      # identifier disamakan (Lpms3::KodeProyek). Memakai update_columns, jadi tanpa rekursi callback.
+      unless ::CustomValue.instance_variable_get(:@lpms3_kode_proyek)
+        ::CustomValue.instance_variable_set(:@lpms3_kode_proyek, true)
+        ::CustomValue.after_commit(on: %i[create update]) do
+          next unless customized_type == "Project" && custom_field_id == ::Lpms3::KodeProyek.field&.id
+
+          ::Lpms3::KodeProyek.sync_identifier!(::Project.new { |p| p.id = customized_id })
+        end
+        ::Project.after_commit(on: %i[create update]) do
+          next unless previous_changes.key?("name") || previous_changes.key?("id")
+          next if ::Lpms3::KodeProyek.kode_of(self)
+
+          ::Lpms3::KodeProyek.sync_identifier!(self)
+        end
+      end
+    end
+
+    config.to_prepare do
       # Member berjenjang (1.39): saat Pimpro ditetapkan (peran Pimpro atau atribut proyek "Pimpro"), Pejabat Eselon 2
       # atasannya dan tim default Direksi/Eselon 1 ditambahkan. Lpms3::TimProyek menahan rekursi dan menelan galat.
       unless ::MemberRole.instance_variable_get(:@lpms3_tim_proyek)

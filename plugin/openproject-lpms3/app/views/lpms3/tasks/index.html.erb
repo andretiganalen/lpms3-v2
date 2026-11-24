@@ -122,6 +122,16 @@
     <% end %>
   <% end %>
 
+  <% if @kode_proyek.present? %>
+    <h2 style="margin:24px 0 4px">Kode Proyek belum diisi <span style="font-size:14px;color:var(--uix-text-secondary)">(<%= @kode_proyek.size %> proyek)</span></h2>
+    <p class="lpms3-note">Isi atribut <strong>Kode Proyek</strong> (format XXX-XXXXXXXX) di pengaturan proyek. Kode menjadi alamat (URL) proyek dan prefiks nomor WBS; sementara dipakai 12 karakter dari judul proyek.</p>
+    <% @kode_proyek.each do |pj| %>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;margin-bottom:8px;border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);background:var(--uix-surface)">
+        <div><strong><%= pj.name %></strong><div style="font-size:12px;color:var(--uix-text-secondary)">Sementara: <%= ::Lpms3::KodeProyek.prefix(pj) %></div></div>
+        <%= link_to "Isi Kode Proyek", "/projects/#{pj.identifier}/settings/general", style: "display:inline-flex;align-items:center;height:40px;padding:0 14px;border-radius:var(--uix-radius-control);font-weight:600;color:var(--uix-surface);background:var(--uix-primary);text-decoration:none" %>
+      </div>
+    <% end %>
+  <% end %>
   <h2 style="margin:24px 0 4px">Proyek baru dari LenO <span style="font-size:14px;color:var(--uix-text-secondary)">(<%= @pemicu.size %> menunggu)</span></h2>
   <% if @pemicu.empty? %>
     <div style="padding:16px;border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);color:var(--uix-text-secondary)">Tidak ada pemicu LenO yang menunggu tindakan Anda.</div>

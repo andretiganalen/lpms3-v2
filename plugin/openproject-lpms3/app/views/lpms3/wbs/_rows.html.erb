@@ -5,10 +5,11 @@
 %>
 <% @rows.each do |r| %>
   <% n = r[:node]; leaf = r[:leaf]; edit = @editable; act = leaf && !n.root?; beku = @frozen.include?(n.id) %>
-  <tr data-id="<%= n.id %>" class="<%= 'lpms3-wbs__sum' unless leaf %> <%= 'lpms3-wbs__done' if act && n.done? %>">
-    <td class="lpms3-wbs__code"><%= n.wbs_code %></td>
+  <tr data-id="<%= n.id %>" data-parent="<%= n.parent_id %>" data-depth="<%= r[:depth] %>" class="<%= 'lpms3-wbs__sum' unless leaf %> <%= 'lpms3-wbs__done' if act && n.done? %>">
+    <td class="lpms3-wbs__code" title="Prefiks = Kode Proyek (atau 12 karakter judul sebelum kode diisi)"><%= @kode_prefix %>.<%= n.wbs_code %></td>
     <td class="lpms3-wbs__lvl"><%= n.level %></td>
     <td class="lpms3-wbs__task" style="--d:<%= r[:depth] %>">
+      <% if !leaf && !n.root? %><button type="button" class="lpms3-wbs__tg" data-tg="<%= n.id %>" aria-expanded="true" aria-label="Ciutkan/bentangkan <%= n.wbs_code %>"></button><% elsif !n.root? %><span class="lpms3-wbs__tg lpms3-wbs__tg--none" aria-hidden="true"></span><% end %>
       <% if beku %><span class="lpms3-chip lpms3-chip--ok" title="Selesai 100 % — rekam dibekukan">Beku</span><% end %>
       <% if (pg = @pengadaan && @pengadaan[n.id]) %><%= link_to "Pengadaan #{pg[:count]} item · usulan #{pg[:usulan]} %", lpms3_project_procurement_path(@project, anchor: "daftar"), class: "lpms3-chip#{pg[:usulan] > (n.pct * 100).round ? ' lpms3-chip--warn' : ''}", title: "Nilai item tertaut: Rp #{number_with_delimiter(pg[:nilai].to_i, delimiter: '.')}" %><% end %>
       <% if edit && !n.root? && !beku %>

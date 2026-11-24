@@ -22,6 +22,7 @@ module Lpms3
       @baseline_cr = ::Lpms3::Inbox.baseline_cr(User.current)
       @kontrak = ::Lpms3::Inbox.kontrak(User.current)
       @anggota = ::Lpms3::Inbox.anggota(User.current)
+      @kode_proyek = ::Lpms3::Inbox.kode_proyek(User.current)
       @isian = isian_saya(User.current)
     end
 

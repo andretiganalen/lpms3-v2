@@ -36,6 +36,40 @@
     </div>
   <% end %>
 
+  <%= javascript_tag(nonce: true) do %>
+    // Ciutkan/bentangkan induk WBS mulai Level 1 (baris Level 0 selalu tampak). Keadaan disimpan per proyek di peramban.
+    (function () {
+      var root = document.getElementById("lpms3-wbs");
+      var body = document.getElementById("lpms3-wbs-body");
+      if (!root || !body || root.dataset.tgBound) return;
+      root.dataset.tgBound = "1";
+      var KEY = "lpms3.wbs.collapsed." + root.dataset.base;
+      var collapsed = {};
+      try { collapsed = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { collapsed = {}; }
+      function save() { try { localStorage.setItem(KEY, JSON.stringify(collapsed)); } catch (e) {} }
+      function apply() {
+        var hidden = {};
+        body.querySelectorAll("tr[data-id]").forEach(function (tr) {
+          var id = tr.dataset.id, p = tr.dataset.parent;
+          var hide = !!(p && (collapsed[p] || hidden[p]));
+          if (hide) hidden[id] = true;
+          tr.hidden = hide;
+          var b = tr.querySelector("[data-tg]");
+          if (b) { b.setAttribute("aria-expanded", collapsed[id] ? "false" : "true"); b.classList.toggle("is-collapsed", !!collapsed[id]); }
+        });
+      }
+      root.addEventListener("click", function (e) {
+        var b = e.target.closest("[data-tg]");
+        if (!b) return;
+        var id = b.dataset.tg;
+        if (collapsed[id]) { delete collapsed[id]; } else { collapsed[id] = 1; }
+        save(); apply();
+      });
+      new MutationObserver(apply).observe(body, { childList: true });
+      apply();
+    })();
+  <% end %>
+
   <% if @editable %>
     <dialog id="lpms3-wbs-dlg" class="lpms3-wbs__dlg" aria-labelledby="lpms3-wbs-dlg-title">
       <form method="dialog" id="lpms3-wbs-dlg-form">

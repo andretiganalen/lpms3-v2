@@ -1060,3 +1060,13 @@ html #main-menu .op-sidemenu-filterable-tree [role="treeitem"] > .TreeViewItemCo
 html #main-menu .op-sidemenu-filterable-tree .TreeViewItemContainer:hover { background: transparent; color: var(--leno-accent); }
 html #main-menu .op-sidemenu-filterable-tree [aria-current="page"] > .TreeViewItemContainer, html #main-menu .op-sidemenu-filterable-tree [aria-selected="true"] > .TreeViewItemContainer { background: var(--leno-menu-active-bg); color: var(--leno-accent); box-shadow: inset -3px 0 0 var(--uix-primary); }
 html #main-menu .op-sidemenu-filterable-tree .TreeViewItemContentText, html #main-menu .op-sidemenu-filterable-tree a { font-size: 12px; font-weight: 400; color: inherit; text-decoration: none; }
+
+/* v6 (1.48): WBS — tombol ciut/bentang induk (Level 1 ke bawah) */
+.lpms3-wbs__tg { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-right: 4px; padding: 0; vertical-align: middle; border: 0; background: transparent; color: var(--uix-text-secondary); cursor: pointer; }
+.lpms3-wbs__tg::before { content: ""; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translate(-1px, -1px); transition: transform .12s; }
+.lpms3-wbs__tg.is-collapsed::before { transform: rotate(-45deg); }
+.lpms3-wbs__tg:hover { color: var(--uix-primary); }
+.lpms3-wbs__tg--none { cursor: default; }
+.lpms3-wbs__tg--none::before { content: none; }
+.lpms3-wbs__table tr[hidden] { display: none; }
+.lpms3-wbs__code { min-width: 120px; }

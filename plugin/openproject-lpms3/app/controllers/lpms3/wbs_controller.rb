@@ -102,6 +102,7 @@ module Lpms3
 
     def load_table
       @rows = ::Lpms3::Wbs.rows(@project)
+      @kode_prefix = ::Lpms3::KodeProyek.prefix(@project)
       @editable = ::Lpms3::Wbs.can_edit?(User.current, @project)
       @members = ::Lpms3::Wbs.member_options(@project)
       @units = ::Lpms3::Wbs.eselon1_units

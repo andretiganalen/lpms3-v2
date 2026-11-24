@@ -237,7 +237,7 @@ module Lpms3
     end
 
     def unique_identifier
-      base = "lpms3-#{kode_proyek_lpms3.downcase.gsub(/[^a-z0-9]+/, '-')}".first(90).delete_suffix("-")
+      base = kode_proyek_lpms3.downcase.gsub(/[^a-z0-9\-_]+/, "-").first(90).delete_suffix("-") # = Kode Proyek (1.48)
       candidate = base
       n = 1
       candidate = "#{base}-#{n += 1}" while ::Project.exists?(identifier: candidate)
