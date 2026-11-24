@@ -406,3 +406,46 @@
     })();
   <% end %>
 <% end %>
+<%# Sidebar akordeon gaya LenO: submenu terbuka di bawah induknya (chevron), menu utama tetap terlihat.
+    Menggantikan perilaku "turun ke submenu" bawaan OpenProject (menus--main#descend). %>
+<%= javascript_tag(nonce: true) do %>
+  (function () {
+    function sync(li) {
+      var t = li.querySelector(':scope > .main-item-wrapper > .main-menu-toggler');
+      if (t) { t.setAttribute('aria-expanded', li.classList.contains('lpms3-acc') ? 'true' : 'false'); }
+    }
+    function flatten(root) {
+      if (!root.classList.contains('closed')) { return; }
+      root.querySelectorAll(':scope > li.open').forEach(function (li) { li.classList.remove('open'); li.classList.add('lpms3-acc'); sync(li); });
+      root.classList.remove('closed'); root.classList.add('open');
+    }
+    function setup() {
+      var root = document.querySelector('#main-menu ul.menu_root');
+      if (!root || root.dataset.lpms3Acc) { return; }
+      root.dataset.lpms3Acc = '1';
+      flatten(root);
+      // OpenProject menandai anak submenu "terpilih" walau halamannya lain (mis. Wiki di My Page): rapikan.
+      root.querySelectorAll('ul.main-menu--children a.selected').forEach(function (a) {
+        var here = location.pathname, p = a.pathname;
+        if (p && p !== here && here.indexOf(p + '/') !== 0) { a.classList.remove('selected'); }
+      });
+      root.querySelectorAll(':scope > li').forEach(function (li) {
+        if (li.querySelector(':scope > ul.main-menu--children a.selected')) { li.classList.add('lpms3-acc'); }
+        sync(li);
+      });
+      new MutationObserver(function () { flatten(root); }).observe(root, { attributes: true, attributeFilter: ['class'] });
+    }
+    document.addEventListener('click', function (e) {
+      var t = e.target.closest && e.target.closest('#main-menu .main-menu-toggler');
+      if (!t) { return; }
+      var li = t.closest('li');
+      if (!li) { return; }
+      e.preventDefault(); e.stopImmediatePropagation();
+      li.classList.toggle('lpms3-acc');
+      sync(li);
+    }, true);
+    document.addEventListener('DOMContentLoaded', setup);
+    document.addEventListener('turbo:load', setup);
+    if (document.readyState !== 'loading') { setup(); }
+  })();
+<% end %>

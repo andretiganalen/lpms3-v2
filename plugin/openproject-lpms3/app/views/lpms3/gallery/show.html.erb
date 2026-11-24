@@ -1,5 +1,5 @@
 <% content_for :page_title, t("lpms3.gallery.title") %>
-<div style="max-width:1100px;margin:0 auto;padding:16px">
+<div class="lpms3-page-wide">
   <h1 style="margin:0 0 4px"><%= t("lpms3.gallery.title") %></h1>
   <p style="margin:0 0 16px;color:var(--uix-text-secondary)"><%= @project.name %> · <%= t("lpms3.gallery.hint", days: ::Lpms3::Gallery::WINDOW_DAYS) %></p>
   <% if @photos.empty? %>
