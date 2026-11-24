@@ -242,9 +242,11 @@ module Lpms3
 
       mutate!(node.project, actor) do
         role = ::ProjectRole.find_by!(name: "Tim Proyek")
-        member = ::Member.find_or_initialize_by(project: node.project, principal: user)
-        member.roles = (member.roles.to_a + [role]).uniq
-        member.save!
+        ::Lpms3::MemberRequest.bypass do # penugasan PIC oleh Kepala/Admin Eselon 1 adalah alur resmi
+          member = ::Member.find_or_initialize_by(project: node.project, principal: user)
+          member.roles = (member.roles.to_a + [role]).uniq
+          member.save!
+        end
         node.reload.update!(pic_user_id: user.id, pic_assigned_by: actor.id, pic_assigned_at: Time.current, updated_by: actor.id)
         node
       end

@@ -13,17 +13,31 @@ end
 proyek = Project.find_by!(name: "Proyek Kristian")
 
 ActiveRecord::Base.transaction do
-  staff = u("staff.eselon2.uji@len.co.id")
+  staff = u("eselon2.staff02.mpr@len.co.id")
   # WP uji sementara (dibuang saat rollback)
   wp = WorkPackage.new(project: proyek, type: Type.first, subject: "Dokumen Uji Alur Persetujuan",
                        author: staff, status: Status.default, priority: IssuePriority.default)
   wp.save!(validate: false)
-  e2 = u("pejabat.eselon2.uji@len.co.id")
-  e1 = u("pejabat.eselon1.uji@len.co.id")
-  adm = u("admin.eselon2.uji@len.co.id")
-  analis = u("spesialis.eselon2.uji@len.co.id")
-  dir = u("pejabat.direksi1.uji@len.co.id")
+  e2 = u("eselon2.pejabat02.mpr@len.co.id")
+  e1 = u("eselon1.spesialis02.mpr@len.co.id")
+  adm = u("eselon2.admin02.pwp@len.co.id")
+  analis = u("eselon2.spesialis02.pwp@len.co.id")
+  dir = u("direksi.pejabat01.dir@len.co.id")
   AT = Lpms3::ApprovalTask
+  # Sejak 1.42 kursi Proyek Kristian dipegang persona: akun uji dimasukkan di dalam transaksi ini (di-rollback),
+  # tanpa jabatan aktif agar memakai jalur PROYEK, dan Kick-Off lama dikosongkan.
+  Lpms3::Kickoff.where(project: proyek).delete_all
+  { staff => "Tim Proyek", e2 => "Pejabat Eselon 2", e1 => "Pejabat Eselon 1", adm => "Fungsi Pengawasan Proyek",
+    analis => "Project Analis", dir => "Direksi" }.each do |usr, r|
+    Lpms3::UserPosition.active_on.where(user_id: usr.id).update_all(valid_to: Date.yesterday)
+    Lpms3::MemberRequest.bypass do
+      m = Member.find_or_initialize_by(project: proyek, principal: usr)
+      m.roles = [ProjectRole.find_by!(name: r)]
+      m.save!
+    end
+  end
+  staff, e2, e1, adm, analis, dir = [staff, e2, e1, adm, analis, dir].map { |x| User.find(x.id) } # buang cache izin
+  proyek.reload
 
   t1 = AT.ajukan!(wp, staff, note: "uji")
   check.("staff mengajukan → tahap pimpro", t1.stage == "pimpro" && t1.state == "menunggu")
@@ -63,7 +77,7 @@ ActiveRecord::Base.transaction do
   end
 
   # Pembaca Baca Saja: masukan → pembuat bisa edit (tanpa reviu) hanya saat masukan terbuka
-  reader = u("pejabat.direksi1.uji@len.co.id")
+  reader = u("direksi.pejabat01.dir@len.co.id")
   fb = Lpms3::Feedback.give!(wp, reader, "Typo uji")
   check.("pembaca Baca Saja bisa memberi masukan", fb.persisted? && fb.state == "terbuka")
   check.("masukan muncul di catatan aktivitas WP", wp.reload.journals.any? { |j| j.notes.to_s.include?("Typo uji") })

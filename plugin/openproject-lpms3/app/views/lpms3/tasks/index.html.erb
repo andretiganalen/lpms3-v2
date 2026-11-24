@@ -41,6 +41,43 @@
     </section>
   <% end %>
 
+  <% if @anggota.any? %>
+    <h2 style="margin:24px 0 4px">Permintaan anggota proyek <span style="font-size:14px;color:var(--uix-text-secondary)">(<%= @anggota.size %> menunggu persetujuan Pimpro)</span></h2>
+    <% @anggota.each do |r| %>
+      <section style="border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);padding:14px;margin-bottom:12px;background:var(--uix-surface)">
+        <strong><%= r.user.name %></strong> → <%= link_to r.project.name, project_path(r.project) %>
+        <div style="font-size:13px;margin-top:6px"><span style="color:var(--uix-text-secondary)">Diusulkan:</span> <%= r.requester.name %> · <%= l(r.requested_at, format: :short) %> · Peran: <%= r.roles.map(&:name).join(", ").presence || "Tim Proyek" %></div>
+        <%= form_with url: lpms3_tugas_anggota_path(r), method: :post, local: true, style: "margin-top:10px;display:flex;gap:8px;flex-wrap:wrap" do %>
+          <input name="catatan" class="lpms3-input" placeholder="Catatan (opsional)" aria-label="Catatan keputusan">
+          <button name="keputusan" value="setujui" class="lpms3-btn lpms3-btn--primary">Setujui</button>
+          <button name="keputusan" value="tolak" class="lpms3-btn">Tolak</button>
+        <% end %>
+      </section>
+    <% end %>
+  <% end %>
+
+  <% if @isian.any? %>
+    <h2 style="margin:24px 0 4px">Draft & isian saya <span style="font-size:14px;color:var(--uix-text-secondary)">(draft hanya terlihat oleh Anda sampai diajukan)</span></h2>
+    <div class="lpms3-table-wrap"><table class="lpms3-table">
+      <thead><tr><th scope="col">Isian</th><th scope="col">Proyek</th><th scope="col">Status</th><th scope="col"><span class="sr-only">Aksi</span></th></tr></thead>
+      <tbody>
+        <% @isian.each do |wp| %>
+          <tr>
+            <th scope="row"><%= link_to wp.subject, work_package_path(wp) %><br><small class="lpms3-hint"><%= wp.type.name %></small></th>
+            <td><%= wp.project.name %></td>
+            <td><span class="lpms3-chip <%= 'lpms3-chip--warn' if ::Lpms3::DraftVisibility.draft?(wp) %>"><%= wp.status.name %></span></td>
+            <td>
+              <%= form_with url: lpms3_project_ajukan_path(wp.project, wp), method: :post, local: true, class: "lpms3-kontrak__inline" do %>
+                <input name="catatan" class="lpms3-input" placeholder="Catatan" aria-label="Catatan pengajuan <%= wp.subject %>">
+                <button class="lpms3-btn lpms3-btn--primary">Ajukan</button>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table></div>
+  <% end %>
+
   <% if @kontrak.any? %>
     <h2 style="margin:24px 0 4px">Peringatan Kontrak <span style="font-size:14px;color:var(--uix-text-secondary)">(<%= @kontrak.size %>)</span></h2>
     <% @kontrak.each do |k| %>

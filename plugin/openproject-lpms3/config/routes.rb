@@ -78,6 +78,7 @@ Rails.application.routes.draw do
   get "projects/:project_id/lpms3/pdf/aspek", to: "lpms3/pdf#aspek", as: :lpms3_project_pdf_aspek
   get "lpms3/pdf/laporan/:id", to: "lpms3/pdf#laporan", as: :lpms3_pdf_laporan
   post "projects/:project_id/lpms3/ajukan-semua", to: "lpms3/tasks#ajukan_semua", as: :lpms3_project_ajukan_semua
+  post "lpms3/tugas/anggota/:id", to: "lpms3/tasks#anggota", as: :lpms3_tugas_anggota
   post "projects/:project_id/lpms3/ajukan/:wp_id", to: "lpms3/tasks#ajukan", as: :lpms3_project_ajukan
 
   # Panel header gaya LenO (Reminder, Tasklist, Notifikasi): penyegaran berkala dan tandai notifikasi dibaca.

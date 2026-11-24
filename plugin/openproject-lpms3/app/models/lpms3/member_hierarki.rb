@@ -29,6 +29,41 @@ module Lpms3
 
     module_function
 
+    # Pohon yang boleh dilihat viewer (1.44): Direktur/Admin Direktur, Pimpro, dan admin melihat seluruhnya; Pejabat & Admin
+    # Eselon 1/2 melihat garis ke atas + seluruh bawahannya; Spesialis/Staff hanya garis lurus ke atas sampai Direktur.
+    def build_for(project, viewer)
+      data = build(project)
+      return data if viewer.nil? || viewer.admin? || data[:roots].empty?
+      return data if viewer.roles_for_project(project).map(&:name).intersect?([PIMPRO, "Direksi", "Admin Direksi"])
+
+      root = data[:roots].first
+      path = find_path(root, viewer.id)
+      return data.merge(roots: [], terbatas: true) unless path
+
+      me = path.last
+      parent = path[-2]
+      # Admin melihat seperti pejabat unitnya; pejabat (node bercabang) melihat subtree-nya.
+      focus = if me.children.any? || me.kind == "KEPALA" then me
+              elsif me.kind == "ADMIN" && parent then parent
+              end
+      keep = focus ? path[0...path.index(focus)] : path[0...-1]
+      pruned = keep.reverse.inject(focus || me) do |child, anc|
+        Node.new(label: anc.label, unit_name: anc.unit_name, person: anc.person, kind: anc.kind, level: anc.level, children: [child])
+      end
+      data.merge(roots: [pruned], lainnya: [], terbatas: true)
+    end
+
+    def find_path(node, uid, trail = [])
+      trail += [node]
+      return trail if node.person && node.person[:user].id == uid
+
+      node.children.each do |c|
+        r = find_path(c, uid, trail)
+        return r if r
+      end
+      nil
+    end
+
     def build(project)
       members = ::Member.where(project_id: project.id).includes(:principal, :roles).to_a
                         .select { |m| m.principal.is_a?(::User) && !m.principal.locked? }

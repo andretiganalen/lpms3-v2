@@ -35,3 +35,14 @@ end
 # 1.40: PIC WBS = assignee work package; peran kerja harus dapat ditugaskan.
 added = Lpms3::Wbs.ensure_assignable_roles!
 puts "[izin] work_package_assigned ditambahkan ke: #{added.join(', ').presence || '(tidak ada)'}"
+
+# 1.44: "Admin Pejabat Eselon 2" — izin Tim Proyek + kelola anggota. Anggota yang ia masukkan menunggu persetujuan Pimpro
+# (Lpms3::MemberRequest); Pimpro memasukkan anggota langsung.
+adm2 = ProjectRole.find_or_initialize_by(name: "Admin Pejabat Eselon 2")
+perms = (tim.permissions.map(&:to_sym) + %i[view_members manage_members]).uniq
+if adm2.new_record? || (perms - adm2.permissions.map(&:to_sym)).any?
+  adm2.permissions = perms
+  adm2.save!
+  puts "[peran] Admin Pejabat Eselon 2: #{adm2.permissions.size} izin"
+end
+Lpms3::Wbs.ensure_assignable_roles!

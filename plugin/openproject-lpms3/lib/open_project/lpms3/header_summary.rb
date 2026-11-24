@@ -71,6 +71,10 @@ module OpenProject::Lpms3
         list << item(title: "#{n.wbs_code} #{n.tasks}", from: n.project.name, at: n.updated_at,
                      text: "Tugaskan tim #{n.pic_unit&.name} sebagai PIC WBS", href: routes.lpms3_tugas_path)
       end
+      inbox.anggota(user).each do |r|
+        list << item(title: "#{r.user.name} — #{r.project.name}", from: r.requester.name, at: r.requested_at,
+                     text: "Setujui anggota proyek baru", href: routes.lpms3_tugas_path)
+      end
       inbox.kontrak(user).each do |k|
         list << item(title: k[:finding].text, from: k[:project].name, at: Time.current,
                      text: "Peringatan kontrak", href: routes.lpms3_project_kontrak_path(k[:project]))

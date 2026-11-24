@@ -171,6 +171,33 @@ module OpenProject::Lpms3
         end
       end
       OpenProject::Lpms3::Hooks
+      # Draft privat (1.44): draft hanya terlihat pembuat/penerima tugas sampai diajukan.
+      unless ::WorkPackage.instance_variable_get(:@lpms3_draft_visibility)
+        ::WorkPackage.instance_variable_set(:@lpms3_draft_visibility, true)
+        ::WorkPackage.singleton_class.prepend(Module.new do
+          def visible(user = ::User.current, *rest, **kw)
+            ::Lpms3::DraftVisibility.restrict(super, user)
+          end
+        end)
+      end
+      # Anggota proyek (1.44): penambahan selain oleh Pimpro/admin menjadi permintaan yang menunggu persetujuan Pimpro.
+      unless ::Members::CreateService.instance_variable_get(:@lpms3_member_gate)
+        ::Members::CreateService.instance_variable_set(:@lpms3_member_gate, true)
+        ::Members::CreateService.prepend(Module.new do
+          def call(params = {}, *rest)
+            prm = params.respond_to?(:to_h) ? params.to_h.symbolize_keys : {}
+            project = prm[:project] || (prm[:project_id] && ::Project.find_by(id: prm[:project_id]))
+            principal = prm[:principal] || (prm[:user_id] && ::Principal.find_by(id: prm[:user_id]))
+            if ::Lpms3::MemberRequest.gated?(user, project, principal)
+              req = ::Lpms3::MemberRequest.request!(user, project, principal, prm[:role_ids] || Array(prm[:roles]).map { |r| r.respond_to?(:id) ? r.id : r })
+              m = ::Member.new(project:, principal:)
+              m.errors.add(:base, "#{principal.name} dicatat sebagai permintaan anggota ##{req.id}; akses View/Edit diberikan setelah Pimpro menyetujui (Tugas & Notifikasi).")
+              return ServiceResult.failure(result: m, errors: m.errors)
+            end
+            super
+          end
+        end)
+      end
       # Beranda Proyek (1.42): kartu Member diganti bagan garis komando untuk workspace "project".
       unless ::Grids::WidgetGridComponent.instance_variable_get(:@lpms3_member_hierarki)
         ::Grids::WidgetGridComponent.instance_variable_set(:@lpms3_member_hierarki, true)

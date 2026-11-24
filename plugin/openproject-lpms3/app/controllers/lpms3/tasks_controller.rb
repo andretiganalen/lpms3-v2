@@ -7,7 +7,7 @@ module Lpms3
     AT = ::Lpms3::ApprovalTask
 
     before_action :require_login
-    no_authorization_required! :index, :ajukan, :langkah, :masukan, :selesai_masukan, :ajukan_semua, :tembusan, :kickoff_tunjuk, :kickoff_undang
+    no_authorization_required! :index, :ajukan, :langkah, :masukan, :selesai_masukan, :ajukan_semua, :tembusan, :kickoff_tunjuk, :kickoff_undang, :anggota
 
     def index
       @tasks = AT.pending_for(User.current)
@@ -21,9 +21,33 @@ module Lpms3
       @wbs_pic = ::Lpms3::Inbox.wbs_pic(User.current)
       @baseline_cr = ::Lpms3::Inbox.baseline_cr(User.current)
       @kontrak = ::Lpms3::Inbox.kontrak(User.current)
+      @anggota = ::Lpms3::Inbox.anggota(User.current)
+      @isian = isian_saya(User.current)
+    end
+
+    # Permintaan anggota proyek (1.44): Pimpro menyetujui atau menolak.
+    def anggota
+      req = ::Lpms3::MemberRequest.pending.find(params[:id])
+      req.decide!(User.current, params[:keputusan] == "setujui", params[:catatan])
+      flash[:notice] = "#{req.user.name} #{req.state == 'disetujui' ? 'menjadi anggota' : 'ditolak sebagai anggota'} #{req.project.name}."
+      redirect_to lpms3_tugas_path
+    rescue ::Lpms3::MemberRequest::Error, ActiveRecord::RecordNotFound => e
+      flash[:error] = e.is_a?(ActiveRecord::RecordNotFound) ? "Permintaan tidak ditemukan." : e.message
+      redirect_to lpms3_tugas_path
     end
 
     # Pengaju mengirim dokumen (WP) untuk persetujuan. Hanya dokumen yang bisa dilihat pengguna.
+    # Isian milik user (pembuat/penerima tugas) yang belum tertutup dan belum menunggu keputusan: siap diajukan.
+    private def isian_saya(user)
+      return [] unless user.logged?
+
+      pending_ids = AT.pending.select(:work_package_id)
+      ::WorkPackage.visible(user).joins(:status).where(statuses: { is_closed: false })
+                   .where("work_packages.author_id = :u OR work_packages.assigned_to_id = :u", u: user.id)
+                   .where.not(id: pending_ids).where.not("work_packages.subject LIKE ?", "[T%")
+                   .includes(:project, :type, :status).order(updated_at: :desc).limit(25).to_a
+    end
+
     def ajukan
       wp = ::WorkPackage.visible(User.current).find_by(id: params[:wp_id])
       return render_404 unless wp

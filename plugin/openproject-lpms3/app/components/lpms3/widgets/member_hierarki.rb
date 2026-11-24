@@ -14,7 +14,7 @@ module Lpms3
         widget_wrapper do |container|
           if current_user.allowed_in_project?(:view_members, project)
             container.with_footer { helpers.link_to("Lihat semua member", helpers.project_members_path(project)) }
-            body(::Lpms3::MemberHierarki.build(project))
+            body(::Lpms3::MemberHierarki.build_for(project, current_user))
           else
             content_tag(:p, I18n.t("grids.widgets.not_available"), class: "lpms3-hint")
           end
@@ -25,11 +25,14 @@ module Lpms3
 
       def body(data)
         return content_tag(:p, "Belum ada member.", class: "lpms3-hint") if data[:total].zero?
+        if data[:terbatas] && data[:roots].empty?
+          return content_tag(:p, "Jabatan Anda belum tercatat di struktur; garis komando belum dapat ditampilkan.", class: "lpms3-hint")
+        end
 
         safe_join([
           content_tag(:div, class: "lpms3-org__bar") do
             safe_join([
-              content_tag(:span, "#{data[:total]} member · garis komando dari Pejabat Direktur Operasional", class: "lpms3-org__meta"),
+              content_tag(:span, data[:terbatas] ? "Garis komando Anda: atasan sampai Pejabat Direktur Operasional#{' dan bawahan Anda' if data[:roots].first&.size.to_i > 1}" : "#{data[:total]} member · garis komando dari Pejabat Direktur Operasional", class: "lpms3-org__meta"),
               content_tag(:button, "Buka semua", type: "button", class: "lpms3-btn", data: { lpms3_org: "open" }),
               content_tag(:button, "Tutup semua", type: "button", class: "lpms3-btn", data: { lpms3_org: "close" })
             ])

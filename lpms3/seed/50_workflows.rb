@@ -31,3 +31,13 @@ Lpms3Data::TYPES.each do |tname, (statuses, _c, _m)|
   end
 end
 puts "workflows ok: #{Workflow.where(type_variant_id: TypeVariant.where(type_id: Type.where(name: Lpms3Data::TYPES.keys).select(:id))).count} (diproses #{count})"
+# 1.44: "Admin Pejabat Eselon 2" bekerja seperti Tim Proyek (plus kelola anggota): salin seluruh transisi Tim Proyek.
+if (adm2 = ProjectRole.find_by(name: "Admin Pejabat Eselon 2"))
+  src = ProjectRole.find_by!(name: "Tim Proyek")
+  n = 0
+  Workflow.where(role_id: src.id).find_each do |w|
+    Workflow.find_or_create_by!(type_variant_id: w.type_variant_id, role_id: adm2.id, old_status_id: w.old_status_id, new_status_id: w.new_status_id)
+    n += 1
+  end
+  puts "Admin Pejabat Eselon 2: #{n} transisi (salinan Tim Proyek)"
+end

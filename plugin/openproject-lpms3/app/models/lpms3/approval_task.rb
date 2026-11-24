@@ -43,18 +43,65 @@ module Lpms3
       def eselon1?(user, project) = user.admin? || roles_of(user, project).include?(ESELON1_ROLE)
       def direksi?(user, project) = roles_of(user, project).include?(DIREKSI_ROLE)
 
-      # Pengaju: Pimpro atau Pejabat Eselon 2 mengirim langsung ke Pejabat Eselon 2; selain itu ke Pimpro.
+      # Jalur persetujuan (1.44):
+      #  - PROYEK: pengaju Fungsi Pelaksanaan Proyek (atau tanpa jabatan) → Pimpro → Pejabat Eselon 2 → Pejabat Eselon 1 proyek.
+      #    Pimpro atau Pejabat Eselon 2 mengirim langsung ke tahap Eselon 2.
+      #  - FUNGSI: pengaju fungsi lain (mis. Penjaminan Mutu) → Kepala Bagian (Eselon 2) pengaju → Kepala Divisi (Eselon 1)
+      #    fungsinya. Kepala Bagian sendiri langsung ke Eselon 1. Pejabat fungsi dimasukkan ke proyek agar dapat meninjau.
+      def route_for(user, project)
+        up = ::Lpms3::UserPosition.active_on.where(user_id: user.id).includes(position: :unit).to_a
+                                  .min_by { |x| { "KEPALA" => 0, "ADMIN" => 1 }.fetch(x.position.kind, 2) }
+        unit = up&.position&.unit
+        es1 = unit && (unit.grade == "ES1" ? unit : unit.ancestor_with_grade("ES1"))
+        proyek_es1 = ::Lpms3::Hierarki.unit_eselon1_of_fungsi
+        if es1.nil? || es1.id == proyek_es1&.id || pimpro?(user, project) || roles_of(user, project).include?(ESELON2_ROLE)
+          return { jalur: "PROYEK", stage: (pimpro?(user, project) || eselon2?(user, project)) ? "eselon2" : "pimpro" }
+        end
+
+        es2 = if unit.grade == "ES2" then unit
+              elsif unit.grade == "ES3" then unit.ancestor_with_grade("ES2")
+              end
+        kepala_es2 = es2 ? ::Lpms3::Hierarki.holders(es2, "KEPALA") : []
+        head_self = kepala_es2.any? { |u| u.id == user.id }
+        stage = es2 && kepala_es2.any? && !head_self ? "eselon2" : "eselon1"
+        if stage == "eselon1" && ::Lpms3::Hierarki.holders(es1, "KEPALA").empty?
+          raise Error, "Kursi Pejabat Eselon 1 #{es1.name} belum diisi; pengajuan fungsi ini belum dapat diproses."
+        end
+
+        { jalur: "FUNGSI", stage:, unit_es2_id: es2&.id, unit_es1_id: es1.id }
+      end
+
+      # Pejabat fungsi yang memutus tahap berikutnya dimasukkan ke proyek (peran fungsi pengaju) agar dapat melihat & memberi masukan.
+      def ensure_reviewers!(task, requester)
+        unit_id = task.stage == "eselon2" ? task.unit_es2_id : task.unit_es1_id
+        unit = unit_id && ::Lpms3::OrgUnit.find_by(id: unit_id)
+        return unless task.jalur == "FUNGSI" && unit
+
+        role = requester.roles_for_project(task.project).reject { |r| %w[Pimpro Project\ admin].include?(r.name) }.first ||
+               ::ProjectRole.find_by(name: "Pembaca (Informed)")
+        ::Lpms3::MemberRequest.bypass do
+          ::Lpms3::Hierarki.holders(unit, "KEPALA").each do |u|
+            m = ::Member.find_or_initialize_by(project: task.project, principal: u)
+            next if m.persisted? && m.roles.include?(role)
+
+            m.roles = (m.roles.to_a + [role]).uniq
+            m.save!
+          end
+        end
+      end
+
       def ajukan!(work_package, user, note: nil)
         project = work_package.project
         raise Error, "Anda bukan anggota proyek ini." unless user.admin? || user.allowed_in_project?(:view_work_packages, project)
 
-        stage = (pimpro?(user, project) || eselon2?(user, project)) ? "eselon2" : "pimpro"
+        route = route_for(user, project)
         transaction do
           work_package.lock!
           raise Error, "Dokumen ini masih menunggu keputusan." if pending.exists?(work_package_id: work_package.id)
 
-          task = create!(work_package:, project:, stage:, state: "menunggu", requested_by: user,
-                         requested_at: Time.current, requester_note: note.to_s.strip.presence)
+          task = create!(work_package:, project:, state: "menunggu", requested_by: user,
+                         requested_at: Time.current, requester_note: note.to_s.strip.presence, **route)
+          ensure_reviewers!(task, user)
           set_status!(work_package, "Reviu", "Diajukan untuk persetujuan oleh #{user.name}")
           task
         end
@@ -80,10 +127,10 @@ module Lpms3
         pending.includes(:work_package, :project, :requested_by).order(:requested_at).select { |t| t.actable_by?(user) }
       end
 
-      # Dokumen final yang belum ditembuskan dan bisa ditembuskan user (Pejabat Eselon 1).
+      # Dokumen final yang belum ditembuskan dan bisa ditembuskan user (Pejabat Eselon 1 jalurnya).
       def tembusan_candidates(user)
         final_approved.where(tembusan_at: nil).includes(:work_package, :project, :requested_by)
-                      .order(:decided_at).select { |t| eselon1?(user, t.project) }
+                      .order(:decided_at).select { |t| t.eselon1_for?(user) }
       end
 
       # Tembusan yang diterima user sebagai Direksi (untuk diketahui).
@@ -99,12 +146,33 @@ module Lpms3
       # tidak boleh memutus tahap berikutnya. Satu orang, satu tindakan per siklus persetujuan.
       return false if cycle_actor_ids.include?(user.id)
 
+      if jalur == "FUNGSI"
+        return true if user.admin?
+
+        unit = ::Lpms3::OrgUnit.find_by(id: stage == "eselon2" ? unit_es2_id : unit_es1_id)
+        return unit.present? && ::Lpms3::Hierarki.holders(unit, "KEPALA").any? { |u| u.id == user.id }
+      end
+
       case stage
       when "pimpro" then self.class.pimpro?(user, project) || self.class.eselon2?(user, project)
       when "eselon2" then self.class.eselon2?(user, project)
       when "eselon1" then self.class.eselon1?(user, project)
       else false
       end
+    end
+
+    # Pejabat Eselon 1 yang berwenang atas tugas ini (jalur FUNGSI: Kepala Divisi pengaju; PROYEK: peran Pejabat Eselon 1).
+    def eselon1_for?(user)
+      return user.admin? || self.class.roles_of(user, project).include?(ESELON1_ROLE) unless jalur == "FUNGSI"
+
+      unit = ::Lpms3::OrgUnit.find_by(id: unit_es1_id)
+      user.admin? || (unit.present? && ::Lpms3::Hierarki.holders(unit, "KEPALA").any? { |u| u.id == user.id })
+    end
+
+    def unit_label
+      return nil unless jalur == "FUNGSI"
+
+      ::Lpms3::OrgUnit.find_by(id: stage == "eselon2" ? unit_es2_id : unit_es1_id)&.name
     end
 
     # Pengaju dan pemutus pada siklus persetujuan yang sedang berjalan untuk dokumen ini.
@@ -133,7 +201,7 @@ module Lpms3
     def required_action_for(user)
       case stage
       when "pimpro" then actions_for(user).include?("setujui") ? "Setujui langsung (bypass Pimpro) atau minta revisi" : "Tinjau dokumen, lalu teruskan ke Pejabat Eselon 2 atau minta revisi"
-      when "eselon2" then "Setujui lalu teruskan ke Fungsi Manajemen Proyek (Eselon 1), atau minta revisi"
+      when "eselon2" then jalur == "FUNGSI" ? "Setujui lalu teruskan ke Pejabat Eselon 1 fungsi Anda, atau minta revisi" : "Setujui lalu teruskan ke Fungsi Manajemen Proyek (Eselon 1), atau minta revisi"
       when "eselon1" then "Setujui (final) atau minta revisi"
       else "Tidak ada tindakan"
       end
@@ -161,8 +229,9 @@ module Lpms3
 
         if forward
           next_stage = action == "teruskan" ? "eselon2" : "eselon1"
-          self.class.create!(work_package:, project:, stage: next_stage, state: "menunggu", requested_by: user,
-                             requested_at: Time.current, requester_note: text.presence)
+          nxt = self.class.create!(work_package:, project:, stage: next_stage, state: "menunggu", requested_by: user,
+                                   requested_at: Time.current, requester_note: text.presence, jalur:, unit_es2_id:, unit_es1_id:)
+          self.class.ensure_reviewers!(nxt, requested_by)
         elsif new_state == "revisi"
           self.class.set_status!(work_package, "Revisi", "Diminta revisi oleh #{user.name}: #{text}")
         elsif new_state == "disetujui"
@@ -179,7 +248,7 @@ module Lpms3
         lock!
         raise Error, "Hanya dokumen final yang bisa ditembuskan." unless stage == "eselon1" && state == "disetujui"
         raise Error, "Dokumen ini sudah ditembuskan." if tembusan_at
-        raise Error, "Anda tidak berwenang menembuskan dokumen ini." unless self.class.eselon1?(user, project)
+        raise Error, "Anda tidak berwenang menembuskan dokumen ini." unless eselon1_for?(user)
 
         update!(tembusan_at: Time.current, tembusan_by: user)
       end
