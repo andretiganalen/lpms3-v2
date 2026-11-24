@@ -1034,3 +1034,29 @@ table.generic-table td a:not(.button):not(.Button) { color: var(--uix-primary); 
 .op-uc-table { width: 100%; max-width: 100%; table-layout: fixed; }
 .op-uc-table--cell { min-width: 0; padding: 8px 10px; overflow-wrap: anywhere; word-break: normal; font-size: 12px; vertical-align: top; }
 th.op-uc-table--cell, .op-uc-table thead .op-uc-table--cell { background: var(--leno-table-head); font-weight: 600; color: var(--leno-text); }
+
+/* =====================================================================================================
+   v5 (1.48) — Work/Biaya/Jam-orang disembunyikan (belum dipakai di logika proyek Indonesia LPMS3):
+   Work, Remaining work, Spent time, Unit costs, Labor/Material/Overall costs, Budget. Modul Costs & Budgets dinonaktifkan.
+   ===================================================================================================== */
+.attributes-key-value:has([class~="estimatedTime"], [class~="remainingTime"], [class~="spentTime"], [class~="costsByType"], [class~="laborCosts"], [class~="materialCosts"], [class~="overallCosts"], [class~="budget"], [class~="derivedEstimatedTime"], [class~="derivedRemainingTime"], [class~="costObject"]),
+[data-test-selector^="op-wp-single-view--field-estimatedTime"], [data-test-selector^="op-wp-single-view--field-remainingTime"], [data-test-selector^="op-wp-single-view--field-spentTime"],
+[data-field-name="estimatedTime"], [data-field-name="remainingTime"], [data-field-name="spentTime"], [data-field-name="costsByType"], [data-field-name="laborCosts"],
+[data-field-name="materialCosts"], [data-field-name="overallCosts"], [data-field-name="budget"],
+.work-package-details-tab--spent-time, .op-wp-spent-time, a[href$="/cost_reports"], a[href*="/cost_types"], a[href*="/admin/costs"], a[href$="/budgets"], a[href*="/time_entries"]:not([href*="/lpms3"]) { display: none !important; }
+#main-menu li[data-name="budgets"], #main-menu li[data-name="costs"], #main-menu li[data-name="time_entries"], #main-menu li[data-name="cost_reports"] { display: none !important; }
+
+/* =====================================================================================================
+   v5 — submenu "daftar tampilan" (Work packages, Wiki, Board, dst.) seragam dengan submenu fase:
+   tanpa kotak pencarian, tanpa gulir bertingkat, butir selebar sidebar dengan tipografi tingkat 3.
+   ===================================================================================================== */
+html #main-menu .op-sidemenu-filterable-tree .FilterableTreeViewLayout > :first-child,
+html #main-menu filterable-tree-view .FilterableTreeViewLayout > .Stack:first-child,
+html #main-menu .op-sidemenu-filterable-tree [data-target~="filterable-tree-view.filterInput"], html #main-menu .op-sidemenu-filterable-tree input[type="search"],
+html #main-menu .op-sidemenu-filterable-tree .FormControl { display: none !important; }
+html #main-menu .op-sidemenu-filterable-tree, html #main-menu filterable-tree-view, html #main-menu .FilterableTreeViewTreeContainer { height: auto !important; max-height: none !important; overflow: visible !important; padding: 0; margin: 0; }
+html #main-menu .op-sidemenu-filterable-tree ul { margin: 0; padding: 0; list-style: none; }
+html #main-menu .op-sidemenu-filterable-tree [role="treeitem"] > .TreeViewItemContainer, html #main-menu .op-sidemenu-filterable-tree .TreeViewItemContainer { min-height: 40px; padding: 0 16px 0 var(--leno-menu-pad-l3); background: transparent; border-radius: 0; font-size: 12px; font-weight: 400; color: var(--leno-menu-text); }
+html #main-menu .op-sidemenu-filterable-tree .TreeViewItemContainer:hover { background: transparent; color: var(--leno-accent); }
+html #main-menu .op-sidemenu-filterable-tree [aria-current="page"] > .TreeViewItemContainer, html #main-menu .op-sidemenu-filterable-tree [aria-selected="true"] > .TreeViewItemContainer { background: var(--leno-menu-active-bg); color: var(--leno-accent); box-shadow: inset -3px 0 0 var(--uix-primary); }
+html #main-menu .op-sidemenu-filterable-tree .TreeViewItemContentText, html #main-menu .op-sidemenu-filterable-tree a { font-size: 12px; font-weight: 400; color: inherit; text-decoration: none; }

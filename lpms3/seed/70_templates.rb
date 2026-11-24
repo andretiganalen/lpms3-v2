@@ -37,7 +37,7 @@ ASM_DESC = "Asumsi proyek disusun dari 9 aspek PMP yang telah disahkan; sejajar 
 WorkPackage.where("subject LIKE ?", "[T1-3] Penetapan Project Charter").find_each do |wp|
   wp.update_column(:subject, "[T1-4] Penetapan Project Charter")
 end
-MODULES_COMMON = %w[work_package_tracking gantt meetings documents budgets costs news wiki calendar_view].freeze
+MODULES_COMMON = %w[work_package_tracking gantt meetings documents news wiki calendar_view].freeze
 
 # RASCI pada level FUNGSI GENERIK BOP-001 (bukan akun, divisi, atau unit kerja):
 #  - "Struktural Fungsi X" -> "Fungsi X"; Pimpro / Tim Proyek -> Fungsi Pelaksanaan Proyek (alias F-MPR);
