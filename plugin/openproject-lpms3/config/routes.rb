@@ -29,6 +29,13 @@ Rails.application.routes.draw do
 
   get "projects/:project_id/lpms3/pengadaan(/:sub)", to: "lpms3/procurement#show", as: :lpms3_project_procurement,
       constraints: { sub: /pr|buyer|penyelesaian/ }
+  # Pengadaan 1.43: tautan WBS, evaluasi penyedia, master rekanan
+  post "projects/:project_id/lpms3/pengadaan-item/:id/wbs", to: "lpms3/procurement#tautkan", as: :lpms3_project_procurement_tautkan
+  post "projects/:project_id/lpms3/pengadaan-item/:id/evaluasi", to: "lpms3/procurement#evaluasi", as: :lpms3_project_procurement_evaluasi
+  get "lpms3/rekanan", to: "lpms3/rekanan#index", as: :lpms3_rekanan
+  post "lpms3/rekanan(/:id)", to: "lpms3/rekanan#save", as: :lpms3_rekanan_save
+  post "lpms3/rekanan/:id/hitam", to: "lpms3/rekanan#hitam", as: :lpms3_rekanan_hitam
+  post "lpms3/rekanan/:id/pulihkan", to: "lpms3/rekanan#pulihkan", as: :lpms3_rekanan_pulihkan
   get "lpms3/pengadaan(/:sub)", to: "lpms3/procurement#show", as: :lpms3_procurement, constraints: { sub: /pr|buyer|penyelesaian/ }
 
   # Editor WBS bobot cascading (1.40).

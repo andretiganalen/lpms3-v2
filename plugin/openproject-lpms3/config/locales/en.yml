@@ -162,6 +162,8 @@ en:
     sidebar:
       settings: "Settings"
       my_settings: "My settings"
+    rekanan:
+      menu: "Suppliers"
     kontrak:
       menu: "Contract"
       menu_global: "Contract monitoring"
@@ -312,6 +314,8 @@ en:
       value_rate_missing: "No exchange rate"
       value_invalid: "Invalid value"
       col:
+        wbs: "WBS activity"
+        evaluasi: "Supplier evaluation"
         project: "Project"
         item: "Item"
         stage: "Stage"
@@ -345,7 +349,12 @@ en:
         milestones_open: "Milestones not finished"
         missing_gr: "GR/SES number missing"
         missing_ba: "Billing Acceptance Report not issued"
+        vendor_blacklisted: "Supplier is blacklisted (PFR-030)"
+        vendor_unregistered: "Supplier not in master list"
+        evaluation_missing: "Supplier evaluation (PFR-019) missing"
+        wbs_unlinked: "Not linked to a WBS activity"
       gate:
+        vendor_blacklisted: "Supplier %{vendor} is blacklisted (PFR-030): %{reason}. Choose another supplier."
         budget_required: "A PR must rest on a Budget: select the project Budget first."
         pr_required: "Enter the PR number before leaving the Rencana stage."
         value_required: "Enter the procurement value (or contract value) so it can be checked against the Budget."

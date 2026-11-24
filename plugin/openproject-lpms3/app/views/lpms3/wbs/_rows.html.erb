@@ -10,6 +10,7 @@
     <td class="lpms3-wbs__lvl"><%= n.level %></td>
     <td class="lpms3-wbs__task" style="--d:<%= r[:depth] %>">
       <% if beku %><span class="lpms3-chip lpms3-chip--ok" title="Selesai 100 % — rekam dibekukan">Beku</span><% end %>
+      <% if (pg = @pengadaan && @pengadaan[n.id]) %><%= link_to "Pengadaan #{pg[:count]} item · usulan #{pg[:usulan]} %", lpms3_project_procurement_path(@project, anchor: "daftar"), class: "lpms3-chip#{pg[:usulan] > (n.pct * 100).round ? ' lpms3-chip--warn' : ''}", title: "Nilai item tertaut: Rp #{number_with_delimiter(pg[:nilai].to_i, delimiter: '.')}" %><% end %>
       <% if edit && !n.root? && !beku %>
         <input class="lpms3-wbs__in" data-field="tasks" value="<%= n.tasks %>" maxlength="200" aria-label="Tasks <%= n.wbs_code %>">
       <% else %>

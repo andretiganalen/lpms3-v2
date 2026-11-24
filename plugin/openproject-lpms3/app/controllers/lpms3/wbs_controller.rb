@@ -109,6 +109,7 @@ module Lpms3
       @frozen = ::Lpms3::Wbs.frozen_ids(@rows.map { |r| r[:node] })
       @baseline = ::Lpms3::WbsBaseline.summary(@project)
       @cr_type = ::Lpms3::WbsBaseline.cr_type(@project)
+      @pengadaan = ::Lpms3::PengadaanWbs.summary(@project)
     end
 
     def respond_table(focus: nil)

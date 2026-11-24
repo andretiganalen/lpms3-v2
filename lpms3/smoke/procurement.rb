@@ -56,7 +56,8 @@ begin
   items = P.items(WorkPackage.where(project_id: proj.id))
   summary = P.summary(items)
   items = items.index_by { _1.wp.id }
-  fi = ->(w) { items[w.id].findings }
+  # Temuan rekanan/evaluasi/WBS (1.43) diuji di pengadaan_wbs.rb; di sini diabaikan.
+  fi = ->(w) { items[w.id].findings - %i[vendor_unregistered evaluation_missing wbs_unlinked] }
   chk("P0", "field Kontrak Awal/GR/BA dan tipe Item Pengadaan tersedia", P::F.values.all? { WorkPackageCustomField.exists?(name: _1) })
   chk("P1", "sub-fase 1: PR tanpa Budget, tanpa No. PR dan tanpa nilai ditandai", %i[no_budget missing_pr no_value].all? { fi.(a).include?(_1) } && fi.(a).include?(:missing_po))
   chk("P2", "sub-fase 1: item di Budget lengkap tidak ditandai no_budget", !fi.(b).include?(:no_budget) && !fi.(c).include?(:no_budget))

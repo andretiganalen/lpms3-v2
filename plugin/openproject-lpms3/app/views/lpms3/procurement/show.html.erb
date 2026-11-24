@@ -100,10 +100,10 @@
     <% if @shown.empty? %>
       <p class="lpms3-hint"><%= t("lpms3.procurement.empty") %></p>
     <% else %>
-      <% cols = { nil => %i[item stage budget numbers vendor contract value need findings],
-                  "pr" => %i[item stage budget value pr need findings],
+      <% cols = { nil => %i[item stage wbs budget numbers vendor contract value need findings],
+                  "pr" => %i[item stage wbs budget value pr need findings],
                   "buyer" => %i[item stage vendor numbers contract value findings],
-                  "penyelesaian" => %i[item stage milestones gr ba findings] }[@sub] %>
+                  "penyelesaian" => %i[item stage wbs milestones gr ba evaluasi findings] }[@sub] %>
       <div class="lpms3-table-wrap">
         <table class="lpms3-table">
           <thead>
@@ -123,6 +123,27 @@
                   <% elsif c == :stage %><span class="lpms3-chip<%= ' lpms3-chip--ok' if it.stage_index >= pr::I_GR %>"><%= it.stage %></span>
                   <% elsif c == :budget %><%= it.budget ? link_to(it.budget.subject, budget_path(it.budget)) : tag.span(t("lpms3.procurement.no_budget_short"), class: "lpms3-hint") %>
                   <% elsif c == :vendor %><%= v[:vendor] %>
+                    <% if v[:vendor].present? %><br><% if it.rekanan&.hitam? %><span class="lpms3-chip lpms3-chip--danger">Daftar hitam</span><% elsif it.rekanan %><span class="lpms3-chip lpms3-chip--ok">Terdaftar</span><% else %><%= link_to "Belum terdaftar", lpms3_rekanan_path(q: v[:vendor]), class: "lpms3-chip lpms3-chip--warn" %><% end %><% end %>
+                  <% elsif c == :wbs %>
+                    <% if it.wbs_node %><div><%= link_to "#{it.wbs_node.wbs_code} #{it.wbs_node.tasks}", lpms3_project_wbs_path(it.wp.project) %></div><small class="lpms3-hint">Usulan <%= ::Lpms3::PengadaanWbs.stage_pct(it.wp) %> % · aktual <%= (it.wbs_node.pct * 100).round %> %</small><% end %>
+                    <% if @project && @can_link && @wbs_acts.any? %>
+                      <%= form_with url: lpms3_project_procurement_tautkan_path(@project, it.wp, sub: @sub), method: :post, local: true, class: "lpms3-kontrak__inline" do %>
+                        <select name="wbs_node_id" class="lpms3-input" aria-label="Aktivitas WBS untuk <%= it.wp.subject %>"><option value="">— tanpa tautan —</option><% @wbs_acts.each do |n| %><option value="<%= n.id %>" <%= "selected" if it.wbs_node&.id == n.id %>><%= n.wbs_code %> <%= n.tasks.truncate(40) %></option><% end %></select>
+                        <button class="lpms3-btn">Tautkan</button>
+                      <% end %>
+                    <% end %>
+                  <% elsif c == :evaluasi %>
+                    <% if it.evaluasi %>
+                      <span class="lpms3-chip lpms3-chip--ok">Skor <%= it.evaluasi.rata %></span><br><small class="lpms3-hint">M<%= it.evaluasi.skor_mutu %> W<%= it.evaluasi.skor_waktu %> H<%= it.evaluasi.skor_harga %> K3L<%= it.evaluasi.skor_k3l %></small>
+                    <% elsif @project && @can_eval && it.stage_index >= pr::I_GR && it.rekanan %>
+                      <%= form_with url: lpms3_project_procurement_evaluasi_path(@project, it.wp, sub: @sub), method: :post, local: true, class: "lpms3-kontrak__inline" do %>
+                        <% { skor_mutu: "Mutu", skor_waktu: "Waktu", skor_harga: "Harga", skor_k3l: "K3L" }.each do |k, lbl| %>
+                          <label class="lpms3-hint"><%= lbl %> <select name="e[<%= k %>]" class="lpms3-input" style="width:auto"><% 5.downto(1) { |n| %><option><%= n %></option><% } %></select></label>
+                        <% end %>
+                        <input name="e[catatan]" placeholder="Catatan" class="lpms3-input" aria-label="Catatan evaluasi">
+                        <button class="lpms3-btn lpms3-btn--primary">Simpan evaluasi</button>
+                      <% end %>
+                    <% else %><span class="lpms3-hint">—</span><% end %>
                   <% elsif c == :pr %><%= v[:pr] %>
                   <% elsif c == :numbers %>
                     <% [[:pr, "PR"], [:po, "PO"]].each do |k, label| %><% if v[k].present? %><div><%= label %>: <%= v[k] %></div><% end %><% end %>

@@ -25,15 +25,17 @@ module OpenProject::Lpms3
     SEVERITY = { no_budget: :high, over_budget: :high, missing_pr: :high, no_value: :medium,
                  missing_po: :high, missing_vendor: :high, overdue_need: :high, contract_expired: :high,
                  contract_expiring: :medium, no_end_date: :medium,
-                 no_milestones: :medium, milestones_open: :high, missing_gr: :medium, missing_ba: :high }.freeze
+                 no_milestones: :medium, milestones_open: :high, missing_gr: :medium, missing_ba: :high,
+                 vendor_blacklisted: :high, vendor_unregistered: :medium, evaluation_missing: :medium, wbs_unlinked: :medium }.freeze
     # temuan relevan per sub-fase (untuk ringkasan dan filter)
     SUB_FINDINGS = {
       "pr" => %i[no_budget over_budget missing_pr no_value overdue_need],
-      "buyer" => %i[missing_po missing_vendor contract_expired contract_expiring no_end_date overdue_need],
-      "penyelesaian" => %i[no_milestones milestones_open missing_gr missing_ba contract_expired]
+      "buyer" => %i[missing_po missing_vendor vendor_blacklisted vendor_unregistered contract_expired contract_expiring no_end_date overdue_need],
+      "penyelesaian" => %i[no_milestones milestones_open missing_gr missing_ba evaluation_missing contract_expired]
     }.freeze
 
-    Item = Struct.new(:wp, :stage, :stage_index, :v, :findings, :value_base, :value_note, :milestones, :budget, keyword_init: true) do
+    Item = Struct.new(:wp, :stage, :stage_index, :v, :findings, :value_base, :value_note, :milestones, :budget,
+                      :wbs_node, :rekanan, :evaluasi, keyword_init: true) do
       def milestones_done = milestones.count { _1.status&.is_closed? }
       def milestones_open = milestones.size - milestones_done
     end
@@ -68,10 +70,18 @@ module OpenProject::Lpms3
       cfs = cf_map
       ms_ids = ::Type.where(is_milestone: true).pluck(:id)
       list = scope.where(type_id: t.id).includes(:status, :project, :custom_values, :budget, children: :status).order(:project_id, :id).to_a
+      ids = list.map(&:id)
+      links = ::Lpms3::PengadaanWbs.where(work_package_id: ids).includes(:wbs_node).index_by(&:work_package_id)
+      evals = ::Lpms3::RekananEvaluasi.where(work_package_id: ids).index_by(&:work_package_id)
+      rek = ::Lpms3::Rekanan.index_by_name
+      wbs_projects = ::Lpms3::WbsNode.where(project_id: list.map(&:project_id).uniq).where.not(parent_id: nil).distinct.pluck(:project_id).to_set
       list.map do |wp|
         v = values_from_stored(wp, cfs)
         idx = stage_index(wp.status&.name)
-        it = Item.new(wp:, stage: STAGES[idx], stage_index: idx, v:, findings: [], milestones: milestones_of(wp, ms_ids), budget: wp.budget)
+        it = Item.new(wp:, stage: STAGES[idx], stage_index: idx, v:, findings: [], milestones: milestones_of(wp, ms_ids), budget: wp.budget,
+                      wbs_node: links[wp.id]&.wbs_node, rekanan: v[:vendor].present? ? rek[::Lpms3::Rekanan.norm(v[:vendor])] : nil,
+                      evaluasi: evals[wp.id])
+        it.findings << :wbs_unlinked if it.wbs_node.nil? && wbs_projects.include?(wp.project_id)
         compute_value!(it, on)
         evaluate!(it, on)
         it
@@ -90,6 +100,9 @@ module OpenProject::Lpms3
       # Sub-fase 2: Buyer sampai kontrak
       f << :missing_po if i >= I_CONTRACT && v[:po].blank? && v[:contract].blank?
       f << :missing_vendor if i >= I_CONTRACT && v[:vendor].blank?
+      f << :vendor_blacklisted if it.rekanan&.hitam?
+      f << :vendor_unregistered if v[:vendor].present? && it.rekanan.nil?
+      f << :evaluation_missing if i >= I_DONE && it.evaluasi.nil?
       end_date = date(v[:contract_end])
       f << :no_end_date if i >= I_CONTRACT && i < I_DONE && v[:contract].present? && end_date.nil?
       f << :contract_expired if end_date && end_date < on && i < I_DONE
@@ -169,6 +182,9 @@ module OpenProject::Lpms3
         end
       end
       errs << [:vendor_required] if idx >= I_CONTRACT && v[:vendor].blank?
+      if idx >= I_CONTRACT && v[:vendor].present? && (r = ::Lpms3::Rekanan.find_by_name(v[:vendor]))&.hitam?
+        errs << [:vendor_blacklisted, { vendor: r.nama, reason: r.alasan_hitam.to_s }]
+      end
       errs << [:contract_required] if idx >= I_CONTRACT && v[:po].blank? && v[:contract].blank?
       if idx >= I_DONE
         ms_ids = ::Type.where(is_milestone: true).pluck(:id)

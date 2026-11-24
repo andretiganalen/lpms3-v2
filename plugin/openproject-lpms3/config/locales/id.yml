@@ -162,6 +162,8 @@ id:
     sidebar:
       settings: "Pengaturan"
       my_settings: "Pengaturan saya"
+    rekanan:
+      menu: "Rekanan"
     kontrak:
       menu: "Kontrak"
       menu_global: "Monitoring Kontrak"
@@ -312,6 +314,8 @@ id:
       value_rate_missing: "Kurs belum ada"
       value_invalid: "Nilai tidak valid"
       col:
+        wbs: "Aktivitas WBS"
+        evaluasi: "Evaluasi penyedia"
         project: "Proyek"
         item: "Item"
         stage: "Tahap"
@@ -345,7 +349,12 @@ id:
         milestones_open: "Milestone belum selesai"
         missing_gr: "No. GR/SES belum diisi"
         missing_ba: "Berita Acara penagihan belum terbit"
+        vendor_blacklisted: "Rekanan dalam daftar hitam (PFR-030)"
+        vendor_unregistered: "Rekanan belum terdaftar di master"
+        evaluation_missing: "Evaluasi penyedia (PFR-019) belum diisi"
+        wbs_unlinked: "Belum tertaut ke aktivitas WBS"
       gate:
+        vendor_blacklisted: "Rekanan %{vendor} dalam daftar hitam (PFR-030): %{reason}. Pilih rekanan lain."
         budget_required: "PR wajib bersandar pada Budget: pilih Budget proyek terlebih dahulu."
         pr_required: "Isi No. PR sebelum melewati tahap Rencana."
         value_required: "Isi nilai pengadaan (atau nilai kontrak) agar dapat diuji terhadap Budget."

@@ -133,6 +133,8 @@ module OpenProject::Lpms3
       menu :project_menu, :lpms3_fase_inisiasi_kontrak, { controller: "/lpms3/kontrak", action: :show },
            caption: :"lpms3.kontrak.menu", parent: OpenProject::Lpms3::Phases.menu_name(OpenProject::Lpms3::Phases.find("inisiasi")),
            if: visible, skip_permissions_check: true, html: { class: grp_cls.(:lpms3_fase_inisiasi_kontrak, "lpms3-grp-item") }
+      menu :global_menu, :lpms3_rekanan, { controller: "/lpms3/rekanan", action: :index },
+           if: Proc.new { User.current.logged? }, caption: :"lpms3.rekanan.menu", icon: "organization", after: :lpms3_procurement
       menu :global_menu, :lpms3_kontrak, { controller: "/lpms3/kontrak", action: :index },
            if: Proc.new { User.current.logged? }, caption: :"lpms3.kontrak.menu_global", icon: "file", after: :lpms3_procurement
       # Submenu 2 setiap fase: "Langkah BOP-001" (dropdown berisi langkah urut; isinya anak dinamis menu fase).
@@ -190,6 +192,10 @@ module OpenProject::Lpms3
           next unless saved_change_to_status_id?
 
           ::Lpms3::WbsBaseline.on_cr_status_change(self)
+          # Pengadaan 1.43: tahap Item Pengadaan menaikkan % Complete aktivitas WBS tertaut (bila bukti ada).
+          if type&.name == ::OpenProject::Lpms3::Procurement::TYPE && (link = ::Lpms3::PengadaanWbs.find_by(work_package_id: id))
+            ::Lpms3::PengadaanWbs.sync_activity!(link.wbs_node)
+          end
         rescue StandardError => e
           Rails.logger.error("[LPMS3] baseline CR ##{id}: #{e.class}: #{e.message}")
         end

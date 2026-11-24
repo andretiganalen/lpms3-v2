@@ -189,7 +189,7 @@
     var box = b.closest('.lpms3-org__bar') && b.closest('.lpms3-org__bar').parentElement;
     if (!box) { return; }
     var open = b.getAttribute('data-lpms3-org') === 'open';
-    box.querySelectorAll('details.lpms3-org__branch').forEach(function (d) { d.open = open; });
+    box.querySelectorAll('details.lpms3-tree__branch').forEach(function (d) { d.open = open; });
   });
   // Sidebar tetap (tidak dimuat ulang) saat berpindah halaman lewat Turbo Drive, seperti sidebar :8585.
   // Elemen #main-menu ditandai data-turbo-permanent selama konteksnya sama (project atau area yang sama);

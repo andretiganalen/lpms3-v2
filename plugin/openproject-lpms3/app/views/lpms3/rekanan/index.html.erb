@@ -1,0 +1,59 @@
+<% html_title "Rekanan" %>
+<%=
+  render(Primer::OpenProject::PageHeader.new) do |header|
+    header.with_title { "Rekanan" }
+    header.with_breadcrumbs([{ href: home_path, text: t("label_home") }, "Rekanan"])
+    header.with_description { "Master rekanan (PFR-001) dipakai kolom Rekanan Item Pengadaan. Skor dari evaluasi penyedia (PFR-019) per item; rekanan daftar hitam (PFR-030) tidak dapat dipilih sampai tahap PO/Kontrak." }
+  end
+%>
+<% rform = lambda do |r| %>
+  <%= form_with url: lpms3_rekanan_save_path(r.persisted? ? r.id : nil), method: :post, local: true, class: "lpms3-kontrak__form" do %>
+    <label>Nama rekanan <input name="r[nama]" value="<%= r.nama %>" required class="lpms3-input"></label>
+    <label>NPWP <input name="r[npwp]" value="<%= r.npwp %>" class="lpms3-input"></label>
+    <label>Kategori <input name="r[kategori]" value="<%= r.kategori %>" class="lpms3-input" placeholder="mis. Trafo, Kabel, Sipil"></label>
+    <label>Kontak <input name="r[kontak]" value="<%= r.kontak %>" class="lpms3-input"></label>
+    <label class="lpms3-kontrak__wide">Alamat <input name="r[alamat]" value="<%= r.alamat %>" class="lpms3-input"></label>
+    <button class="lpms3-btn lpms3-btn--primary">Simpan rekanan</button>
+  <% end %>
+<% end %>
+<div class="lpms3-page">
+  <section class="lpms3-card">
+    <%= form_with url: lpms3_rekanan_path, method: :get, local: true, class: "lpms3-kontrak__inline" do %>
+      <input name="q" value="<%= @q %>" placeholder="Cari nama, NPWP, kategori" class="lpms3-input" style="width:260px" aria-label="Cari rekanan">
+      <select name="status" class="lpms3-input" style="width:auto" aria-label="Status"><option value="">Semua status</option><option value="AKTIF" <%= "selected" if @status == "AKTIF" %>>Aktif</option><option value="DAFTAR_HITAM" <%= "selected" if @status == "DAFTAR_HITAM" %>>Daftar hitam</option></select>
+      <button class="lpms3-btn">Cari</button>
+    <% end %>
+    <% if @manage %><details style="margin-top:8px"><summary class="lpms3-btn">+ Tambah rekanan</summary><% rform.call(::Lpms3::RekananRow.new(nama: @q.presence)) %></details><% end %>
+  </section>
+  <% if @rows.empty? %>
+    <section class="lpms3-card lpms3-empty"><p>Belum ada rekanan.</p></section>
+  <% else %>
+    <div class="lpms3-table-wrap"><table class="lpms3-table">
+      <thead><tr><th scope="col">Rekanan</th><th scope="col">Kategori</th><th scope="col">Dipakai item</th><th scope="col">Evaluasi</th><th scope="col">Status</th><% if @manage || @hitam %><th scope="col"><span class="sr-only">Aksi</span></th><% end %></tr></thead>
+      <tbody>
+        <% @rows.each do |x| r = x[:row] %>
+          <tr>
+            <th scope="row"><%= r.nama %><br><small class="lpms3-hint"><%= [r.npwp, r.kontak].compact.join(" · ") %></small></th>
+            <td><%= r.kategori %></td>
+            <td class="lpms3-num"><%= x[:item] %></td>
+            <td><%= x[:skor] ? "#{x[:skor]} / 5 (#{x[:evaluasi]})" : "—" %></td>
+            <td><% if r.hitam? %><span class="lpms3-chip lpms3-chip--danger">Daftar hitam</span><br><small><%= r.alasan_hitam %> · <%= r.tanggal_hitam %></small><% else %><span class="lpms3-chip lpms3-chip--ok">Aktif</span><% end %></td>
+            <% if @manage || @hitam %>
+              <td class="lpms3-kontrak__acts">
+                <% if @manage %><details><summary class="lpms3-btn">Ubah</summary><% rform.call(r) %></details><% end %>
+                <% if @hitam && !r.hitam? %>
+                  <%= form_with url: lpms3_rekanan_hitam_path(r), method: :post, local: true, class: "lpms3-kontrak__inline" do %>
+                    <input name="alasan" required placeholder="Alasan (PFR-030)" class="lpms3-input" aria-label="Alasan daftar hitam <%= r.nama %>">
+                    <button class="lpms3-btn">Daftar hitam</button>
+                  <% end %>
+                <% elsif @hitam %>
+                  <%= button_to "Pulihkan", lpms3_rekanan_pulihkan_path(r), class: "lpms3-btn", data: { turbo_confirm: "Cabut #{r.nama} dari daftar hitam?" } %>
+                <% end %>
+              </td>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table></div>
+  <% end %>
+</div>

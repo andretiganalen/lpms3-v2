@@ -55,7 +55,9 @@ module Lpms3
         end
         atasan = Hierarki.atasan_eselon2_of(p)
         warnings << "Jabatan Kepala #{es2.name} (atasan Pimpro #{p.name}) belum diisi." if atasan.empty? && Hierarki.holders(es2, "KEPALA").none? { |u| u.id == p.id }
-        atasan.each { |u| out << [u, ROLE_ESELON2, "Atasan Eselon 2 Pimpro #{p.name} (#{es2.name})"] }
+        # Bagian bisa punya lebih dari satu Pejabat Eselon 2: bila salah satunya sudah member, itulah atasan di proyek ini.
+        hadir = atasan.select { |u| ::Member.exists?(project_id: project.id, user_id: u.id) }
+        (hadir.presence || atasan.first(1)).each { |u| out << [u, ROLE_ESELON2, "Atasan Eselon 2 Pimpro #{p.name} (#{es2.name})"] }
       end
       [out, warnings]
     end
