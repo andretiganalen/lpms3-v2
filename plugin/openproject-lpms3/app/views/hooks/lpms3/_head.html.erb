@@ -444,6 +444,21 @@
       li.classList.toggle('lpms3-acc');
       sync(li);
     }, true);
+    // Pola LenO: klik JUDUL menu (bukan hanya panah) membuka/menutup submenunya; halaman tidak dibuka.
+    // Berlaku untuk menu utama yang punya anak (termasuk Inisiasi s.d. Penutupan) dan sub-kelompok "Ringkasan Fase".
+    document.addEventListener('click', function (e) {
+      if (e.defaultPrevented || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) { return; }
+      var a = e.target.closest && e.target.closest('#main-menu a.op-menu--item-action');
+      if (!a) { return; }
+      var btn = null;
+      var wrap = a.parentElement;
+      if (wrap && wrap.classList.contains('main-item-wrapper')) { btn = wrap.querySelector(':scope > .main-menu-toggler'); }
+      var li = a.parentElement && a.parentElement.closest('li');
+      if (!btn && li && li.classList.contains('lpms3-grp') && a.parentElement === li) { btn = li.querySelector(':scope > .lpms3-grp-toggle'); }
+      if (!btn) { return; }
+      e.preventDefault(); e.stopImmediatePropagation();
+      btn.click();
+    }, true);
     document.addEventListener('DOMContentLoaded', setup);
     document.addEventListener('turbo:load', setup);
     if (document.readyState !== 'loading') { setup(); }

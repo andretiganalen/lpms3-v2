@@ -1029,3 +1029,8 @@ table.generic-table td a:not(.button):not(.Button) { color: var(--uix-primary); 
 .op-uc-container table, .op-uc-container .op-uc-table, .work-package--description table { width: 100%; table-layout: fixed; border-collapse: collapse; border: 1px solid var(--leno-panel-border); border-radius: var(--uix-radius-control); font-size: 12px; margin: 8px 0; }
 .op-uc-container table th, .work-package--description table th { background: var(--leno-table-head); color: var(--leno-text); font-weight: 600; text-align: left; padding: 8px 10px; border: 1px solid var(--leno-table-line); }
 .op-uc-container table td, .work-package--description table td { padding: 8px 10px; vertical-align: top; border: 1px solid var(--leno-table-line); color: var(--leno-text); overflow-wrap: anywhere; }
+/* Tabel markdown OpenProject (op-uc-table): muat selebar kolom, tanpa gulir mendatar; teks panjang turun baris */
+.op-uc-figure--content { display: block; overflow: visible; }
+.op-uc-table { width: 100%; max-width: 100%; table-layout: fixed; }
+.op-uc-table--cell { min-width: 0; padding: 8px 10px; overflow-wrap: anywhere; word-break: normal; font-size: 12px; vertical-align: top; }
+th.op-uc-table--cell, .op-uc-table thead .op-uc-table--cell { background: var(--leno-table-head); font-weight: 600; color: var(--leno-text); }
