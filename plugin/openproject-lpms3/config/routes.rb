@@ -40,6 +40,8 @@ Rails.application.routes.draw do
     post ":id/pindah", action: :move, as: :lpms3_project_wbs_move
     post ":id/bobot", action: :weights, as: :lpms3_project_wbs_weights
     post ":id/kurva", action: :bell_curve, as: :lpms3_project_wbs_bell
+    post "baseline/tetapkan", action: :baseline0, as: :lpms3_project_wbs_baseline0
+    post "baseline/kembalikan", action: :restore, as: :lpms3_project_wbs_restore
   end
   post "lpms3/wbs/:id/tugaskan", to: "lpms3/wbs#tugaskan", as: :lpms3_wbs_tugaskan
 

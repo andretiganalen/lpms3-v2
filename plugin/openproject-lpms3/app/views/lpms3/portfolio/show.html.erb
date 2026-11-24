@@ -28,7 +28,11 @@
             <%= t("lpms3.portfolio.col.amendemen") %>: <%= r[:amendemen].presence || "—" %>
           </div>
         </div>
-        <span class="lpms3-chip <%= 'lpms3-chip--ok' if r[:status] == 'Leading' %>"><%= t("lpms3.portfolio.status.#{r[:status].to_s.downcase}", default: r[:status]) %></span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start">
+          <% if r[:baseline] %><%= link_to r[:baseline], lpms3_project_wbs_path(r[:id]), class: "lpms3-chip", title: t("lpms3.portfolio.baseline_hint") %><% end %>
+          <% if r[:baseline_draft] %><span class="lpms3-chip lpms3-chip--warn"><%= t("lpms3.portfolio.baseline_draft", label: r[:baseline_draft]) %></span><% end %>
+          <span class="lpms3-chip <%= 'lpms3-chip--ok' if r[:status] == 'Leading' %>"><%= t("lpms3.portfolio.status.#{r[:status].to_s.downcase}", default: r[:status]) %></span>
+        </div>
       </div>
 
       <%# Bar chart: rencana vs aktual, dengan batas 100% %>

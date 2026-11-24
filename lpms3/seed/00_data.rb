@@ -67,6 +67,24 @@ module Lpms3Data
   }.freeze
   # Peran umum untuk transisi bebas maju pada tipe non-CR
   GENERAL_ROLES = ["Pimpro", "Tim Proyek", "Fungsi Pengawasan Proyek"].freeze
+  # Pemilik register (tipe tanpa DECISION_FLOWS): fungsi yang mengisi register mendapat transisi penuh seperti
+  # GENERAL_ROLES, termasuk New -> status awal. Contoh: Risk Register diisi Fungsi Manajemen Risiko, daftar Bahaya K3L
+  # oleh Fungsi K3 & LH, Inspeksi Mutu/NCR oleh Fungsi Penjaminan Mutu.
+  FUNGSI_KONTRIBUTOR = ["Fungsi Perencanaan Proyek", "Fungsi Pelaksanaan Proyek (Struktural)", "Fungsi Manajemen Risiko",
+                        "Fungsi K3 & Lingkungan Hidup", "Fungsi Penjaminan Mutu", "Fungsi Pengadaan & Pengelola Gudang",
+                        "Fungsi Pengendali Anggaran/Keuangan/Akuntansi", "Fungsi Rekayasa Solusi Teknis", "Pengelola Biaya Proyek",
+                        "Spesialis Pejabat Eselon 1", "Spesialis Pejabat Eselon 2", "Project Analis"].freeze
+  REGISTER_OWNERS = {
+    "Risiko"         => ["Fungsi Manajemen Risiko"],
+    "Isu"            => ["Fungsi Manajemen Risiko"],
+    "Bahaya K3L"     => ["Fungsi K3 & Lingkungan Hidup"],
+    "Inspeksi Mutu"  => ["Fungsi Penjaminan Mutu"],
+    "NCR"            => ["Fungsi Penjaminan Mutu"],
+    "Item Pengadaan" => ["Fungsi Pengadaan & Pengelola Gudang"],
+    "Stakeholder"    => ["Fungsi Perencanaan Proyek"],
+    "Action Item"    => FUNGSI_KONTRIBUTOR,
+    "Lesson Learned" => FUNGSI_KONTRIBUTOR,
+  }.freeze
 
   # Tipe dengan status keputusan: workflow form OpenProject TIDAK boleh mencapai status keputusan secara langsung
   # (temuan audit P0 #2, ditutup 20-23 Nov 2026). Daftar ini = satu-satunya transisi form yang diizinkan; seed

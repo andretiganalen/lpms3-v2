@@ -6,6 +6,8 @@ id:
       period_label: "Periode"
       periods: { day: "Harian", week: "Mingguan", month: "Bulanan", quarter: "Triwulan" }
       compare_to: "Dibandingkan dengan %{date}"
+      baseline_hint: "Rencana dihitung dari baseline WBS aktif"
+      baseline_draft: "%{label} menunggu CR"
       empty: "Tidak ada proyek yang bisa Anda lihat."
       limit: "Batas 100%"
       days:

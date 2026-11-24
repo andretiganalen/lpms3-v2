@@ -1,0 +1,80 @@
+<% b = @baseline %>
+<% if b %>
+  <% active = b[:active]; draft = b[:draft]; rej = b[:rejected]
+     show_rej = rej && draft.nil? && (active.nil? || rej.version > active.version)
+     cr = draft&.change_request %>
+  <section class="lpms3-card lpms3-wbs__base" aria-labelledby="lpms3-wbs-base-title">
+    <h2 id="lpms3-wbs-base-title" class="lpms3-card__title">Baseline</h2>
+    <dl class="lpms3-wbs__base-grid">
+      <div>
+        <dt>Baseline aktif</dt>
+        <dd>
+          <% if active %>
+            <strong><%= active.label %></strong>
+            <small>disetujui <%= l(active.approved_at.to_date, format: "%d %b %Y") if active.approved_at %><%= " oleh #{active.approver.name}" if active.approver %></small>
+          <% else %>
+            <span class="lpms3-chip lpms3-chip--warn">Belum ditetapkan</span>
+          <% end %>
+        </dd>
+      </div>
+      <div>
+        <dt>Rencana / Aktual</dt>
+        <dd><%= b[:planned].nil? ? "—" : "#{b[:planned]} %" %> / <%= b[:actual].nil? ? "—" : "#{b[:actual]} %" %></dd>
+      </div>
+      <div>
+        <dt>Pekerjaan selesai (beku)</dt>
+        <dd><%= b[:frozen] %> aktivitas</dd>
+      </div>
+      <div>
+        <dt>Draft</dt>
+        <dd>
+          <% if draft.nil? %>
+            Tidak ada — WBS sama dengan baseline aktif.
+          <% elsif draft.version.zero? %>
+            <strong><%= draft.label %></strong> <span class="lpms3-chip">Draft</span>
+          <% else %>
+            <strong><%= draft.label %></strong>
+            <% if cr %>
+              <span class="lpms3-chip <%= ::Lpms3::WbsBaseline::CR_EDITABLE.include?(cr.status&.name) ? 'lpms3-chip--warn' : '' %>">CR <%= cr.status&.name %></span>
+              <%= link_to "Change Request ##{cr.id}", work_package_path(cr), target: "_top" %>
+            <% elsif @cr_type.nil? %>
+              <span class="lpms3-chip lpms3-chip--warn">Tipe Change Request belum aktif di proyek ini</span>
+            <% end %>
+          <% end %>
+        </dd>
+      </div>
+    </dl>
+
+    <% if draft && draft.version.positive? && draft.change_summary.present? %>
+      <details class="lpms3-wbs__base-diff">
+        <summary>Perubahan terhadap <%= active&.label || "baseline aktif" %></summary>
+        <ul><% draft.change_summary.lines.each do |line| %><li><%= line.strip %></li><% end %></ul>
+      </details>
+    <% end %>
+
+    <% if draft && draft.version.positive? && cr && ::Lpms3::WbsBaseline::CR_EDITABLE.include?(cr.status&.name) %>
+      <p class="lpms3-note">Pimpro mengajukan Change Request (Draft → Diajukan) agar draft ditinjau Fungsi Pengawasan Proyek dan diputus Sidang CCM. Setelah diajukan, perubahan rencana ditahan sampai CR diputuskan.</p>
+    <% elsif draft && draft.version.positive? && cr %>
+      <p class="lpms3-note">Draft sedang diproses lewat CR; perubahan rencana ditahan. % Complete dan tanggal aktual tetap dapat diisi.</p>
+    <% end %>
+    <% if show_rej %>
+      <p class="lpms3-note"><%= rej.label %> ditolak lewat Change Request #<%= rej.change_request_form_id %>. WBS masih berbeda dari baseline aktif; kembalikan atau ubah lalu ajukan CR baru.</p>
+    <% end %>
+
+    <% if @editable %>
+      <div class="lpms3-wbs__base-acts">
+        <% if active.nil? && draft&.version&.zero? %>
+          <%= button_to "Tetapkan Baseline 0 (Kick-Off)", lpms3_project_wbs_baseline0_path(@project), method: :post, class: "lpms3-btn lpms3-btn--primary",
+                        data: { turbo_confirm: "Tetapkan WBS saat ini sebagai Baseline 0? Perubahan rencana berikutnya memerlukan Change Request." } %>
+        <% end %>
+        <% if active && draft && ::Lpms3::WbsBaseline.cr_editable?(draft) %>
+          <%= button_to "Kembalikan ke #{active.label}", lpms3_project_wbs_restore_path(@project), method: :post, class: "lpms3-btn",
+                        data: { turbo_confirm: "Batalkan perubahan rencana dan kembalikan WBS ke #{active.label}?" } %>
+        <% elsif show_rej %>
+          <%= button_to "Kembalikan ke #{active.label}", lpms3_project_wbs_restore_path(@project), method: :post, class: "lpms3-btn",
+                        data: { turbo_confirm: "Kembalikan WBS ke #{active.label}?" } %>
+        <% end %>
+      </div>
+    <% end %>
+  </section>
+<% end %>

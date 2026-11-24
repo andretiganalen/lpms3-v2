@@ -19,6 +19,7 @@ module Lpms3
       @kickoff_undang = ::Lpms3::Kickoff.pending_for(User.current).select { |k| k.state == "menunggu_undangan" }
       @pemicu = ::Lpms3::Inbox.pemicu(User.current)
       @wbs_pic = ::Lpms3::Inbox.wbs_pic(User.current)
+      @baseline_cr = ::Lpms3::Inbox.baseline_cr(User.current)
     end
 
     # Pengaju mengirim dokumen (WP) untuk persetujuan. Hanya dokumen yang bisa dilihat pengguna.

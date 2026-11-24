@@ -88,23 +88,28 @@ module OpenProject::Lpms3
            icon: "gear"
 
       # Menu project per fase BOP-001: lima container (drilldown) berurutan tepat di bawah Ikhtisar.
+      # Kelas bawaan "<nama>-menu-item" harus tetap ada (sorotan menu) saat menambah kelas grup sidebar.
+      grp_cls = ->(name, extra) { "#{name.to_s.dasherize}-menu-item #{extra}" }
       visible = ->(project) { project.module_enabled?("work_package_tracking") && User.current.allowed_in_project?(:view_work_packages, project) }
       previous = :overview
       OpenProject::Lpms3::Phases::ALL.each do |ph|
         parent = OpenProject::Lpms3::Phases.menu_name(ph)
         url = { controller: "/lpms3/phases", action: :show, phase: ph.key }
+        # Anak dinamis = daftar Langkah BOP-001 project (dipindah JS ke bawah submenu "Langkah BOP-001").
         menu :project_menu, parent, url,
              caption: OpenProject::Lpms3::Phases.menu_title_key(ph), icon: ph.icon, after: previous, if: visible,
-             skip_permissions_check: true
-        sections = %i[ringkasan gerbang langkah]
+             skip_permissions_check: true, children: ->(project) { OpenProject::Lpms3::Phases.step_menu_items(project, ph) }
+        # Submenu 1 "Ringkasan Fase" (kepala grup) + anggota grupnya; submenu 2 "Langkah BOP-001" didaftarkan terakhir.
+        menu :project_menu, OpenProject::Lpms3::Phases.menu_name(ph, :ringkasan), url,
+             caption: :"lpms3.phases.menu.ringkasan_fase", parent:, if: visible, skip_permissions_check: true,
+             html: { class: grp_cls.(OpenProject::Lpms3::Phases.menu_name(ph, :ringkasan), "lpms3-grp-head lpms3-grp-head--ringkasan") }
+        sections = %i[gerbang]
         sections << :aspek if ph.key == "inisiasi"
-        sections << :register
+        sections << :register unless ph.types.empty?
         sections.each do |section|
-          next if section == :register && ph.types.empty?
-
-          menu :project_menu, OpenProject::Lpms3::Phases.menu_name(ph, section),
-               url.merge(section == :ringkasan ? {} : { section: section.to_s }),
-               caption: :"lpms3.phases.menu.#{section}", parent:, if: visible, skip_permissions_check: true
+          menu :project_menu, OpenProject::Lpms3::Phases.menu_name(ph, section), url.merge(section: section.to_s),
+               caption: :"lpms3.phases.menu.#{section}", parent:, if: visible, skip_permissions_check: true,
+               html: { class: grp_cls.(OpenProject::Lpms3::Phases.menu_name(ph, section), "lpms3-grp-item") }
         end
         previous = parent
       end
@@ -112,15 +117,24 @@ module OpenProject::Lpms3
       # Editor WBS & Bobot (1.40) di fase Perencanaan.
       menu :project_menu, :lpms3_fase_perencanaan_wbs, { controller: "/lpms3/wbs", action: :show },
            caption: :"lpms3.wbs.menu", parent: OpenProject::Lpms3::Phases.menu_name(OpenProject::Lpms3::Phases.find("perencanaan")),
-           if: visible, skip_permissions_check: true
+           if: visible, skip_permissions_check: true, html: { class: grp_cls.(:lpms3_fase_perencanaan_wbs, "lpms3-grp-item") }
 
       # Eksekusi Item Pengadaan: ringkasan + tiga sub-fase (anak menu fase Eksekusi) + menu global lintas project.
       eks = OpenProject::Lpms3::Phases.menu_name(OpenProject::Lpms3::Phases.find("eksekusi"))
       menu :project_menu, :lpms3_fase_eksekusi_pengadaan, { controller: "/lpms3/procurement", action: :show },
-           caption: :"lpms3.procurement.menu", parent: eks, if: visible, skip_permissions_check: true
+           caption: :"lpms3.procurement.menu", parent: eks, if: visible, skip_permissions_check: true,
+           html: { class: grp_cls.(:lpms3_fase_eksekusi_pengadaan, "lpms3-grp-item") }
       %w[pr buyer penyelesaian].each do |sub|
         menu :project_menu, :"lpms3_fase_eksekusi_pengadaan_#{sub}", { controller: "/lpms3/procurement", action: :show, sub: },
-             caption: :"lpms3.procurement.sub.#{sub}.menu", parent: eks, if: visible, skip_permissions_check: true
+             caption: :"lpms3.procurement.sub.#{sub}.menu", parent: eks, if: visible, skip_permissions_check: true,
+             html: { class: grp_cls.(:"lpms3_fase_eksekusi_pengadaan_#{sub}", "lpms3-grp-item lpms3-grp-item--sub") }
+      end
+      # Submenu 2 setiap fase: "Langkah BOP-001" (dropdown berisi langkah urut; isinya anak dinamis menu fase).
+      OpenProject::Lpms3::Phases::ALL.each do |ph|
+        menu :project_menu, OpenProject::Lpms3::Phases.menu_name(ph, :langkah),
+             { controller: "/lpms3/phases", action: :show, phase: ph.key, section: "langkah" },
+             caption: :"lpms3.phases.menu.langkah_bop", parent: OpenProject::Lpms3::Phases.menu_name(ph), if: visible,
+             skip_permissions_check: true, html: { class: grp_cls.(OpenProject::Lpms3::Phases.menu_name(ph, :langkah), "lpms3-grp-head lpms3-grp-head--langkah") }
       end
       menu :global_menu, :lpms3_procurement, { controller: "/lpms3/procurement", action: :show },
            if: Proc.new { User.current.logged? }, caption: :"lpms3.procurement.menu", icon: "package", after: :lpms3_currencies
@@ -149,6 +163,17 @@ module OpenProject::Lpms3
         end
       end
       OpenProject::Lpms3::Hooks
+      # Baseline WBS (1.41): CR (BFR-001) Disetujui mengaktifkan draft baseline; Ditolak menandai draft REJECTED.
+      unless WorkPackage.instance_variable_get(:@lpms3_baseline_cr)
+        WorkPackage.instance_variable_set(:@lpms3_baseline_cr, true)
+        WorkPackage.after_commit(on: :update) do
+          next unless saved_change_to_status_id?
+
+          ::Lpms3::WbsBaseline.on_cr_status_change(self)
+        rescue StandardError => e
+          Rails.logger.error("[LPMS3] baseline CR ##{id}: #{e.class}: #{e.message}")
+        end
+      end
       # Gerbang Eksekusi Item Pengadaan: berlandaskan Budget, tiga sub-fase (PR, Buyer sampai kontrak, milestone sampai BA).
       unless WorkPackage.instance_variable_get(:@lpms3_procurement_gate)
         WorkPackage.instance_variable_set(:@lpms3_procurement_gate, true)

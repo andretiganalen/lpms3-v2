@@ -164,6 +164,14 @@ id:
       my_settings: "Pengaturan saya"
     phases:
       stepper: "Fase proyek BOP-001"
+      baseline:
+        title: "WBS & Baseline"
+        active: "Baseline aktif"
+        none: "Belum ditetapkan"
+        planned_actual: "Rencana / Aktual"
+        draft: "Draft baseline"
+        frozen: "Aktivitas selesai (beku)"
+        open: "Buka WBS & Bobot"
       progress: "%{done} dari %{total} selesai"
       gates: "Gerbang (Gate)"
       steps: "Langkah BOP-001"
@@ -179,7 +187,10 @@ id:
         assignee: "Penanggung jawab"
         due: "Tenggat"
       menu:
-        ringkasan: "Ringkasan fase"
+        ringkasan: "Ringkasan"
+        ringkasan_fase: "Ringkasan Fase"
+        langkah_bop: "Langkah BOP-001"
+        langkah_semua: "Tabel seluruh langkah"
         gerbang: "Gerbang"
         langkah: "Langkah"
         aspek: "9 Aspek PMP"

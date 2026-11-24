@@ -29,3 +29,5 @@ lpms3/seed/tambah_akun_fungsi.rb
 
 # Laporan audit internal (repo publik) – simpan di luar git
 docs/AUDIT-*.md
+lpms3/seed/proyek_kristian_epc.rb
+lpms3/seed/run_kristian.sh

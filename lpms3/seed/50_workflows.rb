@@ -10,7 +10,9 @@ Lpms3Data::TYPES.each do |tname, (statuses, _c, _m)|
   type = Type.find_by!(name: tname)
   # WP baru OpenProject selalu berstatus default "New"; beri transisi New -> status awal tipe
   # agar pembuat dapat memilih status awal yang benar di form (CR: hanya Pimpro).
-  (tname == "Change Request" ? ["Pimpro"] : Lpms3Data::GENERAL_ROLES).each { |rn| mk.(type, role[rn], "New", statuses.first) }
+  owners = (Lpms3Data::REGISTER_OWNERS[tname] || []).select { |rn| ProjectRole.exists?(name: rn) }
+  (tname == "Change Request" ? ["Pimpro"] : Lpms3Data::GENERAL_ROLES + (Lpms3Data::DECISION_FLOWS[tname] ? [] : owners))
+    .each { |rn| mk.(type, role[rn], "New", statuses.first) }
   if (flows = Lpms3Data::DECISION_FLOWS[tname])
     # Sinkron penuh: hanya transisi di DECISION_FLOWS yang boleh ada; sisanya (dari seed lama) dihapus.
     keep = flows.flat_map { |rn, pairs| pairs.map { |f, t| [role[rn].id, st[f].id, st[t].id] } }
@@ -23,7 +25,7 @@ Lpms3Data::TYPES.each do |tname, (statuses, _c, _m)|
     Lpms3Data::CR_FLOW.each { |rn, pairs| pairs.each { |f, t| mk.(type, role[rn], f, t) } }
   else
     # semua transisi antar-status untuk peran umum (sederhana; dapat diperketat PMO)
-    Lpms3Data::GENERAL_ROLES.each do |rn|
+    (Lpms3Data::GENERAL_ROLES + owners).uniq.each do |rn|
       statuses.permutation(2).each { |f, t| mk.(type, role[rn], f, t) }
     end
   end

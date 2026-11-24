@@ -12,6 +12,8 @@ module Lpms3
   #                (hanya WP yang nilainya diketahui pada kedua waktu).
   #  - Judul    : field "Judul Proyek Lengkap" (jika kosong, nama proyek).
   #  - Isu / Risiko: WP tipe "Isu" / "Risiko" yang statusnya belum tertutup.
+  #  - Proyek dengan baseline WBS aktif (1.41): Rencana % = Σ weight aktivitas baseline × waktu berjalan (linear),
+  #    Aktual % = % Progress Level 0 WBS, Kenaikan dari riwayat done_ratio WP aktivitas × weight.
   module Portfolio
     PERIODS = %w[day week month quarter].freeze
     EXECUTION_TYPES = %w[Task Deliverable Feature].freeze
@@ -55,6 +57,14 @@ module Lpms3
       end
       delta = pairs.any? ? (avg(pairs.map(&:first)) - avg(pairs.map(&:last))) : nil
 
+      base = ::Lpms3::WbsBaseline.summary(project, today:)
+      if base&.dig(:active)
+        planned = base[:planned]
+        actual = base[:actual]
+        was = ::Lpms3::WbsBaseline.actual_pct_at(project, prev)
+        delta = actual && was ? actual - was : nil
+      end
+
       deadline = date_of(cfv(project, "Tanggal Selesai Kontrak")) || wps.map(&:due_date).max
       start = date_of(cfv(project, "Tanggal Kick-Off (Baseline 0)")) || date_of(cfv(project, "Tanggal Kontrak")) ||
               wps.map(&:start_date).min
@@ -74,7 +84,9 @@ module Lpms3
         jalan_hari: start && (today - start).to_i,
         jalan_pct: (start && deadline && deadline > start) ? (((today - start).to_f / (deadline - start)) * 100).clamp(0, 100).round(1) : nil,
         kenaikan: delta&.round(1),
-        jumlah_wp: wps.size
+        jumlah_wp: wps.size,
+        baseline: base&.dig(:active)&.label,
+        baseline_draft: base&.dig(:draft)&.then { |d| d.version.positive? ? d.label : nil }
       }
     end
 

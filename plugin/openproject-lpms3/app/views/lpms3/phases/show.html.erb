@@ -23,6 +23,23 @@
     <% end %>
   </ol>
 
+  <% if (wb = @wbs_baseline) %>
+  <section class="lpms3-card" id="baseline">
+    <h3 class="lpms3-card__title"><%= t("lpms3.phases.baseline.title") %></h3>
+    <dl class="lpms3-wbs__base-grid">
+      <div><dt><%= t("lpms3.phases.baseline.active") %></dt><dd><%= wb[:active]&.label || t("lpms3.phases.baseline.none") %></dd></div>
+      <div><dt><%= t("lpms3.phases.baseline.planned_actual") %></dt><dd><%= wb[:planned].nil? ? "—" : "#{wb[:planned]} %" %> / <%= wb[:actual].nil? ? "—" : "#{wb[:actual]} %" %></dd></div>
+      <div><dt><%= t("lpms3.phases.baseline.draft") %></dt><dd>
+        <% if (d = wb[:draft]) %>
+          <%= d.label %><% if d.change_request %> · <%= link_to "CR ##{d.change_request.id} (#{d.cr_status})", work_package_path(d.change_request) %><% end %>
+        <% else %>—<% end %>
+      </dd></div>
+      <div><dt><%= t("lpms3.phases.baseline.frozen") %></dt><dd><%= wb[:frozen] %></dd></div>
+    </dl>
+    <p style="margin:8px 0 0"><%= link_to t("lpms3.phases.baseline.open"), lpms3_project_wbs_path(@project) %></p>
+  </section>
+  <% end %>
+
   <% if @all || @section == "gerbang" %>
   <section class="lpms3-card" id="gerbang">
     <h3 class="lpms3-card__title"><%= t("lpms3.phases.gates") %></h3>

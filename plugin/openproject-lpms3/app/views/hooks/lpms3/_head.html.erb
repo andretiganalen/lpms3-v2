@@ -85,6 +85,103 @@
       t.setAttribute('aria-expanded', open ? 'true' : 'false');
     }, true);
   })();
+  // Menu fase: dua submenu dropdown — "Ringkasan Fase" (Ringkasan, Gerbang, Aspek, Register, WBS, Pengadaan) dan
+  // "Langkah BOP-001" (langkah urut predecessor → successor; anak dinamis dari server dipindah ke bawahnya).
+  (function () {
+    if (window.__lpms3PhaseGroups) { return; }
+    window.__lpms3PhaseGroups = true;
+    var KEY = 'lpms3.sidebar.grp.';
+    function stored(k) { try { return localStorage.getItem(KEY + k); } catch (e) { return null; } }
+    function store(k, v) { try { localStorage.setItem(KEY + k, v); } catch (e) {} }
+    function setOpen(li, open) {
+      li.classList.toggle('is-grp-open', open);
+      var b = li.querySelector(':scope > .lpms3-grp-toggle');
+      if (b) { b.setAttribute('aria-expanded', open ? 'true' : 'false'); }
+    }
+    function toggleBtn(li, label, id) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'lpms3-grp-toggle'; b.setAttribute('aria-label', label);
+      b.setAttribute('aria-controls', id);
+      b.innerHTML = '<svg aria-hidden="true" viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><path d="M12.78 5.22a.749.749 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.06 0L3.22 6.28a.749.749 0 1 1 1.06-1.06L8 8.939l3.72-3.719a.749.749 0 0 1 1.06 0Z"/></svg>';
+      li.appendChild(b);
+      return b;
+    }
+    function samePath(href) {
+      try { var p = new URL(href, location.href).pathname; return p === location.pathname || location.pathname.indexOf(p + '/') === 0; } catch (e) { return false; }
+    }
+    function group() {
+      document.querySelectorAll('#main-menu ul.menu_root > li[data-name^="lpms3_fase_"]').forEach(function (phase) {
+        var ul = phase.querySelector(':scope > ul.main-menu--children:not(.unattached)');
+        if (!ul || ul.dataset.lpms3Grouped) { return; }
+        ul.dataset.lpms3Grouped = '1';
+        var key = phase.getAttribute('data-name');
+        var headR = ul.querySelector('a.lpms3-grp-head--ringkasan'); headR = headR && headR.closest('li');
+        var headL = ul.querySelector('a.lpms3-grp-head--langkah'); headL = headL && headL.closest('li');
+        if (headR) {
+          var subR = document.createElement('ul'); subR.className = 'lpms3-sub'; subR.id = key + '-grp-ringkasan';
+          var first = document.createElement('li');
+          var a0 = headR.querySelector('a').cloneNode(true);
+          a0.classList.remove('lpms3-grp-head', 'lpms3-grp-head--ringkasan'); a0.classList.add('lpms3-grp-item');
+          a0.querySelector('.ellipsis') && (a0.querySelector('.ellipsis').textContent = <%= raw t("lpms3.phases.menu.ringkasan").to_json %>);
+          first.appendChild(a0); subR.appendChild(first);
+          ul.querySelectorAll('a.lpms3-grp-item').forEach(function (a) { if (a !== a0) { subR.appendChild(a.closest('li')); } });
+          headR.classList.add('lpms3-grp');
+          toggleBtn(headR, <%= raw t("lpms3.phases.menu.ringkasan_fase").to_json %>, subR.id);
+          headR.appendChild(subR);
+          var hasSel = !!subR.querySelector('a.selected');
+          var sR = stored(key + '.r');
+          setOpen(headR, sR ? sR === '1' : hasSel);
+        }
+        var un = phase.querySelector(':scope > ul.main-menu--children.unattached');
+        if (headL) {
+          var subL = document.createElement('ol'); subL.className = 'lpms3-sub lpms3-steps'; subL.id = key + '-grp-langkah';
+          if (un) {
+            un.querySelectorAll(':scope > li').forEach(function (li) {
+              var a = li.querySelector('a');
+              if (!a) { li.remove(); return; }
+              if (a.classList.contains('lpms3-step--all')) { li.className = 'lpms3-steps__all'; } else { li.className = 'lpms3-steps__item is-' + (a.dataset.state || 'todo'); }
+              if (samePath(a.href)) { a.classList.add('selected'); a.setAttribute('aria-current', 'page'); }
+              subL.appendChild(li);
+            });
+            var hdr = un.previousElementSibling;
+            if (hdr && hdr.classList.contains('main-menu--children-menu-header')) { hdr.remove(); }
+            un.remove();
+          }
+          var allLi = document.createElement('li'); allLi.className = 'lpms3-steps__all';
+          var allA = document.createElement('a'); allA.href = headL.querySelector('a').href;
+          allA.className = 'lpms3-step lpms3-step--all'; allA.textContent = <%= raw t("lpms3.phases.menu.langkah_semua").to_json %>;
+          allLi.appendChild(allA); subL.insertBefore(allLi, subL.firstChild);
+          headL.classList.add('lpms3-grp');
+          headL.appendChild(subL);
+          toggleBtn(headL, <%= raw t("lpms3.phases.menu.langkah_bop").to_json %>, subL.id);
+          // Klik "Langkah BOP-001" membuka/menutup dropdown langkah (tidak berpindah halaman).
+          headL.querySelector('a').addEventListener('click', function (ev) {
+            ev.preventDefault();
+            var open = !headL.classList.contains('is-grp-open'); setOpen(headL, open); store(key + '.l', open ? '1' : '0');
+          });
+          var curStep = !!subL.querySelector('a.selected');
+          var sL = stored(key + '.l');
+          setOpen(headL, curStep || (sL ? sL === '1' : false));
+          if (curStep) { phase.classList.add('open'); }
+        }
+      });
+    }
+    document.addEventListener('click', function (ev) {
+      var b = ev.target && ev.target.closest && ev.target.closest('#main-menu .lpms3-grp-toggle');
+      if (!b) { return; }
+      ev.preventDefault(); ev.stopPropagation();
+      var li = b.closest('li.lpms3-grp');
+      var open = !li.classList.contains('is-grp-open');
+      setOpen(li, open);
+      var phase = li.closest('li[data-name^="lpms3_fase_"]');
+      var which = li.querySelector('a.lpms3-grp-head--langkah') ? '.l' : '.r';
+      if (phase) { store(phase.getAttribute('data-name') + which, open ? '1' : '0'); }
+    }, true);
+    document.addEventListener('DOMContentLoaded', group);
+    document.addEventListener('turbo:load', group);
+    document.addEventListener('turbo:render', group);
+    if (document.readyState !== 'loading') { group(); }
+  })();
   // Sidebar tetap (tidak dimuat ulang) saat berpindah halaman lewat Turbo Drive, seperti sidebar :8585.
   // Elemen #main-menu ditandai data-turbo-permanent selama konteksnya sama (project atau area yang sama);
   // bila konteks berganti (mis. pindah project atau ke Administrasi), sidebar baru dipakai.
@@ -119,6 +216,19 @@
         var head = li.querySelector('.main-item-wrapper a.op-menu--item-action');
         if (head) { head.classList.add('selected'); }
       }
+      // Langkah BOP-001 (dropdown): tandai langkah yang sedang dibuka; buka fase + grupnya.
+      nav.querySelectorAll('.lpms3-steps a').forEach(function (a) {
+        var p;
+        try { p = new URL(a.href, location.href).pathname; } catch (e) { return; }
+        var on = path === p || path.indexOf(p + '/') === 0;
+        a.classList.toggle('selected', on);
+        if (on) { a.setAttribute('aria-current', 'page'); } else { a.removeAttribute('aria-current'); }
+      });
+      nav.querySelectorAll('.lpms3-sub a.selected').forEach(function (a) {
+        var grp = a.closest('li.lpms3-grp'), ph = a.closest('ul.menu_root > li');
+        if (grp) { grp.classList.add('is-grp-open'); }
+        if (ph) { ph.classList.add('open'); }
+      });
     }
 
     document.addEventListener('turbo:before-render', function (event) {

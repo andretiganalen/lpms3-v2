@@ -35,6 +35,38 @@ module OpenProject::Lpms3
 
     def find(key) = ALL.find { |p| p.key == key.to_s }
 
+    STEP_RE = /\A\[T(\d)-(\d+)\]\s*/
+
+    # Langkah BOP-001 fase pada project, urut predecessor → successor (nomor langkah), walau tanpa relasi.
+    def steps(project, phase)
+      ::WorkPackage.where(project_id: project.id).where("work_packages.subject LIKE ?", "[#{phase.prefix}-%")
+                   .includes(:status).to_a.sort_by { |wp| wp.subject[STEP_RE, 2].to_i }
+    end
+
+    # Anak dinamis menu fase (sidebar): tautan tabel langkah + setiap langkah dengan penanda selesai / berikutnya / belum.
+    def step_menu_items(project, phase)
+      return [] unless project && project.module_enabled?("work_package_tracking") &&
+                       ::User.current.allowed_in_project?(:view_work_packages, project)
+
+      list = steps(project, phase)
+      nxt = list.find { |wp| !wp.status&.is_closed? }
+      # Hanya tautan work package: OpenProject memeriksa izin tiap anak dinamis lewat peta izin controller.
+      # Tautan "Tabel seluruh langkah" ditambahkan JS sidebar dari URL submenu Langkah BOP-001.
+      items = []
+      list.each_with_index do |wp, i|
+        state = wp.status&.is_closed? ? "done" : (wp == nxt ? "next" : "todo")
+        items << ::Redmine::MenuManager::MenuItem.new(
+          :"lpms3_step_#{wp.id}", { controller: "/work_packages", action: :show, id: wp.id },
+          caption: "#{i + 1}. #{wp.subject.sub(STEP_RE) { "T#{::Regexp.last_match(1)}-#{::Regexp.last_match(2)} " }}",
+          html: { class: "lpms3-step is-#{state}", title: "#{wp.subject} — #{wp.status&.name}", data: { state: } }
+        )
+      end
+      items
+    rescue StandardError => e
+      Rails.logger.error("[LPMS3] menu langkah #{phase.key}: #{e.class}: #{e.message}")
+      []
+    end
+
     def index_of(phase) = ALL.index(phase)
 
     def menu_name(phase, section = nil) = [:lpms3_fase, phase.key, section].compact.join("_").to_sym

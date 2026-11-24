@@ -164,6 +164,14 @@ en:
       my_settings: "My settings"
     phases:
       stepper: "BOP-001 project phases"
+      baseline:
+        title: "WBS & Baseline"
+        active: "Active baseline"
+        none: "Not set"
+        planned_actual: "Planned / Actual"
+        draft: "Draft baseline"
+        frozen: "Completed activities (frozen)"
+        open: "Open WBS & Weights"
       progress: "%{done} of %{total} done"
       gates: "Gates"
       steps: "BOP-001 steps"
@@ -179,7 +187,10 @@ en:
         assignee: "Assignee"
         due: "Due date"
       menu:
-        ringkasan: "Phase summary"
+        ringkasan: "Summary"
+        ringkasan_fase: "Phase Summary"
+        langkah_bop: "BOP-001 Steps"
+        langkah_semua: "All steps table"
         gerbang: "Gates"
         langkah: "Steps"
         aspek: "9 PMP Aspects"

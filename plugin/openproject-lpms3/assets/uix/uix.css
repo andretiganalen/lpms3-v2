@@ -643,3 +643,35 @@ body[class*="controller-lpms3/"] #content { background: transparent; }
 .lpms3-wbs__dlg-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 6px 0; }
 .lpms3-wbs__dlg-row input { width: 110px; }
 .lpms3-wbs__dlg-acts { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+/* 1.41 Baseline WBS */
+.lpms3-wbs__base { margin-bottom: 12px; }
+.lpms3-wbs__base-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px 16px; margin: 0; }
+.lpms3-wbs__base-grid dt { font-size: 12px; color: var(--uix-text-secondary); }
+.lpms3-wbs__base-grid dd { margin: 2px 0 0; overflow-wrap: anywhere; }
+.lpms3-wbs__base-grid small { display: block; color: var(--uix-text-secondary); }
+.lpms3-wbs__base-diff { margin-top: 8px; font-size: 13px; }
+.lpms3-wbs__base-diff ul { margin: 6px 0 0; padding-left: 20px; max-height: 240px; overflow-y: auto; }
+.lpms3-wbs__base-acts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.lpms3-wbs__base-acts form { margin: 0; }
+/* 1.41 Sidebar fase: dua submenu dropdown (Ringkasan Fase, Langkah BOP-001) */
+#main-menu li.lpms3-grp { position: relative; }
+#main-menu li.lpms3-grp > a { padding-right: 32px; }
+#main-menu .lpms3-grp-toggle { position: absolute; top: 4px; right: 4px; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: var(--uix-radius-control); background: transparent; color: inherit; cursor: pointer; }
+#main-menu .lpms3-grp-toggle:hover { background: var(--uix-surface-muted, rgba(0,0,0,.06)); }
+#main-menu .lpms3-grp-toggle:focus-visible { outline: 2px solid var(--uix-focus-ring); }
+#main-menu .lpms3-grp-toggle svg { transition: transform .15s ease; transform: rotate(-90deg); }
+#main-menu li.lpms3-grp.is-grp-open > .lpms3-grp-toggle svg { transform: rotate(0deg); }
+#main-menu li.lpms3-grp > .lpms3-sub { display: none; list-style: none; margin: 0 0 4px; padding: 0 0 0 14px; }
+#main-menu li.lpms3-grp.is-grp-open > .lpms3-sub { display: block; }
+#main-menu .lpms3-sub a { display: block; padding: 4px 8px; font-size: 13px; line-height: 1.35; border-radius: var(--uix-radius-control); color: inherit; text-decoration: none; overflow-wrap: anywhere; }
+#main-menu .lpms3-sub a:hover { background: var(--uix-surface-muted, rgba(0,0,0,.06)); }
+#main-menu .lpms3-sub a.selected { font-weight: 600; }
+#main-menu .lpms3-sub .lpms3-grp-item--sub { padding-left: 20px; }
+#main-menu .lpms3-steps__item { position: relative; padding-left: 18px; }
+#main-menu .lpms3-steps__item::before { content: ""; position: absolute; left: 4px; top: 10px; width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--uix-border-strong, #9aa3ab); background: var(--uix-surface, #fff); box-sizing: border-box; }
+#main-menu .lpms3-steps__item:not(:last-child)::after { content: ""; position: absolute; left: 7px; top: 19px; bottom: -9px; width: 2px; background: var(--uix-border, #d0d7de); }
+#main-menu .lpms3-steps__item.is-done::before { background: var(--uix-success, #1a7f37); border-color: var(--uix-success, #1a7f37); }
+#main-menu .lpms3-steps__item.is-next::before { border-color: var(--uix-primary); background: var(--uix-primary); box-shadow: 0 0 0 3px var(--uix-focus-ring, rgba(9,105,218,.25)); }
+#main-menu .lpms3-steps__item.is-next > a { font-weight: 600; }
+#main-menu .lpms3-steps__item.is-done > a { opacity: .8; }
+#main-menu .lpms3-steps__all > a { font-style: italic; opacity: .85; }

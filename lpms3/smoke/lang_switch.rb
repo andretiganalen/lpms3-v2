@@ -48,7 +48,7 @@ begin
   %w[ringkasan gerbang langkah register].each do |sec|
     path = sec == "ringkasan" ? "/projects/#{proj.identifier}/lpms3/fase/perencanaan" : "/projects/#{proj.identifier}/lpms3/fase/perencanaan/#{sec}"
     body = grab.(path)
-    child_sel = body.match?(/<a class="lpms3-fase-perencanaan-#{sec}-menu-item selected /)
+    child_sel = body.match?(/<a class="lpms3-fase-perencanaan-#{sec}-menu-item[^"]* selected /)
     parent_open = body.match?(/<li class="open" data-name="lpms3_fase_perencanaan"/)
     only_one = body.scan(/menu-item selected /).size == 2 # induk fase + anak aktif (sorotan induk-anak)
     chk("M-#{sec}", "menu: anak '#{sec}' tersorot, induk Perencanaan terbuka dan tersorot (induk + anak)", child_sel && parent_open && only_one, "status=#{http.response.status} child=#{child_sel} open=#{parent_open} sel=#{body.scan(/menu-item selected /).size}")

@@ -6,13 +6,15 @@
     header.with_description do
       "Work Breakdown Structure mengikuti WBS Template LPMS: setiap tugas berbobot 100 % terhadap induknya (Weight = Weight induk × Weigh Factor). " \
         "Bobot awal sub-tugas mengikuti kurva normal dan dapat diatur lewat \"Bobot anak\" (jumlah wajib 100 %). " \
-        "Setiap baris tertaut ke work package, sehingga Gantt dan Kalender ikut berubah."
+        "Setiap baris tertaut ke work package, sehingga Gantt dan Kalender ikut berubah. " \
+        "Perubahan rencana otomatis menjadi draft baseline yang aktif setelah Change Request (BFR-001) disetujui."
     end
   end
 %>
 
 <div class="lpms3-wbs" id="lpms3-wbs" data-base="<%= lpms3_project_wbs_path(@project) %>">
   <div id="lpms3-wbs-msg" class="lpms3-wbs__msg" role="alert" hidden></div>
+  <div id="lpms3-wbs-baseline"><%= render partial: "lpms3/wbs/baseline" %></div>
   <div id="lpms3-wbs-warn"><%= render partial: "lpms3/wbs/warnings" %></div>
 
   <% if @rows.empty? %>
@@ -77,6 +79,7 @@
             var tbody = document.getElementById("lpms3-wbs-body");
             if (data.tbody != null && tbody) tbody.innerHTML = data.tbody;
             if (data.warnings != null) document.getElementById("lpms3-wbs-warn").innerHTML = data.warnings;
+            if (data.baseline != null) document.getElementById("lpms3-wbs-baseline").innerHTML = data.baseline;
             show(data.error || "", false);
             if (data.focus) {
               var row = root.querySelector('tr[data-id="' + data.focus + '"] [data-field="tasks"]');

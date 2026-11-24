@@ -41,6 +41,19 @@
     </section>
   <% end %>
 
+  <% if @baseline_cr.any? %>
+    <h2 style="margin:24px 0 4px">Draft Baseline WBS <span style="font-size:14px;color:var(--uix-text-secondary)">(<%= @baseline_cr.size %> menunggu pengajuan CR)</span></h2>
+    <% @baseline_cr.each do |b| %>
+      <section style="border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);padding:14px;margin-bottom:12px;background:var(--uix-surface)">
+        <strong><%= b.label %> — <%= b.project.name %></strong>
+        <div style="font-size:13px;color:var(--uix-text-body);margin-top:6px">
+          <div><span style="color:var(--uix-text-secondary)">Harus:</span> <strong>Tinjau perubahan lalu ajukan Change Request (Draft → Diajukan)</strong></div>
+          <div><%= link_to "Change Request ##{b.change_request_form_id}", work_package_path(b.change_request_form_id) %> · <%= link_to "WBS & Bobot", lpms3_project_wbs_path(b.project) %></div>
+        </div>
+      </section>
+    <% end %>
+  <% end %>
+
   <% if @wbs_pic.any? %>
     <h2 style="margin:24px 0 4px">Penugasan PIC WBS <span style="font-size:14px;color:var(--uix-text-secondary)">(<%= @wbs_pic.size %> menunggu)</span></h2>
     <% @wbs_pic.each do |n| %>

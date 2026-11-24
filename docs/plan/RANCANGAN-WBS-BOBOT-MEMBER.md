@@ -48,3 +48,13 @@ Untuk *n* anak, `x_i = -2 + 4·(i + 0,5)/n`, `g_i = exp(-x_i²/2)`, `wf_i = g_i 
 - % Complete > 0 wajib bukti (lampiran WP). Aktivitas berprogres tidak boleh dipecah/dihapus.
 - PIC Fungsi: Kepala/Admin unit ES1 menugaskan pemegang jabatan di unit itu atau di bawahnya; orang tersebut menjadi member "Tim Proyek".
 - Work package diubah sebagai Sistem (Project Analis tidak punya `manage_subtasks`), journal mencatat nama editor.
+
+## 6. Baseline otomatis (1.41, terpasang)
+
+- Atribut baseline = struktur/nomor WBS, Tasks, Level, Weight, Date Plan Start/Finish, harga. Progres tidak membuat draft.
+- Satu DRAFT dan satu ACTIVE per proyek (`lpms3.baseline.status`). Draft pertama = Baseline 0 (Kick-Off), ditetapkan Pimpro/Project Analis tanpa CR.
+- Versi > 0: work package Change Request "BFR-001 Baseline n" dibuat otomatis (Draft, assignee Pimpro). Workflow CR yang ada (Pimpro → Fungsi Pengawasan → Approver CCM) memutuskan: Disetujui → aktif; Ditolak → REJECTED + tombol "Kembalikan ke baseline aktif".
+- CR selain Draft mengunci perubahan rencana; WBS yang kembali sama dengan baseline aktif membuang draft + CR Draft.
+- Aktivitas 100 % dibekukan (`lpms3.wbs_done_snapshot`); baseline berikutnya memakai nilai rekamnya.
+- Aktivasi mengisi Kurva-S bulanan linear (`lpms3.scurve_plan`); Portfolio dan Ikhtisar fase membaca baseline aktif.
+

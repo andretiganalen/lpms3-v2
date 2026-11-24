@@ -115,7 +115,7 @@ ActiveRecord::Base.transaction(joinable: false) do
   chk "PIC Fungsi harus unit Eselon 1", raises("Eselon 1") { W.update_field!(proj, pim, a2.id, "pic", "f:#{bagian.id}") }
   W.update_field!(proj, pim, a2.id, "pic", "f:#{es1.id}")
   chk "tugas penugasan muncul untuk Kepala ES1, tidak untuk orang lain",
-      W.pic_pending_for(es1h).map(&:id) == [a2.id] && W.pic_pending_for(tim).empty?
+      W.pic_pending_for(es1h).select { |n| n.project_id == proj.id }.map(&:id) == [a2.id] && W.pic_pending_for(tim).empty?
   chk "tim ES1 mencakup staf unit di bawahnya", W.unit_team(es1).include?(staf)
   chk "orang luar unit tidak dapat ditugaskan", raises("anggota tim") { W.assign_from_unit!(es1h, a2.id, luar.id) }
   chk "selain Kepala/Admin ES1 tidak dapat menugaskan", raises("bukan Kepala") { W.assign_from_unit!(tim, a2.id, staf.id) }
@@ -124,7 +124,7 @@ ActiveRecord::Base.transaction(joinable: false) do
   chk "penugasan ES1: staf jadi member Tim Proyek, PIC + assignee WP",
       a2.pic_user_id == staf.id && Member.find_by(project: proj, principal: staf)&.roles&.map(&:name)&.include?("Tim Proyek") &&
       a2.work_package.reload.assigned_to_id == staf.id
-  chk "setelah ditugaskan, tugas hilang dari kotak ES1", W.pic_pending_for(es1h).empty?
+  chk "setelah ditugaskan, tugas hilang dari kotak ES1", W.pic_pending_for(es1h).none? { |n| n.project_id == proj.id }
 
   rows = W.rows(proj)
   chk "peringatan: aktivitas tanpa tanggal terdeteksi", W.warnings(rows).any? { |w| w.include?("tanggal rencana") }

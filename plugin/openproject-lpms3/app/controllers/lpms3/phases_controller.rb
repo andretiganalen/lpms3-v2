@@ -41,6 +41,7 @@ module Lpms3
       scope = ::WorkPackage.visible(User.current).where(project_id: @project.id)
       @phases = ::OpenProject::Lpms3::Phases::ALL
       @progress = @phases.to_h { |ph| [ph.key, progress_for(scope, ph)] }
+      @wbs_baseline = ::Lpms3::WbsBaseline.summary(@project) if @all && %w[perencanaan eksekusi pengawasan].include?(@phase.key)
       @steps = scope.where("work_packages.subject LIKE ?", "[#{@phase.prefix}-%")
                     .includes(:status, :assigned_to, :type).to_a
                     .sort_by { |wp| wp.subject[/-(\d+)\]/, 1].to_i }

@@ -6,6 +6,8 @@ en:
       period_label: "Period"
       periods: { day: "Day", week: "Week", month: "Month", quarter: "Quarter" }
       compare_to: "Compared with %{date}"
+      baseline_hint: "Planned progress from the active WBS baseline"
+      baseline_draft: "%{label} awaiting CR"
       empty: "No projects visible to you."
       limit: "100% limit"
       days:

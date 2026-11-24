@@ -15,6 +15,8 @@ module Lpms3
     TEXT_FIELDS = %w[tasks notes resource priority].freeze
     LEAF_FIELDS = %w[date_plan_start date_plan_finish date_actual_start date_actual_finish pct_complete].freeze
     FIELDS = (TEXT_FIELDS + LEAF_FIELDS + %w[pic]).freeze
+    # Aktivitas selesai (100 %) dibekukan (1.41): kolom rekam ini tidak dapat diubah lagi.
+    FROZEN_FIELDS = (%w[tasks] + LEAF_FIELDS).freeze
 
     module_function
 
@@ -99,12 +101,7 @@ module Lpms3
         raise Error, "#{node.wbs_code} punya riwayat progres; tidak dapat dihapus." if progress_history?(node)
 
         parent = node.parent
-        wp = node.work_package
-        node.destroy!
-        if wp
-          res = ::WorkPackages::DeleteService.new(user: ::User.system, model: wp).call
-          raise Error, "Work package #{wp.id} gagal dihapus: #{res.errors.full_messages.join('; ')}" unless res.success?
-        end
+        destroy_node!(node)
         redistribute!(parent.reload)
         nil
       end
@@ -136,6 +133,9 @@ module Lpms3
         leaf = node.children.empty?
         raise Error, "#{label(field)} diisi pada aktivitas (baris tanpa sub-tugas); induk dihitung dari anaknya." if LEAF_FIELDS.include?(field) && !leaf
         raise Error, "Level 0 mengikuti nama proyek." if node.root? && field != "notes"
+        if FROZEN_FIELDS.include?(field) && frozen?(node)
+          raise Error, "#{node.wbs_code} sudah selesai (100 %) dan dibekukan; #{label(field)} tidak dapat diubah."
+        end
 
         case field
         when "tasks"
@@ -187,6 +187,13 @@ module Lpms3
         end
         total = values.values.sum
         raise Error, format("Jumlah bobot sub-tugas %s harus 100 %% (sekarang %.2f %%).", parent.wbs_code, total * 100) if (total - 1).abs > TOLERANCE
+
+        frozen_ids = frozen_ids(kids)
+        values.each do |k, v|
+          if frozen_ids.include?(k.id) && (v - k.weigh_factor.to_f).abs > 0.000001
+            raise Error, "Bobot #{k.wbs_code} dibekukan karena aktivitas sudah selesai (100 %)."
+          end
+        end
 
         values.each { |k, v| k.update_columns(weigh_factor: v.round(6), updated_by: actor.id, updated_at: Time.current) }
         parent
@@ -291,6 +298,7 @@ module Lpms3
         WbsNode.connection.execute("SELECT pg_advisory_xact_lock(#{lock_key(project)})")
         result = yield
         refresh!(project, actor)
+        WbsBaseline.sync_draft!(project, actor)
       end
       result
     end
@@ -317,9 +325,51 @@ module Lpms3
                       sort_order: sort, evidence_folder: "/", updated_by: ::User.current&.id)
     end
 
+    # Kurva normal atas anak yang belum beku; anak beku mempertahankan bobotnya dan sisanya dibagi ke yang lain.
     def redistribute!(parent)
       kids = parent.children.to_a
-      bell_curve(kids.size).each_with_index { |w, i| kids[i].update_columns(weigh_factor: w) }
+      frozen = frozen_ids(kids)
+      free = kids.reject { |k| frozen.include?(k.id) }
+      return if free.empty?
+
+      if frozen.empty?
+        bell_curve(kids.size).each_with_index { |w, i| kids[i].update_columns(weigh_factor: w) }
+        return
+      end
+
+      rest = [1.0 - kids.select { |k| frozen.include?(k.id) }.sum { |k| k.weigh_factor.to_f }, 0.0].max
+      w = bell_curve(free.size).map { |x| (x * rest).round(6) }
+      mid = (free.size - 1) / 2
+      w[mid] = [(w[mid] + (rest - w.sum)).round(6), 0].max
+      free.each_with_index { |k, i| k.update_columns(weigh_factor: w[i]) }
+    end
+
+    def frozen?(node) = WbsDoneSnapshot.exists?(wbs_node_id: node.id)
+    def frozen_ids(nodes) = WbsDoneSnapshot.where(wbs_node_id: nodes.map(&:id)).pluck(:wbs_node_id).to_set
+
+    # Hapus node beserta work package-nya (dipakai delete! dan pemulihan baseline).
+    def destroy_node!(node)
+      wp = node.work_package
+      node.destroy!
+      return unless wp
+
+      res = ::WorkPackages::DeleteService.new(user: ::User.system, model: wp).call
+      raise Error, "Work package #{wp.id} gagal dihapus: #{res.errors.full_messages.join('; ')}" unless res.success?
+    end
+
+    # Rekam aktivitas yang baru mencapai 100 % (sekali; tidak ikut berubah oleh baseline berikutnya).
+    def snapshot_done!(project, rows, actor)
+      done = rows.select { |r| r[:leaf] && !r[:node].root? && r[:node].done? }.map { |r| r[:node] }
+      return if done.empty?
+
+      have = frozen_ids(done)
+      fresh = done.reject { |n| have.include?(n.id) }.map do |n|
+        { wbs_node_id: n.id, project_id: project.id, work_package_id: n.work_package_id, wbs_code: n.wbs_code, tasks: n.tasks,
+          level: n.level, weigh_factor: n.weigh_factor, weight: n.weight, date_plan_start: n.date_plan_start,
+          date_plan_finish: n.date_plan_finish, date_actual_start: n.date_actual_start, date_actual_finish: n.date_actual_finish,
+          harga_pekerjaan: n.harga_pekerjaan, pic_user_id: n.pic_user_id, frozen_by: actor&.id, frozen_at: Time.current }
+      end
+      WbsDoneSnapshot.insert_all!(fresh) if fresh.any?
     end
 
     def progress_history?(node)
@@ -453,6 +503,7 @@ module Lpms3
         n = r[:node]
         n.save!(touch: false) if n.changed?
       end
+      snapshot_done!(project, rows, actor)
       sync_work_packages!(project, rows, by_id, actor)
     end
 
@@ -472,8 +523,10 @@ module Lpms3
         attrs = { subject: "#{n.wbs_code} #{n.tasks}".first(255), description: n.notes.to_s,
                   assigned_to_id: n.pic_user_id, parent_id: parent_node.root? ? nil : parent_node.work_package_id }
         if r[:leaf]
+          # Tanggal WBS = tanggal kalender (template); tanpa ignore_non_working_days OpenProject menggeser tanggal akhir pekan
+          # sehingga selalu berbeda dan setiap refresh menulis jurnal + notifikasi baru ke PIC (temuan 1.41).
           attrs.merge!(start_date: n.date_plan_start, due_date: n.date_plan_finish, schedule_manually: true,
-                       done_ratio: (n.pct * 100).round)
+                       ignore_non_working_days: true, done_ratio: (n.pct * 100).round)
         else
           attrs[:schedule_manually] = false
         end

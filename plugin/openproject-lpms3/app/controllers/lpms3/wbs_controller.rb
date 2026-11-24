@@ -6,8 +6,8 @@ module Lpms3
   class WbsController < ::ApplicationController
     before_action :find_project_by_project_id, except: :tugaskan
     before_action :authorize_view, except: :tugaskan
-    before_action :authorize_edit, only: %i[update create destroy move weights bell_curve]
-    no_authorization_required! :show, :update, :create, :destroy, :move, :weights, :bell_curve, :tugaskan
+    before_action :authorize_edit, only: %i[update create destroy move weights bell_curve baseline0 restore]
+    no_authorization_required! :show, :update, :create, :destroy, :move, :weights, :bell_curve, :tugaskan, :baseline0, :restore
     menu_item :lpms3_fase_perencanaan_wbs
 
     def show
@@ -57,6 +57,27 @@ module Lpms3
       respond_error(e)
     end
 
+    # Pimpro/Project Analis menetapkan Baseline 0 (Kick-Off) dari draft.
+    def baseline0
+      b = ::Lpms3::WbsBaseline.tetapkan_baseline0!(@project, User.current)
+      flash[:notice] = "#{b.label} ditetapkan. Perubahan rencana berikutnya otomatis menjadi draft baseline dengan Change Request (BFR-001)."
+      redirect_to lpms3_project_wbs_path(@project)
+    rescue ::Lpms3::Wbs::Error => e
+      flash[:error] = e.message
+      redirect_to lpms3_project_wbs_path(@project)
+    end
+
+    # Kembalikan rencana WBS ke baseline aktif (mis. setelah CR ditolak).
+    def restore
+      kept = ::Lpms3::WbsBaseline.restore_active!(@project, User.current)
+      flash[:notice] = "WBS dikembalikan ke baseline aktif." +
+                       (kept.any? ? " Baris berprogres dipertahankan: #{kept.join(', ')}." : "")
+      redirect_to lpms3_project_wbs_path(@project)
+    rescue ::Lpms3::Wbs::Error => e
+      flash[:error] = e.message
+      redirect_to lpms3_project_wbs_path(@project)
+    end
+
     # Kepala/Admin Eselon 1 menugaskan anggota timnya sebagai PIC (dari Tugas & Notifikasi).
     def tugaskan
       node = ::Lpms3::Wbs.assign_from_unit!(User.current, params[:id], params[:user_id])
@@ -85,18 +106,23 @@ module Lpms3
       @members = ::Lpms3::Wbs.member_options(@project)
       @units = ::Lpms3::Wbs.eselon1_units
       @warnings = ::Lpms3::Wbs.warnings(@rows)
+      @frozen = ::Lpms3::Wbs.frozen_ids(@rows.map { |r| r[:node] })
+      @baseline = ::Lpms3::WbsBaseline.summary(@project)
+      @cr_type = ::Lpms3::WbsBaseline.cr_type(@project)
     end
 
     def respond_table(focus: nil)
       load_table
       render json: { tbody: render_to_string(partial: "lpms3/wbs/rows", formats: [:html]),
-                     warnings: render_to_string(partial: "lpms3/wbs/warnings", formats: [:html]), focus: }
+                     warnings: render_to_string(partial: "lpms3/wbs/warnings", formats: [:html]),
+                     baseline: render_to_string(partial: "lpms3/wbs/baseline", formats: [:html]), focus: }
     end
 
     def respond_error(error)
       load_table
       render json: { error: error.message, tbody: render_to_string(partial: "lpms3/wbs/rows", formats: [:html]),
-                     warnings: render_to_string(partial: "lpms3/wbs/warnings", formats: [:html]) },
+                     warnings: render_to_string(partial: "lpms3/wbs/warnings", formats: [:html]),
+                     baseline: render_to_string(partial: "lpms3/wbs/baseline", formats: [:html]) },
              status: :unprocessable_entity
     end
   end

@@ -4,12 +4,13 @@
   unit_name = @units.index_by(&:id)
 %>
 <% @rows.each do |r| %>
-  <% n = r[:node]; leaf = r[:leaf]; edit = @editable; act = leaf && !n.root? %>
+  <% n = r[:node]; leaf = r[:leaf]; edit = @editable; act = leaf && !n.root?; beku = @frozen.include?(n.id) %>
   <tr data-id="<%= n.id %>" class="<%= 'lpms3-wbs__sum' unless leaf %> <%= 'lpms3-wbs__done' if act && n.done? %>">
     <td class="lpms3-wbs__code"><%= n.wbs_code %></td>
     <td class="lpms3-wbs__lvl"><%= n.level %></td>
     <td class="lpms3-wbs__task" style="--d:<%= r[:depth] %>">
-      <% if edit && !n.root? %>
+      <% if beku %><span class="lpms3-chip lpms3-chip--ok" title="Selesai 100 % — rekam dibekukan">Beku</span><% end %>
+      <% if edit && !n.root? && !beku %>
         <input class="lpms3-wbs__in" data-field="tasks" value="<%= n.tasks %>" maxlength="200" aria-label="Tasks <%= n.wbs_code %>">
       <% else %>
         <%= n.tasks %>
@@ -41,7 +42,7 @@
     </td>
     <% %w[date_plan_start date_plan_finish date_actual_start date_actual_finish].each do |f| %>
       <td class="lpms3-wbs__date">
-        <% if edit && act && !(n.done? && f.start_with?("date_plan")) %>
+        <% if edit && act && !beku && !(n.done? && f.start_with?("date_plan")) %>
           <input type="date" class="lpms3-wbs__in" data-field="<%= f %>" value="<%= n[f]&.iso8601 %>" aria-label="<%= f.humanize %> <%= n.wbs_code %>">
         <% else %>
           <%= dt.(n[f]) %>
@@ -56,7 +57,7 @@
     </td>
     <td class="lpms3-wbs__num"><%= pct.(n.weight, 4) %></td>
     <td class="lpms3-wbs__num">
-      <% if edit && act %>
+      <% if edit && act && !beku %>
         <select class="lpms3-wbs__in" data-field="pct_complete" aria-label="% Complete <%= n.wbs_code %>">
           <% ::Lpms3::WbsNode::COMPLETE_STEPS.each do |s| %><option value="<%= (s * 100).round %>" <%= "selected" if (n.pct - s).abs < 0.001 %>><%= (s * 100).round %> %</option><% end %>
         </select>
