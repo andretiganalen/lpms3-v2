@@ -15,6 +15,7 @@
 //   PLAYWRIGHT  path modul playwright (default: require('playwright'), cadangan ~/librechat/node_modules/playwright)
 //   SKIP_REGISTER=1  lewati langkah registrasi IDS
 //   ONLY=#02,#10     hanya uji akun dengan nomor tersebut
+//   USERNAME=local   login dengan username tanpa domain (andre.tigana), bukan email lengkap
 //
 // Catatan: login yang gagal tidak diulang, supaya akun Leno asli tidak terkunci.
 
@@ -78,7 +79,7 @@ const now = () => new Date().toISOString().replace('T', ' ').slice(0, 19);
     const login = async step => {
       await p.goto(BASE + '/');
       if (!p.url().startsWith(IDS)) return log(step, 'PASS', 'sesi IDS masih aktif, langsung masuk: ' + p.url());
-      await p.fill('#input-username', a.email); await p.fill('#input-password', a.pw);
+      await p.fill('#input-username', process.env.USERNAME === 'local' ? a.email.split('@')[0] : a.email); await p.fill('#input-password', a.pw);
       // Form IDS mengenkripsi username/password (CryptoJS) pada event change.
       await p.dispatchEvent('#input-username', 'change'); await p.dispatchEvent('#input-password', 'change');
       if (!(await p.inputValue('#input-passwordencrypted')) || !(await p.inputValue('#input-usernameencrypted')))
