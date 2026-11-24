@@ -70,3 +70,45 @@ def test_unknown_table_counts_attempt():
     pg.outbox = [(5, "nope", "1", "UPSERT")]
     assert Syncer(pg, lambda: sr).run_once() == 0
     assert any("attempts = attempts + 1" in l[0] for l in pg.log)
+
+
+def test_sr_type_mapping():
+    from lpms3_data.schema import sr_type
+    assert sr_type("bigint") == "BIGINT" and sr_type("integer") == "INT" and sr_type("smallint") == "SMALLINT"
+    assert sr_type("numeric(20,2)") == "DECIMAL(20,2)" and sr_type("numeric") == "DECIMAL(38,9)"
+    assert sr_type("timestamp(6) with time zone") == "DATETIME" and sr_type("date") == "DATE"
+    assert sr_type("jsonb") == "JSON" and sr_type("text[]") == "JSON" and sr_type("bigint[]") == "JSON"
+    assert sr_type("character varying(30)") == "VARCHAR(120)" and sr_type("text") == "STRING"
+    assert sr_type("text", is_pk=True) == "VARCHAR(128)"
+    assert sr_type("tsvector") is None and sr_type("bytea") is None
+
+
+def test_create_ddl_pk_first_and_synced_at():
+    from lpms3_data.schema import create_ddl, add_column_ddl
+    pg_cols = [("nama", "text"), ("project_id", "bigint"), ("fts", "tsvector"), ("role", "text")]
+    ddl = create_ddl("project_unit_x", pg_cols, ["project_id", "role"], "3")
+    body = ddl.split("(", 1)[1]
+    assert body.index("`project_id`") < body.index("`role`") < body.index("`nama`")
+    assert "`project_id` BIGINT NOT NULL" in ddl and "`role` VARCHAR(128) NOT NULL" in ddl
+    assert "`fts`" not in ddl and "`synced_at` DATETIME" in ddl
+    assert 'PRIMARY KEY(`project_id`, `role`)' in ddl and '"replication_num" = "3"' in ddl
+    alter = add_column_ddl("t", pg_cols, ["project_id"], ["project_id", "nama", "synced_at"])
+    assert alter == "ALTER TABLE `t` ADD COLUMN (`role` STRING)"
+    assert add_column_ddl("t", pg_cols, ["project_id"], ["project_id", "nama", "role", "synced_at"]) is None
+
+
+def test_registry_spec_and_coerce_list():
+    s = mapping.registry_spec("lpms3_form", "form_definition", "code,rev")
+    assert s.pk_cols == ("code", "rev") and s.sql.count("%s") == 2 and s.src == ("lpms3_form", "form_definition")
+    assert coerce(["a", "b"], "varchar(65533)") == '["a", "b"]'
+    assert coerce({"k": 1}, "json") == '{"k": 1}'
+
+
+def test_upsert_without_synced_at_column():
+    pg, sr = FakeDB(), FakeDB()
+    sr.desc = [("id", "int"), ("name", "varchar(10)")]
+    pg.project = (6, "Demo", "1", "x")
+    pg.outbox = [(1, "project", "6", "UPSERT")]
+    Syncer(pg, lambda: sr).run_once()
+    ins = [l for l in sr.log if l[0].startswith("INSERT")][0]
+    assert "synced_at" not in ins[0] and ins[0].endswith("VALUES (%s,%s)")

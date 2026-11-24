@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 import time
 
 import psycopg
@@ -17,18 +18,37 @@ def sr_connect():
                            database=os.environ.get("STARROCKS_DATABASE", "medallion_lpms"), autocommit=True, connect_timeout=10)
 
 
+REPLICATION = os.environ.get("STARROCKS_REPLICATION_NUM", "1")
+
+
+def refresh(s):
+    try:
+        s.refresh_registry(REPLICATION)
+    except Exception:  # noqa: BLE001  (mis. db/070 belum diterapkan -> tetap jalan dengan pemetaan statis)
+        log.exception("refresh registry gagal")
+        s._reset_sr()
+
+
 def main():
     interval = float(os.environ.get("SYNC_INTERVAL", 5))
     recon_every = float(os.environ.get("RECONCILE_INTERVAL", 86400))
+    registry_every = float(os.environ.get("REGISTRY_INTERVAL", 300))
     pg = psycopg.connect(os.environ["PG_DSN"], autocommit=True)
     s = Syncer(pg, sr_connect)
-    last_recon = 0.0
+    if sys.argv[1:2] == ["ddl"]:  # cetak DDL tabel StarRocks yang belum ada (untuk admin, lihat db/starrocks/120)
+        print("\n\n".join(s.missing_ddl(sys.argv[2] if len(sys.argv) > 2 else "${STARROCKS_REPLICATION_NUM}")))
+        return
+    refresh(s)
+    last_recon, last_reg = 0.0, time.time()
     log.info("lpms3-data mulai; interval=%ss", interval)
     while True:
         try:
             n = s.run_once()
             if n == 0:
                 time.sleep(interval)
+            if time.time() - last_reg > registry_every:
+                refresh(s)
+                last_reg = time.time()
             if time.time() - last_recon > recon_every:
                 s.reconcile()
                 last_recon = time.time()

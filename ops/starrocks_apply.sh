@@ -6,6 +6,7 @@ set -a; source deploy/.env; set +a
 : "${STARROCKS_ROOT_PASSWORD:?isi sementara di deploy/.env}"
 command -v mysql >/dev/null || sudo apt-get install -y mysql-client
 for f in db/starrocks/000_init.sql db/starrocks/100_core_mirror.sql db/starrocks/110_lpms3_forms_mirror.sql \
+         db/starrocks/120_lpms3_auto_mirror.sql \
          db/starrocks/200_lkp.sql db/starrocks/300_marts.sql db/starrocks/990_grants.sql; do
   echo ">> $f"
   envsubst '${STARROCKS_DATABASE} ${STARROCKS_REPLICATION_NUM} ${STARROCKS_APP_PASSWORD} ${STARROCKS_ETL_PASSWORD} ${STARROCKS_BI_PASSWORD}' < "$f" \
