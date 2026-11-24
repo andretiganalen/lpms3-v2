@@ -10,6 +10,11 @@ module Lpms3
     ROLE_ADMIN_ESELON1 = "Admin Pejabat Eselon 1"
     ROLE_ESELON2 = "Pejabat Eselon 2"
     ROLE_PIMPRO = "Pimpro"
+    # Fungsi Pengawasan Proyek memantau semua proyek (BOP-001 §5.4): Pejabat Eselon 1 sebagai Approver CCM, Admin (menunjuk
+    # Project Analis saat Kick-Off) dan Pejabat Eselon 2 unit primer F-PWP sebagai peran Fungsi Pengawasan Proyek (1.42).
+    FUNGSI_PENGAWASAN = "F-PWP"
+    ROLE_APPROVER_CCM = "Approver CCM"
+    ROLE_PENGAWAS = "Fungsi Pengawasan Proyek"
     PIMPRO_FIELD = "Pimpro"
 
     Result = Struct.new(:added, :present, :warnings, keyword_init: true)
@@ -30,6 +35,16 @@ module Lpms3
         users = Hierarki.holders(unit, kind)
         warnings << "Jabatan #{label} #{unit.name} belum diisi." if users.empty?
         users.each { |u| out << [u, role, "Tim default: #{label} #{unit.name}"] }
+      end
+
+      pwp1 = Hierarki.unit_eselon1_of_fungsi(FUNGSI_PENGAWASAN)
+      pwp2 = Hierarki.unit_primer_of_fungsi(FUNGSI_PENGAWASAN)
+      pwp2 = nil if pwp2 && pwp2.id == pwp1&.id
+      [[pwp1, "KEPALA", ROLE_APPROVER_CCM, "Pejabat Eselon 1"], [pwp1, "ADMIN", ROLE_PENGAWAS, "Admin Pejabat Eselon 1"],
+       [pwp2, "KEPALA", ROLE_PENGAWAS, "Pejabat Eselon 2"]].each do |unit, kind, role, label|
+        next unless unit && ::ProjectRole.exists?(name: role)
+
+        Hierarki.holders(unit, kind).each { |u| out << [u, role, "Fungsi Pengawasan Proyek: #{label} #{unit.name}"] }
       end
 
       pimpros(project).each do |p|

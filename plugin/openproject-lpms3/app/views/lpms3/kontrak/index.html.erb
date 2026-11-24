@@ -1,0 +1,45 @@
+<% rp = ->(n) { n.nil? ? "—" : "Rp #{number_with_delimiter((n.to_d / 1_000_000).round(0).to_i, delimiter: '.')} jt" }
+   dt = ->(d) { d ? l(d, format: "%d %b %Y") : "—" } %>
+<% html_title "Monitoring Kontrak" %>
+<%=
+  render(Primer::OpenProject::PageHeader.new) do |header|
+    header.with_title { "Monitoring Kontrak" }
+    header.with_breadcrumbs([{ href: home_path, text: t("label_home") }, "Monitoring Kontrak"])
+    header.with_description { "Kontrak proyek yang dapat Anda lihat: kelas SOP-004, masa kontrak, progres terhadap waktu, jaminan, termin, dan adendum. Temuan tinggi ditampilkan lebih dulu." }
+  end
+%>
+<div class="lpms3-page">
+  <nav class="lpms3-kontrak__filter" aria-label="Filter">
+    <%= link_to "Semua (#{@rows.size})", lpms3_kontrak_path, class: "lpms3-btn #{'lpms3-btn--primary' unless @filter}", "aria-current": (@filter ? nil : "page") %>
+    <%= link_to "Bertemuan (#{@rows.count { _1[:findings].any? }})", lpms3_kontrak_path(temuan: 1), class: "lpms3-btn #{'lpms3-btn--primary' if @filter}", "aria-current": (@filter ? "page" : nil) %>
+  </nav>
+  <% if @shown.empty? %>
+    <section class="lpms3-card lpms3-empty"><p>Tidak ada kontrak untuk ditampilkan.</p></section>
+  <% else %>
+    <div class="lpms3-table-wrap"><table class="lpms3-table">
+      <thead><tr>
+        <th scope="col">Proyek</th><th scope="col">Nilai efektif</th><th scope="col">Kelas</th><th scope="col">Selesai</th>
+        <th scope="col">Waktu / progres</th><th scope="col">Jaminan</th><th scope="col">Termin terbayar</th><th scope="col">Adendum</th><th scope="col">Temuan</th>
+      </tr></thead>
+      <tbody>
+        <% @shown.each do |s| %>
+          <% aktif = s[:jaminan].select(&:aktif?); habis = aktif.count { _1.berlaku_sampai < Date.current }; segera = aktif.count { (0..::Lpms3::Kontrak::JAMINAN_WARN_DAYS).cover?(_1.sisa_hari) } %>
+          <tr>
+            <th scope="row"><%= link_to "#{s[:kode]}", lpms3_project_kontrak_path(s[:project]) %><br><small><%= s[:judul].truncate(70) %></small></th>
+            <td class="lpms3-num"><%= rp.(s[:nilai_efektif]) %></td>
+            <td><%= s[:kelas_efektif] || "—" %></td>
+            <td><%= dt.(s[:selesai]) %><br><small><%= s[:sisa_hari].nil? ? "" : (s[:sisa_hari].negative? ? "lewat #{-s[:sisa_hari]} hari" : "#{s[:sisa_hari]} hari lagi") %></small></td>
+            <td><%= s[:elapsed] || "—" %> % / <strong><%= s[:actual] || "—" %> %</strong></td>
+            <td><%= aktif.size %> aktif<% if habis.positive? %> <span class="lpms3-chip lpms3-chip--danger"><%= habis %> kedaluwarsa</span><% end %><% if segera.positive? %> <span class="lpms3-chip lpms3-chip--warn"><%= segera %> segera habis</span><% end %></td>
+            <td class="lpms3-num"><%= s[:nilai_efektif]&.positive? ? "#{((s[:terbayar] / s[:nilai_efektif]) * 100).round(1)} %" : "—" %><br><small><%= s[:termin].count { _1[:t].status == "RENCANA" && _1[:layak] } %> layak tagih</small></td>
+            <td><%= s[:adendum].count(&:disahkan?) %><%= " + #{s[:adendum].count { !_1.disahkan? }} draft" if s[:adendum].any? { !_1.disahkan? } %></td>
+            <td>
+              <% s[:findings].first(3).each do |f| %><span class="lpms3-chip <%= f.severity == :high ? 'lpms3-chip--danger' : 'lpms3-chip--warn' %>" title="<%= f.text %>"><%= f.text.truncate(48) %></span> <% end %>
+              <% if s[:findings].size > 3 %><small>+<%= s[:findings].size - 3 %> lainnya</small><% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table></div>
+  <% end %>
+</div>

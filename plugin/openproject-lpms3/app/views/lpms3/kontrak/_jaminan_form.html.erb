@@ -1,0 +1,13 @@
+<%= form_with url: lpms3_project_kontrak_jaminan_path(@project, j.persisted? ? j.id : nil, anchor: "jaminan"), method: :post, local: true, class: "lpms3-kontrak__form" do %>
+  <label>Jenis
+    <select name="k[jenis]" class="lpms3-input"><% ::Lpms3::KontrakJaminan::JENIS.each do |v, t| %><option value="<%= v %>" <%= "selected" if j.jenis == v %>><%= t %></option><% end %></select>
+  </label>
+  <label>Nomor <input name="k[nomor]" value="<%= j.nomor %>" required class="lpms3-input"></label>
+  <label>Penerbit (bank/asuransi) <input name="k[penerbit]" value="<%= j.penerbit %>" class="lpms3-input"></label>
+  <label>Nilai (Rp) <input name="k[nilai]" value="<%= j.nilai&.to_i %>" inputmode="decimal" class="lpms3-input"></label>
+  <label>Persen dari nilai kontrak <input name="k[persen]" value="<%= j.persen&.to_f %>" inputmode="decimal" class="lpms3-input"></label>
+  <label>Berlaku dari <input type="date" name="k[berlaku_dari]" value="<%= j.berlaku_dari&.iso8601 %>" class="lpms3-input"></label>
+  <label>Berlaku sampai <input type="date" name="k[berlaku_sampai]" value="<%= j.berlaku_sampai&.iso8601 %>" required class="lpms3-input"></label>
+  <label class="lpms3-kontrak__wide">Catatan <input name="k[catatan]" value="<%= j.catatan %>" class="lpms3-input"></label>
+  <button type="submit" class="lpms3-btn lpms3-btn--primary">Simpan jaminan</button>
+<% end %>

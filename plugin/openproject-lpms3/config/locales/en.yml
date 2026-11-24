@@ -162,6 +162,9 @@ en:
     sidebar:
       settings: "Settings"
       my_settings: "My settings"
+    kontrak:
+      menu: "Contract"
+      menu_global: "Contract monitoring"
     phases:
       stepper: "BOP-001 project phases"
       baseline:

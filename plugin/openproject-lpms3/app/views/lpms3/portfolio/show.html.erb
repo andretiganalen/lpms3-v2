@@ -62,6 +62,15 @@
         <div><span style="color:var(--uix-text-secondary)"><%= t("lpms3.portfolio.col.jalan") %></span><br><strong><%= r[:jalan_hari].nil? ? "—" : "#{t("lpms3.portfolio.days", count: r[:jalan_hari])} (#{r[:jalan_pct]}%)" %></strong></div>
         <div><span style="color:var(--uix-text-secondary)"><%= t("lpms3.portfolio.col.kenaikan") %></span><br><strong><%= r[:kenaikan].nil? ? "—" : format("%+.1f pp", r[:kenaikan]) %></strong></div>
       </div>
+      <% if (k = r[:kontrak]) %>
+        <div class="lpms3-portfolio__kontrak">
+          <div><span><%= t("lpms3.portfolio.kontrak.nilai") %></span><strong><%= k[:nilai] ? "Rp #{number_with_delimiter((k[:nilai] / 1_000_000).round(0).to_i, delimiter: '.')} jt" : "—" %></strong><small><%= t("lpms3.portfolio.kontrak.kelas", kelas: k[:kelas] || "—") %></small></div>
+          <div><span><%= t("lpms3.portfolio.kontrak.termin") %></span><strong><%= k[:terbayar_pct].nil? ? "—" : "#{k[:terbayar_pct]} %" %></strong><small><%= t("lpms3.portfolio.kontrak.layak", count: k[:layak_tagih]) %></small></div>
+          <div><span><%= t("lpms3.portfolio.kontrak.jaminan") %></span><strong><%= k[:jaminan_aktif] %></strong><% if k[:jaminan_masalah].positive? %><small class="is-warn"><%= t("lpms3.portfolio.kontrak.jaminan_warn", count: k[:jaminan_masalah]) %></small><% end %></div>
+          <div><span><%= t("lpms3.portfolio.kontrak.adendum") %></span><strong><%= k[:adendum] %></strong></div>
+          <div><%= link_to lpms3_project_kontrak_path(r[:id]), class: "lpms3-chip #{k[:temuan_tinggi].positive? ? 'lpms3-chip--danger' : (k[:temuan].positive? ? 'lpms3-chip--warn' : 'lpms3-chip--ok')}" do %><%= k[:temuan].positive? ? t("lpms3.portfolio.kontrak.temuan", count: k[:temuan]) : t("lpms3.portfolio.kontrak.aman") %><% end %></div>
+        </div>
+      <% end %>
     </section>
   <% end %>
 

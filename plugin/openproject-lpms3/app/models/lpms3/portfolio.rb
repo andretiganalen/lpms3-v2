@@ -85,9 +85,26 @@ module Lpms3
         jalan_pct: (start && deadline && deadline > start) ? (((today - start).to_f / (deadline - start)) * 100).clamp(0, 100).round(1) : nil,
         kenaikan: delta&.round(1),
         jumlah_wp: wps.size,
+        kontrak: kontrak_card(project, today),
         baseline: base&.dig(:active)&.label,
         baseline_draft: base&.dig(:draft)&.then { |d| d.version.positive? ? d.label : nil }
       }
+    end
+
+    # Ringkasan kontrak untuk kartu (1.42): nilai efektif & kelas, termin terbayar, jaminan, adendum, temuan.
+    def kontrak_card(project, today)
+      s = ::Lpms3::Kontrak.summary(project, today:)
+      return nil if s[:nomor].blank? && s[:nilai_efektif].nil? && s[:info].nil?
+
+      aktif = s[:jaminan].select(&:aktif?)
+      { nilai: s[:nilai_efektif], kelas: s[:kelas_efektif],
+        terbayar_pct: s[:nilai_efektif]&.positive? ? ((s[:terbayar] / s[:nilai_efektif]) * 100).round(1).to_f : nil,
+        layak_tagih: s[:termin].count { |r| r[:t].status == "RENCANA" && r[:layak] },
+        jaminan_aktif: aktif.size, jaminan_masalah: aktif.count { |j| j.sisa_hari(today) <= ::Lpms3::Kontrak::JAMINAN_WARN_DAYS },
+        adendum: s[:adendum].count(&:disahkan?), temuan: s[:findings].size, temuan_tinggi: s[:findings].count { _1.severity == :high } }
+    rescue StandardError => e
+      Rails.logger.error("[LPMS3] kartu kontrak #{project.id}: #{e.class}: #{e.message}")
+      nil
     end
 
     def planned_pct(wp, today)

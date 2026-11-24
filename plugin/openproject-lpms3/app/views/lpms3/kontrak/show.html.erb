@@ -1,0 +1,185 @@
+<% s = @s; inf = s[:info]
+   rp = ->(n) { n.nil? ? "—" : "Rp #{number_with_delimiter(n.to_d.round(0).to_i, delimiter: '.')}" }
+   dt = ->(d) { d ? l(d, format: "%d %b %Y") : "—" }
+   sev = ->(f) { f.severity == :high ? "lpms3-chip--danger" : "lpms3-chip--warn" }
+   kj = ::Lpms3::KontrakJaminan; kt = ::Lpms3::KontrakTermin %>
+<% html_title "Kontrak", @project.name %>
+<%=
+  render(Primer::OpenProject::PageHeader.new) do |header|
+    header.with_title { "Kontrak" }
+    header.with_breadcrumbs([{ href: project_path(@project), text: @project.name }, "Kontrak"])
+    header.with_description do
+      "Monitoring kontrak dengan pemberi kerja: kelas SOP-004, Go/No-Go (SFR-028/SFR-024), jaminan, termin pembayaran " \
+        "terhadap progres WBS, dan adendum (SFR-025). Nilai dan tanggal selesai efektif mengikuti adendum yang disahkan."
+    end
+  end
+%>
+<div class="lpms3-page lpms3-kontrak">
+  <section class="lpms3-card" id="ringkasan">
+    <h3 class="lpms3-card__title">Ringkasan kontrak</h3>
+    <dl class="lpms3-wbs__base-grid">
+      <div><dt>Nomor / tanggal</dt><dd><strong><%= s[:nomor] || "—" %></strong><small><%= dt.(s[:tanggal]) %></small></dd></div>
+      <div><dt>Pemberi kerja</dt><dd><%= s[:pelanggan] || "—" %><% if inf&.posisi_len %><small><%= inf.posisi_len %></small><% end %></dd></div>
+      <div><dt>Nilai awal → efektif</dt><dd><strong><%= rp.(s[:nilai_efektif]) %></strong><% if s[:nilai_awal] && s[:nilai_awal] != s[:nilai_efektif] %><small>awal <%= rp.(s[:nilai_awal]) %></small><% end %></dd></div>
+      <div><dt>Kelas (SOP-004)</dt><dd><span class="lpms3-chip"><%= s[:kelas_awal] || "—" %></span><% if s[:kelas_efektif] && s[:kelas_efektif] != s[:kelas_awal] %> → <span class="lpms3-chip lpms3-chip--warn"><%= s[:kelas_efektif] %></span><% end %></dd></div>
+      <div><dt>Masa kontrak</dt><dd><%= dt.(s[:mulai]) %> – <strong><%= dt.(s[:selesai]) %></strong><% if s[:selesai_awal] && s[:selesai_awal] != s[:selesai] %><small>awal <%= dt.(s[:selesai_awal]) %></small><% end %></dd></div>
+      <div><dt>Sisa waktu</dt><dd><%= s[:sisa_hari].nil? ? "—" : (s[:sisa_hari].negative? ? "lewat #{-s[:sisa_hari]} hari" : "#{s[:sisa_hari]} hari") %><small>waktu berjalan <%= s[:elapsed] || "—" %> %</small></dd></div>
+      <div><dt>Progres fisik (WBS)</dt><dd><strong><%= s[:actual].nil? ? "—" : "#{s[:actual]} %" %></strong><small><%= link_to "WBS & Bobot", lpms3_project_wbs_path(@project) %></small></dd></div>
+      <div><dt>Go/No-Go</dt><dd><span class="lpms3-chip <%= inf&.go_nogo == 'GO' ? 'lpms3-chip--ok' : (inf&.go_nogo == 'NO_GO' ? 'lpms3-chip--danger' : 'lpms3-chip--warn') %>"><%= { "GO" => "Go", "NO_GO" => "No-Go" }.fetch(inf&.go_nogo, "Belum dicatat") %></span><% if inf&.go_nogo_nomor %><small><%= inf.go_nogo_nomor %> · <%= dt.(inf.go_nogo_tanggal) %></small><% end %></dd></div>
+      <div><dt>Termin</dt><dd>Terbayar <strong><%= rp.(s[:terbayar]) %></strong><small>ditagih <%= rp.(s[:tertagih]) %> · Σ termin <%= s[:termin_total_pct] %> %</small></dd></div>
+    </dl>
+    <% if s[:findings].any? %>
+      <ul class="lpms3-kontrak__findings" aria-label="Temuan kontrak">
+        <% s[:findings].each do |f| %><li><span class="lpms3-chip <%= sev.(f) %>"><%= f.severity == :high ? "Tinggi" : "Sedang" %></span> <%= f.text %></li><% end %>
+      </ul>
+    <% else %>
+      <p class="lpms3-hint">Tidak ada temuan kontrak.</p>
+    <% end %>
+  </section>
+
+  <% if @edit %>
+  <section class="lpms3-card" id="data">
+    <details>
+      <summary class="lpms3-card__title">Data kontrak & Go/No-Go</summary>
+      <p class="lpms3-hint">Nomor, tanggal, nilai, dan tanggal selesai diubah di Atribut proyek; setelah kontrak berjalan, perubahan nilai/waktu lewat adendum.</p>
+      <%= form_with url: lpms3_project_kontrak_info_path(@project), method: :post, local: true, class: "lpms3-kontrak__form" do %>
+        <label>Tanggal mulai kontrak <input type="date" name="k[tanggal_mulai]" value="<%= (inf&.tanggal_mulai || s[:tanggal])&.iso8601 %>" class="lpms3-input"></label>
+        <label>Posisi Len
+          <select name="k[posisi_len]" class="lpms3-input"><option value="">—</option><% ::Lpms3::KontrakInfo::POSISI.each do |p| %><option <%= "selected" if inf&.posisi_len == p %>><%= p %></option><% end %></select>
+        </label>
+        <label>Term of payment <input name="k[term_of_payment]" value="<%= inf&.term_of_payment %>" class="lpms3-input" placeholder="mis. Termin progres 4 tahap"></label>
+        <label>Go/No-Go
+          <select name="k[go_nogo]" class="lpms3-input"><% { "BELUM" => "Belum dicatat", "GO" => "Go", "NO_GO" => "No-Go" }.each do |v, t| %><option value="<%= v %>" <%= "selected" if (inf&.go_nogo || "BELUM") == v %>><%= t %></option><% end %></select>
+        </label>
+        <label>Tanggal tinjauan <input type="date" name="k[go_nogo_tanggal]" value="<%= inf&.go_nogo_tanggal&.iso8601 %>" class="lpms3-input"></label>
+        <label>No. <%= s[:kelas_awal] == "Kecil" ? "SFR-024" : "SFR-028" %> <input name="k[go_nogo_nomor]" value="<%= inf&.go_nogo_nomor %>" class="lpms3-input"></label>
+        <label class="lpms3-kontrak__wide">Catatan <input name="k[catatan]" value="<%= inf&.catatan %>" class="lpms3-input"></label>
+        <button type="submit" class="lpms3-btn lpms3-btn--primary">Simpan</button>
+      <% end %>
+    </details>
+  </section>
+  <% end %>
+
+  <section class="lpms3-card" id="jaminan">
+    <h3 class="lpms3-card__title">Jaminan</h3>
+    <% if s[:jaminan].empty? %>
+      <p class="lpms3-hint">Belum ada jaminan.</p>
+    <% else %>
+      <div class="lpms3-table-wrap"><table class="lpms3-table">
+        <thead><tr><th scope="col">Jenis</th><th scope="col">Nomor / penerbit</th><th scope="col">Nilai</th><th scope="col">Berlaku</th><th scope="col">Status</th><% if @edit %><th scope="col"><span class="sr-only">Aksi</span></th><% end %></tr></thead>
+        <tbody>
+          <% s[:jaminan].each do |j| %>
+            <% sisa = j.sisa_hari %>
+            <tr>
+              <td><%= j.label %></td>
+              <td><%= j.nomor %><br><small><%= j.penerbit %></small></td>
+              <td><%= rp.(j.nilai) %><%= " (#{j.persen.to_f.round(2)} %)" if j.persen %></td>
+              <td><%= dt.(j.berlaku_dari) %> – <%= dt.(j.berlaku_sampai) %>
+                <% if j.aktif? %><br><span class="lpms3-chip <%= sisa.negative? ? 'lpms3-chip--danger' : (sisa <= ::Lpms3::Kontrak::JAMINAN_WARN_DAYS ? 'lpms3-chip--warn' : '') %>"><%= sisa.negative? ? "kedaluwarsa" : "#{sisa} hari lagi" %></span><% end %>
+              </td>
+              <td><%= kj::STATUS[j.status] %></td>
+              <% if @edit %>
+                <td class="lpms3-kontrak__acts">
+                  <% if j.aktif? %>
+                    <%= button_to "Dikembalikan", lpms3_project_kontrak_jaminan_status_path(@project, j, status: "DIKEMBALIKAN", anchor: "jaminan"), class: "lpms3-btn", data: { turbo_confirm: "Tandai #{j.label} #{j.nomor} dikembalikan?" } %>
+                    <%= button_to "Dicairkan", lpms3_project_kontrak_jaminan_status_path(@project, j, status: "DICAIRKAN", anchor: "jaminan"), class: "lpms3-btn", data: { turbo_confirm: "Tandai #{j.label} #{j.nomor} dicairkan?" } %>
+                  <% end %>
+                  <details><summary class="lpms3-btn">Ubah</summary><%= render "jaminan_form", j: j %></details>
+                </td>
+              <% end %>
+            </tr>
+          <% end %>
+        </tbody>
+      </table></div>
+    <% end %>
+    <% if @edit %><details><summary class="lpms3-btn">+ Tambah jaminan</summary><%= render "jaminan_form", j: kj.new(jenis: "PELAKSANAAN") %></details><% end %>
+  </section>
+
+  <section class="lpms3-card" id="termin">
+    <h3 class="lpms3-card__title">Termin pembayaran</h3>
+    <p class="lpms3-hint">Kelayakan tagih dihitung dari syaratnya: progres fisik WBS, aktivitas WBS selesai, jaminan uang muka aktif, atau gerbang G3 Serah terima. Penagihan & pembayaran dicatat Keuangan/Pimpro.</p>
+    <% if s[:termin].empty? %>
+      <p class="lpms3-hint">Belum ada termin.</p>
+    <% else %>
+      <div class="lpms3-table-wrap"><table class="lpms3-table">
+        <thead><tr><th scope="col">#</th><th scope="col">Uraian</th><th scope="col">%</th><th scope="col">Nilai</th><th scope="col">Syarat</th><th scope="col">Rencana</th><th scope="col">Status</th><% if @edit || @keu %><th scope="col"><span class="sr-only">Aksi</span></th><% end %></tr></thead>
+        <tbody>
+          <% s[:termin].each do |r| t = r[:t] %>
+            <tr>
+              <td><%= t.urutan %></td>
+              <td><%= t.uraian %></td>
+              <td class="lpms3-num"><%= t.persen.to_f.round(2) %> %</td>
+              <td class="lpms3-num"><%= rp.(r[:nilai]) %></td>
+              <td><%= kt::SYARAT[t.syarat] %><br><small><%= r[:alasan] %></small></td>
+              <td><%= dt.(t.rencana_tanggal) %></td>
+              <td>
+                <span class="lpms3-chip <%= t.status == 'DIBAYAR' ? 'lpms3-chip--ok' : (t.status == 'RENCANA' && r[:layak] ? 'lpms3-chip--warn' : '') %>"><%= t.status == "RENCANA" && r[:layak] ? "Layak tagih" : kt::STATUS[t.status] %></span>
+                <% if t.tanggal_tagih %><br><small>Tagih <%= dt.(t.tanggal_tagih) %> · <%= t.nomor_tagihan %></small><% end %>
+                <% if t.tanggal_bayar %><br><small>Bayar <%= dt.(t.tanggal_bayar) %> · <%= rp.(t.nilai_bayar) %></small><% end %>
+              </td>
+              <% if @edit || @keu %>
+                <td class="lpms3-kontrak__acts">
+                  <% if @keu && t.status == "RENCANA" && (r[:layak] || t.syarat == "MANUAL") %>
+                    <%= form_with url: lpms3_project_kontrak_tagih_path(@project, t, anchor: "termin"), method: :post, local: true, class: "lpms3-kontrak__inline" do %>
+                      <input name="nomor_tagihan" required placeholder="No. tagihan" class="lpms3-input" aria-label="Nomor tagihan termin <%= t.urutan %>">
+                      <input type="date" name="tanggal_tagih" value="<%= Date.current.iso8601 %>" class="lpms3-input" aria-label="Tanggal tagih">
+                      <button class="lpms3-btn lpms3-btn--primary">Tagih</button>
+                    <% end %>
+                  <% elsif @keu && t.status == "DITAGIH" %>
+                    <%= form_with url: lpms3_project_kontrak_bayar_path(@project, t, anchor: "termin"), method: :post, local: true, class: "lpms3-kontrak__inline" do %>
+                      <input name="nilai_bayar" value="<%= r[:nilai]&.to_i %>" class="lpms3-input" aria-label="Nilai bayar termin <%= t.urutan %>">
+                      <input type="date" name="tanggal_bayar" value="<%= Date.current.iso8601 %>" class="lpms3-input" aria-label="Tanggal bayar">
+                      <button class="lpms3-btn lpms3-btn--primary">Dibayar</button>
+                    <% end %>
+                  <% end %>
+                  <% if @edit && t.status == "RENCANA" %>
+                    <details><summary class="lpms3-btn">Ubah</summary><%= render "termin_form", t: t %></details>
+                    <%= button_to "Hapus", lpms3_project_kontrak_hapus_path(@project, "termin", t, anchor: "termin"), class: "lpms3-btn", data: { turbo_confirm: "Hapus termin #{t.urutan}?" } %>
+                  <% end %>
+                </td>
+              <% end %>
+            </tr>
+          <% end %>
+        </tbody>
+      </table></div>
+    <% end %>
+    <% if @edit %><details><summary class="lpms3-btn">+ Tambah termin</summary><%= render "termin_form", t: kt.new(syarat: "PROGRES") %></details><% end %>
+  </section>
+
+  <section class="lpms3-card" id="adendum">
+    <h3 class="lpms3-card__title">Adendum (SFR-025)</h3>
+    <% if s[:adendum].empty? %>
+      <p class="lpms3-hint">Belum ada adendum.</p>
+    <% else %>
+      <div class="lpms3-table-wrap"><table class="lpms3-table">
+        <thead><tr><th scope="col">#</th><th scope="col">Dokumen</th><th scope="col">Perubahan</th><th scope="col">Nilai</th><th scope="col">Tanggal selesai</th><th scope="col">Status</th><th scope="col"><span class="sr-only">Aksi</span></th></tr></thead>
+        <tbody>
+          <% s[:adendum].each do |a| %>
+            <tr>
+              <td><%= a.urutan %></td>
+              <td><%= a.nomor_dokumen %><br><small><%= dt.(a.tanggal) %><%= " · #{a.sfr025_nomor}" if a.sfr025_nomor %></small>
+                <% if a.change_request %><br><small><%= link_to "CR ##{a.change_request.id}", work_package_path(a.change_request) %></small><% end %></td>
+              <td><%= a.uraian %><%= " (lingkup)" if a.lingkup %></td>
+              <td><%= a.nilai_baru ? "#{rp.(a.nilai_sebelum) if a.disahkan?}#{' → ' if a.disahkan?}#{rp.(a.nilai_baru)}" : "—" %></td>
+              <td><%= a.tanggal_selesai_baru ? "#{dt.(a.tanggal_selesai_sebelum) if a.disahkan?}#{' → ' if a.disahkan?}#{dt.(a.tanggal_selesai_baru)}" : "—" %></td>
+              <td><span class="lpms3-chip <%= a.disahkan? ? 'lpms3-chip--ok' : 'lpms3-chip--warn' %>"><%= a.disahkan? ? "Disahkan" : "Draft" %></span>
+                <% if a.disahkan? %><br><small><%= a.pengesah&.name %> · <%= dt.(a.disahkan_at&.to_date) %></small><% end %></td>
+              <td class="lpms3-kontrak__acts">
+                <% unless a.disahkan? %>
+                  <% if @pengesah && a.created_by != User.current.id %>
+                    <%= button_to "Sahkan", lpms3_project_kontrak_sahkan_path(@project, a, anchor: "adendum"), class: "lpms3-btn lpms3-btn--primary", data: { turbo_confirm: "Sahkan adendum #{a.urutan}? Nilai/tanggal selesai kontrak di atribut proyek akan diperbarui." } %>
+                  <% end %>
+                  <% if @edit %>
+                    <details><summary class="lpms3-btn">Ubah</summary><%= render "adendum_form", a: a %></details>
+                    <%= button_to "Hapus", lpms3_project_kontrak_hapus_path(@project, "adendum", a, anchor: "adendum"), class: "lpms3-btn", data: { turbo_confirm: "Hapus draft adendum #{a.urutan}?" } %>
+                  <% end %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table></div>
+    <% end %>
+    <% if @edit %><details><summary class="lpms3-btn">+ Catat adendum</summary><%= render "adendum_form", a: ::Lpms3::KontrakAdendum.new %></details><% end %>
+  </section>
+</div>

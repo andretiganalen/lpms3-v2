@@ -33,3 +33,4 @@ lpms3/seed/tambah_akun_fungsi.rb
 docs/AUDIT-*.md
 lpms3/seed/proyek_kristian_epc.rb
 lpms3/seed/run_kristian.sh
+lpms3/seed/persona_e2e.rb

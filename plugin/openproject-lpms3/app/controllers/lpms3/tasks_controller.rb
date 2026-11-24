@@ -20,6 +20,7 @@ module Lpms3
       @pemicu = ::Lpms3::Inbox.pemicu(User.current)
       @wbs_pic = ::Lpms3::Inbox.wbs_pic(User.current)
       @baseline_cr = ::Lpms3::Inbox.baseline_cr(User.current)
+      @kontrak = ::Lpms3::Inbox.kontrak(User.current)
     end
 
     # Pengaju mengirim dokumen (WP) untuk persetujuan. Hanya dokumen yang bisa dilihat pengguna.

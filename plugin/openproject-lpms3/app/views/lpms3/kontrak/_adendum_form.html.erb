@@ -1,0 +1,13 @@
+<%= form_with url: lpms3_project_kontrak_adendum_path(@project, a.persisted? ? a.id : nil, anchor: "adendum"), method: :post, local: true, class: "lpms3-kontrak__form" do %>
+  <label>Nomor dokumen adendum <input name="k[nomor_dokumen]" value="<%= a.nomor_dokumen %>" required class="lpms3-input"></label>
+  <label>Tanggal adendum <input type="date" name="k[tanggal]" value="<%= a.tanggal&.iso8601 %>" required class="lpms3-input"></label>
+  <label>No. SFR-025 (tinjauan adendum) <input name="k[sfr025_nomor]" value="<%= a.sfr025_nomor %>" class="lpms3-input"></label>
+  <label>Nilai kontrak baru (Rp) <input name="k[nilai_baru]" value="<%= a.nilai_baru&.to_i %>" inputmode="decimal" class="lpms3-input"></label>
+  <label>Tanggal selesai baru <input type="date" name="k[tanggal_selesai_baru]" value="<%= a.tanggal_selesai_baru&.iso8601 %>" class="lpms3-input"></label>
+  <label>Change Request terkait
+    <select name="k[change_request_id]" class="lpms3-input"><option value="">—</option><% @crs.each do |c| %><option value="<%= c.id %>" <%= "selected" if a.change_request_id == c.id %>>#<%= c.id %> <%= c.subject.truncate(60) %></option><% end %></select>
+  </label>
+  <label class="lpms3-kontrak__check"><input type="checkbox" name="k[lingkup]" value="1" <%= "checked" if a.lingkup %>> Mengubah lingkup pekerjaan</label>
+  <label class="lpms3-kontrak__wide">Uraian perubahan <input name="k[uraian]" value="<%= a.uraian %>" required class="lpms3-input"></label>
+  <button type="submit" class="lpms3-btn lpms3-btn--primary">Simpan draft adendum</button>
+<% end %>

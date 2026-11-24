@@ -44,6 +44,20 @@ Rails.application.routes.draw do
     post "baseline/kembalikan", action: :restore, as: :lpms3_project_wbs_restore
   end
   post "lpms3/wbs/:id/tugaskan", to: "lpms3/wbs#tugaskan", as: :lpms3_wbs_tugaskan
+  # Monitoring Kontrak awal (1.42)
+  get "lpms3/kontrak", to: "lpms3/kontrak#index", as: :lpms3_kontrak
+  scope "projects/:project_id/lpms3/kontrak", controller: "lpms3/kontrak" do
+    get "", action: :show, as: :lpms3_project_kontrak
+    post "info", action: :info, as: :lpms3_project_kontrak_info
+    post "jaminan(/:id)", action: :jaminan, as: :lpms3_project_kontrak_jaminan
+    post "jaminan/:id/status", action: :jaminan_status, as: :lpms3_project_kontrak_jaminan_status
+    post "termin(/:id)", action: :termin, as: :lpms3_project_kontrak_termin
+    post "termin/:id/tagih", action: :tagih, as: :lpms3_project_kontrak_tagih
+    post "termin/:id/bayar", action: :bayar, as: :lpms3_project_kontrak_bayar
+    post "adendum(/:id)", action: :adendum, as: :lpms3_project_kontrak_adendum
+    post "adendum/:id/sahkan", action: :sahkan, as: :lpms3_project_kontrak_sahkan
+    post "hapus/:jenis/:id", action: :hapus, as: :lpms3_project_kontrak_hapus
+  end
 
   get "projects/:project_id/lpms3/galeri", to: "lpms3/gallery#show", as: :lpms3_project_galeri
   get "lpms3/portofolio", to: "lpms3/portfolio#show", as: :lpms3_portofolio

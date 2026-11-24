@@ -162,6 +162,9 @@ id:
     sidebar:
       settings: "Pengaturan"
       my_settings: "Pengaturan saya"
+    kontrak:
+      menu: "Kontrak"
+      menu_global: "Monitoring Kontrak"
     phases:
       stepper: "Fase proyek BOP-001"
       baseline:

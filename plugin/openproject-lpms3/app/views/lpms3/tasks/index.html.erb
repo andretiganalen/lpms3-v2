@@ -41,6 +41,17 @@
     </section>
   <% end %>
 
+  <% if @kontrak.any? %>
+    <h2 style="margin:24px 0 4px">Peringatan Kontrak <span style="font-size:14px;color:var(--uix-text-secondary)">(<%= @kontrak.size %>)</span></h2>
+    <% @kontrak.each do |k| %>
+      <section style="border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);padding:14px;margin-bottom:12px;background:var(--uix-surface)">
+        <span class="lpms3-chip <%= k[:finding].severity == :high ? 'lpms3-chip--danger' : 'lpms3-chip--warn' %>"><%= k[:finding].severity == :high ? "Tinggi" : "Sedang" %></span>
+        <strong><%= k[:finding].text %></strong>
+        <div style="font-size:13px;margin-top:6px"><span style="color:var(--uix-text-secondary)">Proyek:</span> <%= link_to k[:project].name, lpms3_project_kontrak_path(k[:project]) %></div>
+      </section>
+    <% end %>
+  <% end %>
+
   <% if @baseline_cr.any? %>
     <h2 style="margin:24px 0 4px">Draft Baseline WBS <span style="font-size:14px;color:var(--uix-text-secondary)">(<%= @baseline_cr.size %> menunggu pengajuan CR)</span></h2>
     <% @baseline_cr.each do |b| %>

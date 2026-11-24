@@ -6,6 +6,18 @@ en:
       period_label: "Period"
       periods: { day: "Day", week: "Week", month: "Month", quarter: "Quarter" }
       compare_to: "Compared with %{date}"
+      kontrak:
+        nilai: "Contract value"
+        kelas: "Class %{kelas}"
+        termin: "Terms paid"
+        layak:
+          one: "1 term ready to invoice"
+          other: "%{count} terms ready to invoice"
+        jaminan: "Active guarantees"
+        jaminan_warn: "%{count} expiring/expired"
+        adendum: "Amendments"
+        temuan: "%{count} contract findings"
+        aman: "No contract findings"
       baseline_hint: "Planned progress from the active WBS baseline"
       baseline_draft: "%{label} awaiting CR"
       empty: "No projects visible to you."

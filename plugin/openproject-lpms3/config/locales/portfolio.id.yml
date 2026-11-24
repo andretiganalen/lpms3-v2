@@ -6,6 +6,18 @@ id:
       period_label: "Periode"
       periods: { day: "Harian", week: "Mingguan", month: "Bulanan", quarter: "Triwulan" }
       compare_to: "Dibandingkan dengan %{date}"
+      kontrak:
+        nilai: "Nilai kontrak"
+        kelas: "Kelas %{kelas}"
+        termin: "Termin terbayar"
+        layak:
+          one: "1 termin layak tagih"
+          other: "%{count} termin layak tagih"
+        jaminan: "Jaminan aktif"
+        jaminan_warn: "%{count} segera/sudah habis"
+        adendum: "Adendum"
+        temuan: "%{count} temuan kontrak"
+        aman: "Kontrak tanpa temuan"
       baseline_hint: "Rencana dihitung dari baseline WBS aktif"
       baseline_draft: "%{label} menunggu CR"
       empty: "Tidak ada proyek yang bisa Anda lihat."

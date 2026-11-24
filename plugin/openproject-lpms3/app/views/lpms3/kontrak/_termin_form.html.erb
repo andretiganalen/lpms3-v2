@@ -1,0 +1,14 @@
+<%= form_with url: lpms3_project_kontrak_termin_path(@project, t.persisted? ? t.id : nil, anchor: "termin"), method: :post, local: true, class: "lpms3-kontrak__form" do %>
+  <label class="lpms3-kontrak__wide">Uraian <input name="k[uraian]" value="<%= t.uraian %>" required class="lpms3-input" placeholder="mis. Termin 2 — progres fisik 50 %"></label>
+  <label>Persen nilai kontrak <input name="k[persen]" value="<%= t.persen&.to_f %>" required inputmode="decimal" class="lpms3-input"></label>
+  <label>Syarat tagih
+    <select name="k[syarat]" class="lpms3-input"><% ::Lpms3::KontrakTermin::SYARAT.each do |v, txt| %><option value="<%= v %>" <%= "selected" if t.syarat == v %>><%= txt %></option><% end %></select>
+  </label>
+  <label>Syarat progres (%) <input name="k[syarat_progres]" value="<%= t.syarat_progres&.to_f %>" inputmode="decimal" class="lpms3-input"></label>
+  <label>Aktivitas WBS
+    <select name="k[syarat_wbs_node_id]" class="lpms3-input"><option value="">—</option><% @wbs_acts.each do |n| %><option value="<%= n.id %>" <%= "selected" if t.syarat_wbs_node_id == n.id %>><%= n.wbs_code %> <%= n.tasks %></option><% end %></select>
+  </label>
+  <label>Rencana tagih <input type="date" name="k[rencana_tanggal]" value="<%= t.rencana_tanggal&.iso8601 %>" class="lpms3-input"></label>
+  <label class="lpms3-kontrak__wide">Catatan <input name="k[catatan]" value="<%= t.catatan %>" class="lpms3-input"></label>
+  <button type="submit" class="lpms3-btn lpms3-btn--primary">Simpan termin</button>
+<% end %>

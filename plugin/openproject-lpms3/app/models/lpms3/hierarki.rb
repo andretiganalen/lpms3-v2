@@ -51,6 +51,15 @@ module Lpms3
       maps.filter_map { |m| m.unit.ancestor_with_grade("ES1") }.first
     end
 
+    # Unit primer (pemetaan Nota 021) sebuah Fungsi Generik, mis. F-PWP → Bagian Operation Monitoring & Evaluation (ES2).
+    def unit_primer_of_fungsi(code)
+      st = structure
+      fungsi = ::Lpms3::FungsiGenerik.find_by(code:)
+      return nil unless st && fungsi
+
+      ::Lpms3::FungsiUnitMap.where(structure_id: st.id, fungsi_id: fungsi.id).includes(:unit).order(is_primary: :desc, id: :asc).first&.unit
+    end
+
     def unit_direksi_of_fungsi(code = FUNGSI_PROYEK)
       unit_eselon1_of_fungsi(code)&.ancestor_with_grade("DIREKSI")
     end

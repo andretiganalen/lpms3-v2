@@ -52,8 +52,12 @@ ActiveRecord::Base.transaction(joinable: false) do
   chk "tim default: Pejabat Eselon 1 F-MPR", roles_in(proj, es1h).include?("Pejabat Eselon 1")
   chk "tim default: Admin Pejabat Eselon 1", roles_in(proj, es1a).include?("Admin Pejabat Eselon 1")
   chk "belum ada Pimpro: Eselon 2 belum ditambahkan", roles_in(proj, es2h).empty?
-  chk "jejak lpms3_auto_members tercatat (4)", Lpms3::AutoMember.where(project: proj).count == 4, r.added.size.to_s
-  chk "sinkron kedua idempoten (tidak menambah)", T.sync!(proj).added.empty? && Lpms3::AutoMember.where(project: proj).count == 4
+  # 4 tim default F-MPR/Direksi + pemegang jabatan Fungsi Pengawasan Proyek (Eselon 1, Admin, Eselon 2 unit primer; 1.42).
+  pwp1 = Lpms3::Hierarki.unit_eselon1_of_fungsi("F-PWP")
+  pwp2 = Lpms3::Hierarki.unit_primer_of_fungsi("F-PWP")
+  n_pwp = [[pwp1, "KEPALA"], [pwp1, "ADMIN"], [pwp2, "KEPALA"]].sum { |un, k| un ? Lpms3::Hierarki.holders(un, k).size : 0 }
+  chk "jejak lpms3_auto_members tercatat (4 + #{n_pwp} Fungsi Pengawasan)", Lpms3::AutoMember.where(project: proj).count == 4 + n_pwp, r.added.size.to_s
+  chk "sinkron kedua idempoten (tidak menambah)", T.sync!(proj).added.empty? && Lpms3::AutoMember.where(project: proj).count == 4 + n_pwp
 
   # Hook: Pimpro ditetapkan lewat peran member (after_commit MemberRole).
   ActiveRecord::Base.transaction { Member.create!(project: proj, principal: pim, roles: [ProjectRole.find_by!(name: "Pimpro")]) }

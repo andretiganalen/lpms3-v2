@@ -129,6 +129,12 @@ module OpenProject::Lpms3
              caption: :"lpms3.procurement.sub.#{sub}.menu", parent: eks, if: visible, skip_permissions_check: true,
              html: { class: grp_cls.(:"lpms3_fase_eksekusi_pengadaan_#{sub}", "lpms3-grp-item lpms3-grp-item--sub") }
       end
+      # Monitoring Kontrak awal (1.42): grup Ringkasan Fase Inisiasi + menu global lintas proyek.
+      menu :project_menu, :lpms3_fase_inisiasi_kontrak, { controller: "/lpms3/kontrak", action: :show },
+           caption: :"lpms3.kontrak.menu", parent: OpenProject::Lpms3::Phases.menu_name(OpenProject::Lpms3::Phases.find("inisiasi")),
+           if: visible, skip_permissions_check: true, html: { class: grp_cls.(:lpms3_fase_inisiasi_kontrak, "lpms3-grp-item") }
+      menu :global_menu, :lpms3_kontrak, { controller: "/lpms3/kontrak", action: :index },
+           if: Proc.new { User.current.logged? }, caption: :"lpms3.kontrak.menu_global", icon: "file", after: :lpms3_procurement
       # Submenu 2 setiap fase: "Langkah BOP-001" (dropdown berisi langkah urut; isinya anak dinamis menu fase).
       OpenProject::Lpms3::Phases::ALL.each do |ph|
         menu :project_menu, OpenProject::Lpms3::Phases.menu_name(ph, :langkah),
@@ -163,6 +169,20 @@ module OpenProject::Lpms3
         end
       end
       OpenProject::Lpms3::Hooks
+      # Beranda Proyek (1.42): kartu Member diganti bagan garis komando untuk workspace "project".
+      unless ::Grids::WidgetGridComponent.instance_variable_get(:@lpms3_member_hierarki)
+        ::Grids::WidgetGridComponent.instance_variable_set(:@lpms3_member_hierarki, true)
+        ::Grids::WidgetGridComponent.prepend(Module.new do
+          def build_widget(widget_class, *widget_args, **system_arguments)
+            proj = widget_args.first
+            # Semua workspace (proyek, program, portofolio) memakai tampilan yang sama.
+            if widget_class == ::Grids::Widgets::Members && proj.is_a?(::Project)
+              widget_class = ::Lpms3::Widgets::MemberHierarki
+            end
+            super
+          end
+        end)
+      end
       # Baseline WBS (1.41): CR (BFR-001) Disetujui mengaktifkan draft baseline; Ditolak menandai draft REJECTED.
       unless WorkPackage.instance_variable_get(:@lpms3_baseline_cr)
         WorkPackage.instance_variable_set(:@lpms3_baseline_cr, true)
