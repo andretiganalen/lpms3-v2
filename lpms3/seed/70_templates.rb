@@ -40,9 +40,20 @@ end
 MODULES_COMMON = %w[work_package_tracking gantt meetings documents budgets costs news wiki calendar_view].freeze
 
 def rasci_md(r)
-  rows = { "A" => "Accountable", "R" => "Responsible", "S" => "Supporting", "C" => "Consulted", "I" => "Informed" }
-  "**RASCI BOP-001 #{r['tabel']} no. #{r['no']}** (#{r['fase']})\n\n| Peran | Pihak |\n|---|---|\n" +
-    rows.map { |k, l| "| #{l} (#{k}) | #{r[k].join('; ').presence || '—'} |" }.join("\n")
+  # Tabel mendatar: lima kolom A-S-R-C-I berdampingan, satu baris isi (bukan ditumpuk ke bawah).
+  rows = { "A" => "Accountable (A)", "R" => "Responsible (R)", "S" => "Supporting (S)", "C" => "Consulted (C)", "I" => "Informed (I)" }
+  "**RASCI BOP-001 #{r['tabel']} no. #{r['no']}** (#{r['fase']})\n\n| #{rows.values.join(' | ')} |\n|---|---|---|---|---|\n" +
+    "| #{rows.keys.map { |k| r[k].join('; ').presence || '—' }.join(' | ')} |"
+end
+
+# Migrasi 1.47: tabel RASCI lama (vertikal "Peran | Pihak") diubah menjadi mendatar. Aman diulang.
+WorkPackage.where("description LIKE ?", "%| Peran | Pihak |%").find_each do |wp|
+  vals = {}
+  wp.description.scan(/^\| (?:Accountable|Responsible|Supporting|Consulted|Informed) \((\w)\) \| (.*) \|$/) { |k, v| vals[k] = v }
+  next unless %w[A R S C I].all? { |k| vals.key?(k) }
+  head = wp.description.split("\n\n| Peran").first
+  md = "#{head}\n\n| Accountable (A) | Responsible (R) | Supporting (S) | Consulted (C) | Informed (I) |\n|---|---|---|---|---|\n| #{%w[A R S C I].map { |k| vals[k] }.join(' | ')} |"
+  wp.update_column(:description, md)
 end
 
 def ensure_project(name, ident, parent: nil, desc: nil)

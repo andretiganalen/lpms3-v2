@@ -1024,3 +1024,8 @@ table.generic-table td a:not(.button):not(.Button) { color: var(--uix-primary); 
 
 /* Tab halaman admin (UnderlineNav/tabnav): garis bawah halus */
 .tabnav, .op-tab-row, .UnderlineNav { border-bottom: 1px solid var(--leno-panel-border); margin-bottom: 16px; }
+
+/* Tabel di deskripsi/aktivitas work package (mis. RASCI A-R-S-C-I mendatar): garis LenO, kepala abu, sel atas-rata, lebar kolom sama */
+.op-uc-container table, .op-uc-container .op-uc-table, .work-package--description table { width: 100%; table-layout: fixed; border-collapse: collapse; border: 1px solid var(--leno-panel-border); border-radius: var(--uix-radius-control); font-size: 12px; margin: 8px 0; }
+.op-uc-container table th, .work-package--description table th { background: var(--leno-table-head); color: var(--leno-text); font-weight: 600; text-align: left; padding: 8px 10px; border: 1px solid var(--leno-table-line); }
+.op-uc-container table td, .work-package--description table td { padding: 8px 10px; vertical-align: top; border: 1px solid var(--leno-table-line); color: var(--leno-text); overflow-wrap: anywhere; }
