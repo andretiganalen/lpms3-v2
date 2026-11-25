@@ -18,7 +18,7 @@
 
 ## 0. RINGKASAN EKSEKUTIF
 
-Rencana ini men-deploy OpenProject Community Edition dari repositori GitHub resminya ke server `192.168.125.14`, diekspos di port `5100`, lalu mengonfigurasinya sebagai **LPMS3** — sistem yang menjalankan alur BOP-001 (Inisiasi → Perencanaan → Eksekusi → Pengawasan & Pengendalian → Penutupan) lengkap dengan formulir (BFR-001, CFR-022, FFR-708, FFR-710, RFR-002, VFR-015, BOT-001), matriks RASCI, dan *Integrated Change Control*/CCM.
+Rencana ini men-deploy LPMS Community Edition dari repositori GitHub resminya ke server `192.168.125.14`, diekspos di port `5100`, lalu mengonfigurasinya sebagai **LPMS3** — sistem yang menjalankan alur BOP-001 (Inisiasi → Perencanaan → Eksekusi → Pengawasan & Pengendalian → Penutupan) lengkap dengan formulir (BFR-001, CFR-022, FFR-708, FFR-710, RFR-002, VFR-015, BOT-001), matriks RASCI, dan *Integrated Change Control*/CCM.
 
 Prinsip desain:
 
@@ -45,7 +45,7 @@ Durasi indikatif: **12 minggu** — platform & konfigurasi BOP-001 di staging be
 | A2 | Akses hanya dari LAN/VPN Len (subnet `192.168.125.0/24` + subnet kantor lain yang ditentukan). Tidak dipublikasikan ke Internet. | Bila publik → wajib TLS + WAF sebelum go-live. |
 | A3 | Fase awal memakai **HTTP** (`OPENPROJECT_HTTPS=false`) karena diakses via IP. TLS internal dijadwalkan di Fase 9. | Data login lewat jaringan tanpa enkripsi → mitigasi: batasi subnet, segera pasang TLS. |
 | A4 | Server punya akses keluar ke `github.com`, `ghcr.io`/Docker Hub (`openproject/openproject`), dan repositori paket Ubuntu. | Bila air-gapped → siapkan registry mirror/`docker save` offline (Lampiran D). |
-| A5 | Versi target: **OpenProject 17.x (branch `stable/17`)**, rilis terakhir yang terverifikasi 17.9.6. Saat eksekusi, cek apakah sudah ada `stable/18`. | Nama variabel/skrip seed mungkin perlu penyesuaian bila mayor berubah. |
+| A5 | Versi target: **LPMS 17.x (branch `stable/17`)**, rilis terakhir yang terverifikasi 17.9.6. Saat eksekusi, cek apakah sudah ada `stable/18`. | Nama variabel/skrip seed mungkin perlu penyesuaian bila mayor berubah. |
 | A6 | Edisi **Community** (gratis, GPLv3). | Fitur [EE] memakai alternatif. |
 | A7 | Bahasa antarmuka default **Bahasa Indonesia**, zona waktu **Asia/Jakarta**. | — |
 | A8 | Repo konfigurasi disimpan di GitHub organisasi Len (privat). | Ganti URL remote saja. |
@@ -152,7 +152,7 @@ Aturan repo: `.env`, dump DB, dan file lampiran **tidak pernah** di-commit (`.gi
 |---|---|---|---|---|
 | F0 | Persiapan & keputusan | 0 | Keputusan D1–D12, akses server & staging, repo dibuat | Semua keputusan terisi atau ada default |
 | F1 | Penyiapan server (produksi & staging) | 1 | OS terupdate, Docker, firewall, disk data | Checklist F1 lulus di kedua server |
-| F2S | Deploy OpenProject di **staging** | 1 | Stack resmi berjalan di staging | `/health_checks/full` OK |
+| F2S | Deploy LPMS di **staging** | 1 | Stack resmi berjalan di staging | `/health_checks/full` OK |
 | F3 | Hardening & integrasi dasar (staging) | 2 | Admin aman, SMTP, LDAP, backup harian | Restore drill sukses |
 | F4 | Konfigurasi LPMS3 (BOP-001) | 2–4 | Tipe, status, workflow, CF, role, fase/gate | Seed idempoten jalan 2× tanpa error |
 | **F4b** | **Plugin LPMS3 & sidebar** (7 sprint) + **ETL LKP & approval** (E1–E4), paralel | 2–8 | Image `lpms3/openproject:17.9.6-lpms3.1.0`, `lpms3/lkp-etl`, §12–§13 | Spec plugin & golden-file hijau |
@@ -185,7 +185,7 @@ df -h; lsblk                                   # disk data tersedia
 timedatectl                                    # NTP aktif
 ```
 
-Bila ditemukan instalasi OpenProject lama dan diputuskan dibersihkan: **backup dulu** (`docker compose ... run backup` atau `pg_dump`), simpan di luar host, baru hapus container, volume, dan direktori data. Pembersihan wajib dicatat di log perubahan.
+Bila ditemukan instalasi LPMS lama dan diputuskan dibersihkan: **backup dulu** (`docker compose ... run backup` atau `pg_dump`), simpan di luar host, baru hapus container, volume, dan direktori data. Pembersihan wajib dicatat di log perubahan.
 
 **F1.2 Update OS, zona waktu, paket dasar**
 
@@ -207,7 +207,7 @@ sudo mkdir -p /srv/lpms3
 echo '/dev/vg_lpms3/lv_data /srv/lpms3 ext4 defaults,noatime 0 2' | sudo tee -a /etc/fstab
 sudo mount -a
 sudo mkdir -p /srv/lpms3/{pgdata,opdata/assets,backup,app}
-sudo chown -R 1000:1000 /srv/lpms3/opdata      # UID app OpenProject
+sudo chown -R 1000:1000 /srv/lpms3/opdata      # UID app LPMS
 ```
 
 **F1.4 Docker Engine + Compose plugin (repo resmi Docker)**
@@ -247,7 +247,7 @@ sudo ufw enable && sudo ufw status verbose
 
 **CEK F1:** `docker run --rm hello-world` sukses; `/srv/lpms3` ter-mount; `ufw status` sesuai; `timedatectl` = Asia/Jakarta.
 
-### F2 — Deploy OpenProject dari GitHub (bersih)
+### F2 — Deploy LPMS dari GitHub (bersih)
 
 **F2.1 Siapkan repo konfigurasi dan upstream**
 
@@ -320,7 +320,7 @@ OPENPROJECT_MAIL__FROM=lpms-noreply@len.co.id
 LPMS3_PG_PASSWORD=<PGPW>
 ```
 
-> Verifikasi nama variabel lokalisasi/SMTP terhadap halaman *Configuration → Environment variables* OpenProject versi terpasang. Variabel yang salah nama diabaikan diam-diam, jadi cek hasilnya di Administrasi setelah start.
+> Verifikasi nama variabel lokalisasi/SMTP terhadap halaman *Configuration → Environment variables* LPMS versi terpasang. Variabel yang salah nama diabaikan diam-diam, jadi cek hasilnya di Administrasi setelah start.
 
 `chmod 600 .env`.
 
@@ -388,7 +388,7 @@ Simpan bukti (screenshot + output) ke `docs/evidence/F2/`.
 | H3 | Brute force | Admin → Autentikasi | Blokir setelah 5 gagal, 30 menit |
 | H4 | Sesi | Admin → Autentikasi | Kedaluwarsa idle 120 menit |
 | H5 | 2FA | Admin → Autentikasi → 2FA | Wajib untuk admin; opsional user (TOTP) |
-| H6 | LDAP/AD (D1) | Admin → Autentikasi → LDAP | Bind user read-only, filter grup `LPMS3-Users`, on-the-fly creation aktif, sinkron grup → group OpenProject |
+| H6 | LDAP/AD (D1) | Admin → Autentikasi → LDAP | Bind user read-only, filter grup `LPMS3-Users`, on-the-fly creation aktif, sinkron grup → group LPMS |
 | H7 | Email | Admin → Email | Uji kirim; footer: klausul kerahasiaan Len (*Internal Use*) |
 | H8 | Lampiran | Admin → Lampiran | Maks. 256 MB; aktifkan *antivirus scan* bila ClamAV tersedia |
 | H9 | Nama instans & branding | Admin → Pengaturan umum / Desain | "LPMS3 — PT Len Industri"; warna korporat (logo kustom adalah [EE]) |
@@ -422,11 +422,11 @@ Jadwalkan via systemd timer pukul 01:30 WIB. Retensi off-host mengikuti **COP-00
 
 ## 5. KONFIGURASI LPMS3 SESUAI BOP-001 (F4–F5)
 
-Bagian ini adalah inti: menerjemahkan BOP-001 menjadi struktur data dan alur di OpenProject.
+Bagian ini adalah inti: menerjemahkan BOP-001 menjadi struktur data dan alur di LPMS.
 
 ### 5.1 Model data: siapa disimpan di mana
 
-| Objek BOP-001 | Objek OpenProject | Catatan |
+| Objek BOP-001 | Objek LPMS | Catatan |
 |---|---|---|
 | Proyek (Kode Proyek, FOP-700) | **Project** + project attributes | Satu project per Kode Proyek; identifier = Kode Proyek (huruf kecil, tanda hubung). |
 | Proyek Purnajual (§5.5.3) | **Sub-project** dari proyek induk | Kode purnajual terpisah; dibuat dari template "LPMS3-Purnajual". |
@@ -503,7 +503,7 @@ Semua tipe memakai field bawaan: **Accountable** (A), **Assignee** (R), **Watche
 
 ### 5.4 Siklus hidup proyek: fase & gate
 
-| Fase (OpenProject) | Tahap BOP-001 | Gate penutup fase | Kriteria gate (bukti di sistem) | Accountable gate |
+| Fase (LPMS) | Tahap BOP-001 | Gate penutup fase | Kriteria gate (bukti di sistem) | Accountable gate |
 |---|---|---|---|---|
 | P1 Inisiasi | §5.1 | **G1 — Project Charter ditetapkan** | Kode Proyek terisi (FOP-700); Pimpro & tim inti ditetapkan ≤ 2 minggu setelah kode dibuka (HOP-609); WP "Project Charter" (BOT-001) status Disahkan | Struktural Fungsi Pelaksanaan Proyek |
 | P2 Perencanaan | §5.2 | **G2 — Kick-Off / Baseline 0** | 9 Dokumen Rencana status Disahkan; Meeting Kick-Off selesai dengan risalah CFR-022; tanggal Baseline 0 terisi; baseline jadwal disimpan | Eselon I/II Fungsi Pengawasan Proyek |
@@ -565,7 +565,7 @@ Workflow yang sama polanya (Pimpro mengajukan → Fungsi terkait meninjau) dipak
 
 ### 5.6 Peran (role) dan RASCI
 
-**Peran proyek OpenProject**
+**Peran proyek LPMS**
 
 | Role LPMS3 | Basis BOP-001 | Hak utama |
 |---|---|---|
@@ -601,7 +601,7 @@ Workflow yang sama polanya (Pimpro mengajukan → Fungsi terkait meninjau) dipak
 
 Seluruh baris RASCI (±32 aktivitas) diisi di `lpms3/seed/70_templates.rb` dari file data `lpms3/templates/rasci.yml` agar mudah direvisi bila BOP-001 berubah revisi.
 
-> Catatan teknis: OpenProject mengizinkan satu nilai pada field *Accountable*. Ini selaras dengan BOP-001 §3.25 ("Hanya boleh ada satu orang yang accountable"). Untuk sel A berupa "Direksi / Project Sponsor", isi Project Sponsor dan catat Direksi di Consulted/Informed.
+> Catatan teknis: LPMS mengizinkan satu nilai pada field *Accountable*. Ini selaras dengan BOP-001 §3.25 ("Hanya boleh ada satu orang yang accountable"). Untuk sel A berupa "Direksi / Project Sponsor", isi Project Sponsor dan catat Direksi di Consulted/Informed.
 
 ### 5.7 Jadwal, biaya, dan bobot progres
 
@@ -610,7 +610,7 @@ Seluruh baris RASCI (±32 aktivitas) diisi di `lpms3/seed/70_templates.rb` dari 
 - **Bobot pekerjaan (§5.4.1):** `Bobot (%) = Harga Pekerjaan per scope / Total Nilai Kontrak × 100`.
   - Field *Harga Pekerjaan* di Deliverable; *Nilai Kontrak* di project attribute.
   - Bobot dihitung oleh skrip laporan (`lpms3/reports/ffr708.py`) karena referensi silang ke atribut proyek tidak didukung oleh calculated field WP. Bila *calculated values* [EE] tersedia, bobot bisa disimpan di WP.
-  - **Progres tertimbang proyek** = Σ(Bobot × %selesai Deliverable). Mode progres OpenProject diset ke *status-based* untuk Deliverable (Baru 0%, Dikerjakan 50%, Verifikasi Internal 80%, Validasi Pelanggan 90%, Diterima 100%) — persentase disepakati PMO.
+  - **Progres tertimbang proyek** = Σ(Bobot × %selesai Deliverable). Mode progres LPMS diset ke *status-based* untuk Deliverable (Baru 0%, Dikerjakan 50%, Verifikasi Internal 80%, Validasi Pelanggan 90%, Diterima 100%) — persentase disepakati PMO.
 - **Kurva-S:** dihasilkan skrip laporan (rencana kumulatif dari baseline vs aktual) ke XLSX/PNG, dilampirkan pada laporan FFR-708.
 
 ### 5.8 Komunikasi & pelaporan
@@ -683,7 +683,7 @@ Pembuatan proyek dari template dan pengisian data uji memakai **API v3** (`POST 
 
 ### 6.1 PMBOK 8 — Focus Areas ↔ BOP-001 ↔ LPMS3
 
-| Focus Area PMBOK 8 | BOP-001 | LPMS3 (OpenProject) |
+| Focus Area PMBOK 8 | BOP-001 | LPMS3 (LPMS) |
 |---|---|---|
 | Initiating | §5.1 Tahap Inisiasi | Fase P1, Gate G1, project attributes, WP Project Charter (BOT-001) |
 | Planning | §5.2 Tahap Perencanaan (reviu PMP 9 area, Kick-Off, Top Up) | Fase P2, 9 WP Dokumen Rencana, meeting Kick-Off, Gate G2 / Baseline 0, WP Top Up Anggaran |
@@ -845,7 +845,7 @@ Kanal dukungan (email/grup chat), triase harian 15 menit, defect dicatat sebagai
 | Backup | Harian 01:30 | `ops/backup.sh` via systemd timer | TI |
 | Restore drill | Kuartalan | `ops/restore.sh` ke VM staging | TI + PMO |
 | Patch OS | Bulanan | `apt full-upgrade`, reboot terjadwal | TI |
-| Upgrade minor OpenProject | Bulanan/sesuai rilis keamanan | §8.3 | TI |
+| Upgrade minor LPMS | Bulanan/sesuai rilis keamanan | §8.3 | TI |
 | Upgrade mayor | Setelah diuji di staging ≥ 2 minggu | §8.3 + CR | TI + PMO |
 | Review konfigurasi & akses | Bulanan | Audit user nonaktif, role, token API | PMO |
 | Review kesesuaian BOP-001 | Setiap revisi BOP-001 | Update `rasci.yml`, seed, template via PR | PMO + BPM |
@@ -872,7 +872,7 @@ curl -s http://192.168.125.14:5100/health_checks/full             # 6. verifikas
 # 7. jalankan ulang seed LPMS3 (idempoten) + smoke test U06, U13
 ```
 
-Dengan plugin: langkah 3–4 diganti **ubah `OP_TAG` → rebuild image kustom → jalankan spec plugin & S01–S12 di staging → baru produksi**. Plugin pihak ketiga tidak dijamin kompatibel otomatis dengan versi OpenProject baru.
+Dengan plugin: langkah 3–4 diganti **ubah `OP_TAG` → rebuild image kustom → jalankan spec plugin & S01–S12 di staging → baru produksi**. Plugin pihak ketiga tidak dijamin kompatibel otomatis dengan versi LPMS baru.
 
 Rollback: `down` → restore DB dump + opdata dari backup langkah 1 → set `TAG` lama → `up -d`. Mayor version tidak bisa *downgrade* tanpa restore.
 
@@ -901,10 +901,10 @@ Rollback: `down` → restore DB dump + opdata dari backup langkah 1 → set `TAG
 | R9 | Docker mem-bypass UFW, port terbuka lebih luas | 3 | 3 | 9 | Aturan `DOCKER-USER` (Lampiran C) + firewall jaringan | TI |
 | R10 | Kebutuhan laporan FFR-708 tidak terpenuhi native | 3 | 3 | 9 | Skrip API laporan diuji di UAT U13 | PMO |
 | R11 | Revisi BOP-001 berikutnya mengubah alur | 3 | 2 | 6 | RASCI & seed berbasis data (`rasci.yml`), perubahan via PR | PMO/BPM |
-| R12 | Lisensi/keamanan: kerentanan di image lama | 2 | 4 | 8 | Ikuti rilis keamanan OpenProject, upgrade minor bulanan | TI |
-| R13 | Plugin LPMS3 rusak saat upgrade OpenProject (API menu/komponen berubah) | 3 | 4 | 12 | Pin versi, spec otomatis, hindari override view, upgrade lewat staging | TI |
+| R12 | Lisensi/keamanan: kerentanan di image lama | 2 | 4 | 8 | Ikuti rilis keamanan LPMS, upgrade minor bulanan | TI |
+| R13 | Plugin LPMS3 rusak saat upgrade LPMS (API menu/komponen berubah) | 3 | 4 | 12 | Pin versi, spec otomatis, hindari override view, upgrade lewat staging | TI |
 | R14 | Skema/akses DB LPMS 2 tidak tersedia atau berubah | 3 | 4 | 12 | View kontrak `v_lpms3_*`, akun read-only, mapping YAML, fallback impor Excel | PMO + DBA LPMS 2 |
-| R15 | Kapasitas developer Rails/OpenProject terbatas → G-SB mundur | 3 | 4 | 12 | Prioritaskan S1–S4; Procurement & Health bisa rilis 1.1 bila perlu (dengan persetujuan Sponsor) | PMO |
+| R15 | Kapasitas developer Rails/LPMS terbatas → G-SB mundur | 3 | 4 | 12 | Prioritaskan S1–S4; Procurement & Health bisa rilis 1.1 bila perlu (dengan persetujuan Sponsor) | PMO |
 | R16 | Data pengadaan manual tidak sinkron dengan ERP | 4 | 3 | 12 | Field referensi ERP wajib, rekonsiliasi bulanan, rilis 2 sinkron ERP | F. Pengadaan |
 | R17 | Format LKP baru/berubah membuat ekstraksi gagal | 4 | 3 | 12 | Profil varian berbasis konfigurasi, wizard pemetaan, fallback input manual di layar rekonsiliasi | PMO + data engineer |
 | R18 | Approval macet di satu level → tenggat tgl 5 terlewat | 3 | 4 | 12 | SLA, pengingat, eskalasi, delegasi | F. Pengawasan |
@@ -953,7 +953,7 @@ Rollback: `down` → restore DB dump + opdata dari backup langkah 1 → set `TAG
 
 ## 12. SPESIFIKASI SIDEBAR & PLUGIN LPMS3 (PRASYARAT DEPLOY PRODUKSI)
 
-> **Aturan:** produksi di `192.168.125.14:5100` **tidak** di-deploy sebelum **Gate Sidebar (G-SB)** lulus di staging (§12.10). Sidebar standar OpenProject tidak bisa disusun seperti ini lewat menu Administrasi saja, sehingga dibuat **plugin `openproject-lpms3`** (Rails engine) yang dibangun ke dalam **image Docker kustom**.
+> **Aturan:** produksi di `192.168.125.14:5100` **tidak** di-deploy sebelum **Gate Sidebar (G-SB)** lulus di staging (§12.10). Sidebar standar LPMS tidak bisa disusun seperti ini lewat menu Administrasi saja, sehingga dibuat **plugin `openproject-lpms3`** (Rails engine) yang dibangun ke dalam **image Docker kustom**.
 
 ### 12.1 Keputusan yang sudah ditetapkan (9 Nov 2026)
 
@@ -962,7 +962,7 @@ Rollback: `down` → restore DB dump + opdata dari backup langkah 1 → set `TAG
 | D8 | Sumber data "Add New" | **Koneksi DB LPMS 2 langsung (read-only)** | Koneksi DB kedua di plugin, akun read-only, sebaiknya lewat *view* khusus (§12.7) |
 | D9 | Data Procurement Pipeline | **Gabungan**: rilis 1 input manual, rilis 2 sinkron ERP | Model data sudah memuat field referensi ERP & penanda sumber sejak rilis 1 (§12.6) |
 | D10 | Butir kosong di [Perencanaan] & [Eksekusi] | **Diusulkan Claude** dari BOP-001 | Ditandai *(usulan)* di §12.2; bisa diubah sebelum G-SB |
-| D11 | Theme/Font/Logo/Image | **Plugin LPMS3 sendiri** (bukan lisensi Enterprise) | Halaman Settings milik plugin; CSS variables + aset unggahan. Kode pembatas fitur Enterprise OpenProject **tidak** diubah |
+| D11 | Theme/Font/Logo/Image | **Plugin LPMS3 sendiri** (bukan lisensi Enterprise) | Halaman Settings milik plugin; CSS variables + aset unggahan. Kode pembatas fitur Enterprise LPMS **tidak** diubah |
 
 ### 12.2 Struktur sidebar final
 
@@ -1014,7 +1014,7 @@ SETTINGS
 1. Sidebar **sama** di halaman global maupun halaman proyek. Grup PHASE mengikuti proyek aktif. Bila belum ada proyek dipilih, PHASE memakai proyek terakhir yang dibuka (disimpan di sesi) atau menampilkan "Pilih proyek di bagian PROJECT".
 2. Menu tampil sesuai hak akses: item tanpa izin disembunyikan. Contoh: "Add New" hanya untuk peran Pembuat Proyek/PMO; SETTINGS hanya untuk LPMS Business Admin/Administrator.
 3. Badge di kanan item: jumlah item terbuka/terlambat (mis. Risk Status ⚠3, Issue Status 5) dan titik warna RAG di samping nama proyek.
-4. **Modul bawaan OpenProject** (Work packages, Gantt, Boards, Meetings, Wiki, Documents, Budgets, Time & costs) tidak tampil di sidebar pengguna biasa — dibuka dari tombol di halaman LPMS3 (mis. WBS Generation → "Buka Gantt"). Untuk PMO/Admin tersedia grup lipat tambahan "Modul Lanjutan" (konfigurasi `LPMS3_NATIVE_MENU=pmo_only|all|none`, default `pmo_only`) agar administrasi tetap mudah.
+4. **Modul bawaan LPMS** (Work packages, Gantt, Boards, Meetings, Wiki, Documents, Budgets, Time & costs) tidak tampil di sidebar pengguna biasa — dibuka dari tombol di halaman LPMS3 (mis. WBS Generation → "Buka Gantt"). Untuk PMO/Admin tersedia grup lipat tambahan "Modul Lanjutan" (konfigurasi `LPMS3_NATIVE_MENU=pmo_only|all|none`, default `pmo_only`) agar administrasi tetap mudah.
 5. Urutan [Perencanaan] mengikuti permintaan (Baseline sebelum WBS Generation). Secara proses BOP-001, WBS disusun lebih dulu lalu di-baseline; halaman Baseline menolak pembuatan baseline bila WBS belum ada.
 
 ### 12.3 Spesifikasi tiap item menu
@@ -1043,7 +1043,7 @@ Aturan RAG default (ambang dapat diubah di Settings):
 | Item | Acuan | Detail |
 |---|---|---|
 | **[Inisiasi]** (judul grup) | §5.1.1, §5.1.3 | Ringkasan & Gate G1: status Kode Proyek (FOP-700), Pimpro, tim inti, **Project Charter (BOT-001)**, tombol "Ajukan Gate G1" (aktif bila kriteria terpenuhi). Kode Proyek & Project Charter dikelola di halaman ini agar BOP-001 terpenuhi tanpa menambah item menu. |
-| **Team Assignment** | §5.1.2, HOP-609, §5.3.3 | Penetapan Pimpro & tim inti per peran LPMS3 (§5.6), jabatan proyek, alokasi %, periode; hitung mundur **≤ 2 minggu** sejak Kode Proyek dibuka (kuning H-3, merah lewat batas); unggah SK/penugasan; RASCI aktivitas terkait. Menulis ke *memberships* OpenProject + atribut Pimpro. |
+| **Team Assignment** | §5.1.2, HOP-609, §5.3.3 | Penetapan Pimpro & tim inti per peran LPMS3 (§5.6), jabatan proyek, alokasi %, periode; hitung mundur **≤ 2 minggu** sejak Kode Proyek dibuka (kuning H-3, merah lewat batas); unggah SK/penugasan; RASCI aktivitas terkait. Menulis ke *memberships* LPMS + atribut Pimpro. |
 | **Preliminary Project Management Aspect (9 aspek)** | §5.1.1 (PMP diserahterimakan dari Fungsi Perencanaan Proyek) | Kartu 9 aspek: Ruang Lingkup, Jadwal, Biaya, Mutu, Sumber Daya, Komunikasi, Risiko & K3L, Pengadaan, Stakeholder. Setiap kartu = WP "Dokumen Rencana" versi *preliminary*: status, PIC, lampiran, catatan kekurangan. Menjadi masukan Reviu PMP di [Perencanaan]. |
 
 #### PHASE — [Perencanaan] (BOP-001 §5.2)
@@ -1109,7 +1109,7 @@ Halaman berlangkah (wizard) mengikuti BOP-001 apa adanya, RASCI sesuai Tabel 6:
 
 | Item | Isi | Catatan |
 |---|---|---|
-| **User & Access (Fungsi Manajemen)** | (1) **Versi Struktur Organisasi** (SKEP) & pohon unit beserta alias; (2) katalog **Fungsi Generik** BOP-001 dan **pemetaan Fungsi → Unit** (Nota 021), berversi; (3) posisi & penempatan user (Definitif/Plt/Plh/Delegasi); (4) **matriks kapabilitas** Fungsi × Jenjang × Lingkup dan pengecualian berjangka; (5) mode DIRECT/PROXY per fungsi; (6) pratinjau dampak perubahan struktur; (7) log audit — rincian di **§14** | Dikelola Fungsi Manajemen Proyek. Mesin kapabilitas menurunkan Users/Groups/Memberships OpenProject dan menyinkronkan `lpms3_dw.ref.*`. Bila *Organizational management* (17.7) tersedia di Community, unit disinkronkan ke Departemen. |
+| **User & Access (Fungsi Manajemen)** | (1) **Versi Struktur Organisasi** (SKEP) & pohon unit beserta alias; (2) katalog **Fungsi Generik** BOP-001 dan **pemetaan Fungsi → Unit** (Nota 021), berversi; (3) posisi & penempatan user (Definitif/Plt/Plh/Delegasi); (4) **matriks kapabilitas** Fungsi × Jenjang × Lingkup dan pengecualian berjangka; (5) mode DIRECT/PROXY per fungsi; (6) pratinjau dampak perubahan struktur; (7) log audit — rincian di **§14** | Dikelola Fungsi Manajemen Proyek. Mesin kapabilitas menurunkan Users/Groups/Memberships LPMS dan menyinkronkan `lpms3_dw.ref.*`. Bila *Organizational management* (17.7) tersedia di Community, unit disinkronkan ke Departemen. |
 | **Settings (Application)** | **Theme**: warna primer/sekunder/aksen, header, sidebar, pratinjau langsung. **Font**: font sistem atau unggah WOFF2 (maks. 4 file), ukuran dasar. **Logo**: logo header, logo login, favicon. **Image**: latar login, banner Dashboard. Juga: ambang RAG, mode Modul Lanjutan, teks footer kerahasiaan Len | Disimpan di tabel pengaturan plugin; diterapkan lewat *view hook* (CSS variables + `@font-face`). Unggahan divalidasi (tipe, ≤ 2 MB, SVG disanitasi). |
 
 ### 12.4 Arsitektur plugin `openproject-lpms3`
@@ -1127,7 +1127,7 @@ plugin/openproject-lpms3/                # di dalam repo lpms3-openproject
 │   ├── controllers/lpms3/               # dashboard, health, phases, team_assignment, pm_aspects, baselines,
 │   │                                    # wbs, work_orders, procurement, status, closing, projects_import,
 │   │                                    # functions_access, app_settings
-│   ├── components/lpms3/                # ViewComponent + Primer (gaya UI OpenProject)
+│   ├── components/lpms3/                # ViewComponent + Primer (gaya UI LPMS)
 │   ├── models/lpms3/                    # Vendor, CustomerPaymentTerm, HealthSnapshot, Baseline(+Item),
 │   │                                    # ImportLog, AppSetting, Function, Lpms2::Base (koneksi DB kedua)
 │   ├── services/lpms3/                  # HealthCalculator, BaselineService, WbsImporter, Lpms2Importer, ErpSync (rilis 2)
@@ -1144,16 +1144,16 @@ Prinsip:
 - **Item bawaan** dipindah ke grup "Modul Lanjutan" (PMO/Admin) atau dihapus via `Redmine::MenuManager.map(:project_menu) { |m| m.delete :<item> }` bila `LPMS3_NATIVE_MENU=none`.
 - **Data sebisa mungkin tetap Work Package** (Work Order, Item Pengadaan, Milestone Vendor, Risiko, dst.) agar Gantt, notifikasi, API, filter, dan jejak audit bawaan tetap berfungsi. Tabel `lpms3_*` hanya untuk yang bukan WP.
 - **Hak akses** sebagai permission plugin: `view_lpms3`, `manage_team_assignment`, `manage_baselines` (F. Pengawasan), `manage_work_orders`, `manage_procurement`, `view_cross_payment` (Keuangan/PMO/Sponsor), `manage_closing`, `import_lpms2` (global), `manage_lpms3_functions` (global), `manage_lpms3_app_settings` (global).
-- Kerangka mengikuti contoh plugin resmi (`opf/openproject-proto_plugin`) dan **diverifikasi terhadap kode sumber OpenProject versi yang dipin** — nama helper menu dan sintaks permission dapat berubah antar versi.
+- Kerangka mengikuti contoh plugin resmi (`opf/openproject-proto_plugin`) dan **diverifikasi terhadap kode sumber LPMS versi yang dipin** — nama helper menu dan sintaks permission dapat berubah antar versi.
 
 Pola registrasi (kerangka, diuji di staging):
 
 ```ruby
 # plugin/openproject-lpms3/lib/open_project/lpms3/engine.rb
-module OpenProject::Lpms3
+module LPMS::Lpms3
   class Engine < ::Rails::Engine
     engine_name :openproject_lpms3
-    include OpenProject::Plugins::ActsAsOpEngine
+    include LPMS::Plugins::ActsAsOpEngine
 
     register "openproject-lpms3", author_url: "https://www.len.co.id", bundled: false do
       project_module :lpms3 do
@@ -1162,7 +1162,7 @@ module OpenProject::Lpms3
         permission :manage_procurement, { "lpms3/procurement": %i[edit update] },            permissible_on: :project
         # … permission lain
       end
-      OpenProject::Lpms3::Sidebar.register!(self)   # pasang struktur §12.2 ke :global_menu & :project_menu
+      LPMS::Lpms3::Sidebar.register!(self)   # pasang struktur §12.2 ke :global_menu & :project_menu
     end
   end
 end
@@ -1216,7 +1216,7 @@ docker compose -p lpms3 up -d           # seeder menjalankan migrasi, termasuk t
 docker compose -p lpms3 exec web bundle exec rails runner 'puts Redmine::Plugin.all.map(&:id)'   # CEK: openproject-lpms3 terdaftar
 ```
 
-Penamaan image: `<versi OpenProject>-lpms3.<versi plugin>`; disimpan di registry internal (atau `docker save`) agar rollback cepat. Setiap upgrade OpenProject = **rebuild image + jalankan spec plugin di staging** sebelum produksi. Hindari menimpa *selector* CSS internal; gunakan CSS variables & komponen Primer agar tahan upgrade.
+Penamaan image: `<versi LPMS>-lpms3.<versi plugin>`; disimpan di registry internal (atau `docker save`) agar rollback cepat. Setiap upgrade LPMS = **rebuild image + jalankan spec plugin di staging** sebelum produksi. Hindari menimpa *selector* CSS internal; gunakan CSS variables & komponen Primer agar tahan upgrade.
 
 ### 12.6 Model data tambahan
 
@@ -1231,7 +1231,7 @@ Penamaan image: `<versi OpenProject>-lpms3.<versi plugin>`; disimpan di registry
 | Snapshot kesehatan | Tabel `lpms3_health_snapshots` | Proyek, tanggal, SPI, CPI, progres, hitungan per dimensi, RAG |
 | Log impor | Tabel `lpms3_import_logs` | ID proyek LPMS 2, pengguna, waktu, pemetaan, hasil/kesalahan |
 | Pengaturan aplikasi | Tabel `lpms3_app_settings` + lampiran | Tema, font, logo, gambar, ambang RAG |
-| Fungsi | Tabel `lpms3_functions` | Nama fungsi, group OpenProject, group AD, kepala fungsi (eselon) |
+| Fungsi | Tabel `lpms3_functions` | Nama fungsi, group LPMS, group AD, kepala fungsi (eselon) |
 
 ### 12.7 Add New — impor dari DB LPMS 2 (D8)
 
@@ -1257,10 +1257,10 @@ Penamaan image: `<versi OpenProject>-lpms3.<versi plugin>`; disimpan di registry
 
 ### 12.8 Theme/Font/Logo/Image (D11)
 
-- Plugin menyuntikkan CSS variables ke `<head>` lewat view hook; nilai dari halaman Settings (`--lpms3-primary`, `--lpms3-header-bg`, `--lpms3-sidebar-bg`, `--lpms3-font-family`, …) dipetakan ke variabel tema OpenProject yang setara (diverifikasi pada versi terpasang).
+- Plugin menyuntikkan CSS variables ke `<head>` lewat view hook; nilai dari halaman Settings (`--lpms3-primary`, `--lpms3-header-bg`, `--lpms3-sidebar-bg`, `--lpms3-font-family`, …) dipetakan ke variabel tema LPMS yang setara (diverifikasi pada versi terpasang).
 - Font unggahan disajikan dengan `@font-face`; default font sistem.
 - Logo, favicon, latar login, banner Dashboard disimpan sebagai lampiran dan dirender komponen plugin.
-- Ini kustomisasi milik Len di atas kode GPLv3; **tidak** mengubah atau melewati pemeriksaan token Enterprise OpenProject. Halaman Design bawaan (EE) tidak dipakai.
+- Ini kustomisasi milik Len di atas kode GPLv3; **tidak** mengubah atau melewati pemeriksaan token Enterprise LPMS. Halaman Design bawaan (EE) tidak dipakai.
 - Nilai awal tema ditetapkan bersama Fungsi Komunikasi Korporat sesuai panduan identitas visual Len.
 
 ### 12.9 Rencana pengembangan plugin
@@ -1268,14 +1268,14 @@ Penamaan image: `<versi OpenProject>-lpms3.<versi plugin>`; disimpan di registry
 | Sprint (1 minggu) | Lingkup |
 |---|---|
 | S1 | Kerangka plugin, image kustom, `sidebar.rb` (struktur penuh, halaman placeholder), **tabel Fungsi/Struktur/Posisi & mesin kapabilitas dasar (§14)**, i18n, discovery LPMS 2 — DoD: S01–S05, F01–F02 lulus |
-| S2 | Settings (Theme/Font/Logo/Image), User & Access lengkap (versi struktur, pemetaan Fungsi → Unit, Plt/Plh, pratinjau dampak, sinkron ke OpenProject & `lpms3_dw`), Tier pengguna & halaman awal, Team Assignment, Preliminary 9 Aspek, ringkasan [Inisiasi] + G1 |
+| S2 | Settings (Theme/Font/Logo/Image), User & Access lengkap (versi struktur, pemetaan Fungsi → Unit, Plt/Plh, pratinjau dampak, sinkron ke LPMS & `lpms3_dw`), Tier pengguna & halaman awal, Team Assignment, Preliminary 9 Aspek, ringkasan [Inisiasi] + G1 |
 | S3 | Reviu PMP & Kick-Off, WBS Generation (template/Excel/salin), Baseline & Rebaseline (+ Top Up) |
 | S4 | Work Order, Change Request, ringkasan [Eksekusi]; Issue/Risk/K3LH/Quality Status (+ tab "Semua proyek saya") |
 | S5 | Procurement Pipeline (4 halaman), vendor master, termin pelanggan, Cross Payment |
 | S6 | Dashboard, Project Health + job snapshot, Closing wizard, Add New (impor LPMS 2) |
 | S7 | Stabilisasi, uji performa (≥ 50 proyek, ≥ 20.000 WP data uji), dokumentasi, **Gate G-SB**, rilis image `17.9.6-lpms3.1.0` |
 
-Tim minimum: 2 developer Ruby on Rails (pengalaman OpenProject/Redmine diutamakan), 1 analis bisnis PMO, 1 penguji. Rilis 2 (sinkron ERP Procurement) dijadwalkan terpisah setelah go-live.
+Tim minimum: 2 developer Ruby on Rails (pengalaman LPMS/Redmine diutamakan), 1 analis bisnis PMO, 1 penguji. Rilis 2 (sinkron ERP Procurement) dijadwalkan terpisah setelah go-live.
 
 ### 12.10 Gate Sidebar (G-SB) — kriteria lulus sebelum deploy produksi :5100
 
@@ -1393,7 +1393,7 @@ Bila tidak ingin menambah item, halaman yang sama dapat ditaruh di ringkasan gru
 
 Keputusan teknis:
 
-- **Database terpisah `lpms3_dw`** (di container Postgres yang sama) agar skema OpenProject tidak tersentuh migrasi ETL; plugin membaca lewat koneksi Rails kedua. Backup harian wajib mencakup `lpms3_dw` dan folder `lkp-raw` (§13.10).
+- **Database terpisah `lpms3_dw`** (di container Postgres yang sama) agar skema LPMS tidak tersentuh migrasi ETL; plugin membaca lewat koneksi Rails kedua. Backup harian wajib mencakup `lpms3_dw` dan folder `lkp-raw` (§13.10).
 - **Layanan `lkp-etl`** (Python 3.12: pdfplumber untuk tabel PDF berbasis teks, openpyxl untuk .xlsx dengan *nilai cache* — formula tidak pernah dieksekusi, pandas; OCR ocrmypdf + Tesseract `ind+eng` hanya sebagai fallback untuk PDF hasil scan). Tidak mempublikasikan port; hanya jaringan internal compose.
 - **Profil varian sebagai konfigurasi** (`ref.format_profile`, YAML berversi): jangkar teks, urutan kolom, locale angka, gaya minus, skala persen, halaman lampiran. Varian baru → Admin Bisnis membuat profil lewat wizard pemetaan kolom, tanpa rilis kode.
 - **Keamanan berkas**: hanya `.pdf`, `.xlsx` (tolak `.xlsm`/makro), ≤ 25 MB, pindai antivirus bila tersedia, sheet tersembunyi dicatat, folder raw tidak dapat ditulis oleh web.
@@ -1700,7 +1700,7 @@ Istilah BOP-001 langsung terpetakan:
 
 Setiap Fungsi dapat diset mode keterlibatan: **DIRECT** (pengguna fungsi itu mengisi sendiri di LPMS3) atau **PROXY** (Fungsi Proyek mengisi atas nama fungsi tersebut, lalu fungsi itu cukup mengonfirmasi lewat tautan/email). Default: DIRECT untuk Pengadaan, Mutu, Risiko, K3LH, Keuangan; PROXY untuk fungsi lain — dapat diubah di Settings (keputusan D13).
 
-### 14.4 Tabel data (plugin `openproject-lpms3`, database OpenProject)
+### 14.4 Tabel data (plugin `openproject-lpms3`, database LPMS)
 
 Sumber kebenaran ada di tabel plugin; `lpms3_dw.ref.org_unit`, `ref.position`, dan `ref.approval_level` (§13.4) menjadi **salinan tersinkron** (saat ada perubahan + harian) agar ETL dan RLS memakai struktur yang sama.
 
@@ -1748,7 +1748,7 @@ Matriks ini adalah **data** (`lpms3_capability_rules`), bukan kode; perubahan di
 ### 14.6 Cara kapabilitas diterapkan
 
 - **Halaman LPMS3 (plugin):** setiap controller/menu memeriksa `Lpms3::Capability.allowed?(user, :LKP_APPROVE_ES2, project)`. Item sidebar tanpa kapabilitas disembunyikan (§12.2).
-- **Modul bawaan OpenProject:** mesin kapabilitas **menurunkan** keanggotaan OpenProject secara otomatis — group per (Fungsi × Unit) dan role proyek LPMS3 (§5.6) — lewat job saat ada perubahan dan setiap malam. Keanggotaan manual tetap boleh tetapi ditandai sebagai pengecualian berjangka.
+- **Modul bawaan LPMS:** mesin kapabilitas **menurunkan** keanggotaan LPMS secara otomatis — group per (Fungsi × Unit) dan role proyek LPMS3 (§5.6) — lewat job saat ada perubahan dan setiap malam. Keanggotaan manual tetap boleh tetapi ditandai sebagai pengecualian berjangka.
 - **Approval (§13.6):** approver L3/L4 = pemegang posisi Struktural ES2/ES1 pada unit yang dipetakan ke **Fungsi Pelaksanaan Proyek** dan menaungi unit pelaksana proyek; L2 = Fungsi Pengawasan Proyek. Plt/Plh/delegasi otomatis dipakai bila pejabat definitif berhalangan.
 - **Visibilitas berjenjang (§13.7):** rantai level dihitung dari pohon unit pada versi struktur yang berlaku.
 - **Data (lpms3_dw):** RLS memakai salinan `ref.*` yang tersinkron.
@@ -1859,8 +1859,8 @@ docker compose -p lpms3 up -d            # tanpa --pull always
 - BOP-001 Manajemen Proyek Rev.01, PT Len Industri (Persero), September 2026 — termasuk formulir BFR-001, CFR-022, FFR-708, FFR-710, RFR-002, VFR-015, BOT-001 dan prosedur terkait (FOP-700, FOP-705, HOP-609, SOP-004, SOP-009, BOG-003, QOG-001, QOG-002, QOP-803, QOP-814, COP-002, ROP/VOP/POP Series).
 - PMI, *A Guide to the Project Management Body of Knowledge (PMBOK® Guide) – Seventh Edition* (2021): 12 principles, 8 performance domains.
 - PMI, *PMBOK® Guide – Eighth Edition* (digital, November 2025): 6 principles, 7 performance domains (Governance, Scope, Schedule, Finance, Stakeholders, Resources, Risk), 5 focus areas, ±40 processes.
-- OpenProject Docs — *Installation with Docker Compose* (branch `stable/17`), *Configuration via environment variables*, *Backup/Upgrade*.
-- OpenProject release notes 17.1 (project initiation request, EE) dan 17.7 (phases & gates widget, organizational management, resource management EE).
+- LPMS Docs — *Installation with Docker Compose* (branch `stable/17`), *Configuration via environment variables*, *Backup/Upgrade*.
+- LPMS release notes 17.1 (project initiation request, EE) dan 17.7 (phases & gates widget, organizational management, resource management EE).
 - GitHub: `https://github.com/opf/openproject-docker-compose`, `https://github.com/opf/openproject`.
 
 ---

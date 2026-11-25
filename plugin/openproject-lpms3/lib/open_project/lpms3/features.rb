@@ -14,7 +14,7 @@
 # See COPYRIGHT and LICENSE files for more details.
 #++
 
-# LPMS3 MOD-02: katalog fitur BUATAN SENDIRI (in-house). Ini BUKAN gerbang lisensi OpenProject:
+# LPMS3 MOD-02: katalog fitur BUATAN SENDIRI (in-house). Ini BUKAN gerbang lisensi LPMS:
 # tidak menyentuh EnterpriseToken, tidak mengubah `allows_to?`, tidak mengaktifkan kode Enterprise.
 # Saklar hanya mengatur fitur LPMS3 yang benar-benar sudah kita implementasikan (status :implemented).
 module OpenProject::Lpms3

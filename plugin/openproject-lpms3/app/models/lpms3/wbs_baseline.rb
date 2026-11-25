@@ -388,7 +388,7 @@ module Lpms3
       root && WbsNode.where(parent_id: root.id).exists? ? (root.pct_progress.to_f * 100).round(2) : nil
     end
 
-    # Aktual % pada tanggal lampau dari riwayat done_ratio WP aktivitas (jurnal OpenProject).
+    # Aktual % pada tanggal lampau dari riwayat done_ratio WP aktivitas (jurnal LPMS).
     def actual_pct_at(project, date)
       rows = Wbs.rows(project).select { |r| r[:leaf] && !r[:node].root? && r[:node].work_package_id }
       return nil if rows.empty?

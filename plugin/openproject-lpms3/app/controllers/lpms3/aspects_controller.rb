@@ -2,7 +2,7 @@
 
 module Lpms3
   # Penetapan 9 Aspek PMP (BOP-001 §5.1): isi, lampiran, dan langkah reviu/persetujuan langsung di tabel.
-  # Perubahan lewat service WorkPackages (izin dan workflow OpenProject tetap berlaku).
+  # Perubahan lewat service WorkPackages (izin dan workflow LPMS tetap berlaku).
   class AspectsController < ::ApplicationController
     AP = ::OpenProject::Lpms3::Aspects
 

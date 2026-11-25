@@ -88,7 +88,7 @@ module Lpms3Data
     "Lesson Learned" => FUNGSI_KONTRIBUTOR,
   }.freeze
 
-  # Tipe dengan status keputusan: workflow form OpenProject TIDAK boleh mencapai status keputusan secara langsung
+  # Tipe dengan status keputusan: workflow form LPMS TIDAK boleh mencapai status keputusan secara langsung
   # (temuan audit P0 #2, ditutup 20-23 Nov 2026). Daftar ini = satu-satunya transisi form yang diizinkan; seed
   # 50_workflows menghapus transisi lain untuk tipe ini. Peran => [[dari, ke], ...]
   DECISION_FLOWS = {

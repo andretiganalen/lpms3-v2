@@ -70,7 +70,7 @@
   <% end %>
 <% end %>
 <%= javascript_tag(nonce: true) do %>
-  // Menu fase BOP-001: panah membuka/menutup anak fase di tempat (submenu inline seperti Explore di :8585), tanpa drilldown OpenProject.
+  // Menu fase BOP-001: panah membuka/menutup anak fase di tempat (submenu inline seperti Explore di :8585), tanpa drilldown LPMS.
   (function () {
     if (window.__lpms3PhaseToggle) { return; }
     window.__lpms3PhaseToggle = true;
@@ -424,7 +424,7 @@
       if (!root || root.dataset.lpms3Acc) { return; }
       root.dataset.lpms3Acc = '1';
       flatten(root);
-      // OpenProject menandai anak submenu "terpilih" walau halamannya lain (mis. Wiki di My Page): rapikan.
+      // LPMS menandai anak submenu "terpilih" walau halamannya lain (mis. Wiki di My Page): rapikan.
       root.querySelectorAll('ul.main-menu--children a.selected').forEach(function (a) {
         var here = location.pathname, p = a.pathname;
         if (p && p !== here && here.indexOf(p + '/') !== 0) { a.classList.remove('selected'); }

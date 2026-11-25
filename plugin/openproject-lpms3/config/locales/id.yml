@@ -140,7 +140,7 @@ id:
     branding:
       menu: "Tampilan"
       title: "Tampilan (logo, ikon, warna)"
-      description: "Ubah logo aplikasi, ikon peramban (favicon/thumbnail), dan warna utama. Pengaturan milik LPMS3; tidak memakai halaman Design OpenProject."
+      description: "Ubah logo aplikasi, ikon peramban (favicon/thumbnail), dan warna utama. Pengaturan milik LPMS3; tidak memakai halaman Design LPMS."
       images: "Gambar"
       logo: "Logo"
       favicon: "Ikon / thumbnail (favicon)"

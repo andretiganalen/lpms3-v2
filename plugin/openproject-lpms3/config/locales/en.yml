@@ -140,7 +140,7 @@ en:
     branding:
       menu: "Appearance"
       title: "Appearance (logo, icon, colors)"
-      description: "Change the application logo, browser icon (favicon/thumbnail), and main colors. LPMS3's own setting; does not use the OpenProject Design page."
+      description: "Change the application logo, browser icon (favicon/thumbnail), and main colors. LPMS3's own setting; does not use the LPMS Design page."
       images: "Images"
       logo: "Logo"
       favicon: "Icon / thumbnail (favicon)"

@@ -17,7 +17,7 @@
 module Lpms3
   module Admin
     # Administration > Modul Fitur Internal: saklar On/Off fitur in-house LPMS3.
-    # Saklar hanya berlaku untuk fitur berstatus IMPLEMENTED; tidak berkaitan dengan lisensi OpenProject.
+    # Saklar hanya berlaku untuk fitur berstatus IMPLEMENTED; tidak berkaitan dengan lisensi LPMS.
     class InternalFeaturesSettingsController < ::ApplicationController
       layout "admin"
 

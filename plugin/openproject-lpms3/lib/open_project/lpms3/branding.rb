@@ -14,7 +14,7 @@
 # See COPYRIGHT and LICENSE files for more details.
 #++
 
-# LPMS3: pengaturan tampilan in-house (logo, favicon/thumbnail, warna). Pengganti halaman Design OpenProject
+# LPMS3: pengaturan tampilan in-house (logo, favicon/thumbnail, warna). Pengganti halaman Design LPMS
 # yang dikunci fitur Enterprise; TIDAK memakai CustomStyle/EnterpriseToken. Nilai disimpan di tabel `settings`
 # (logo/favicon sebagai data URI base64, ikut backup database).
 module OpenProject::Lpms3

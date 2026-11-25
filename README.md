@@ -1,6 +1,6 @@
 # LPMS3 v2 — Len Project Management System 3
 
-Aplikasi manajemen proyek PT Len Industri yang menjalankan **BOP-001 Manajemen Proyek** dari Inisiasi sampai Closing, berbasis OpenProject + plugin LPMS3, dengan **StarRocks `default_catalog.lpms3`** sebagai database utama.
+Aplikasi manajemen proyek PT Len Industri yang menjalankan **BOP-001 Manajemen Proyek** dari Inisiasi sampai Closing, berbasis LPMS + plugin LPMS3, dengan **StarRocks `default_catalog.lpms3`** sebagai database utama.
 
 | Mulai dari | Isi |
 |---|---|

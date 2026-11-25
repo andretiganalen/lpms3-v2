@@ -1,4 +1,4 @@
-# Catatan Hukum Internal — LPMS3 (berbasis OpenProject 17.9.7)
+# Catatan Hukum Internal — LPMS3 (berbasis LPMS 17.9.7)
 
 1. **Lisensi.** Sistem ini adalah OpenProject Community (GNU GPLv3) yang dimodifikasi untuk penggunaan internal (plugin LPMS3, IdsLogin, tema UIx, konfigurasi). Salinan `LICENSE`, `COPYRIGHT`, dan `COPYRIGHT_short` dari image resmi (`/app/`) disimpan di root repo ini dan **tidak boleh diubah atau dihapus**. Header `#-- copyright` pada file sumber wajib dipertahankan (GPLv3 Pasal 4–5).
 2. **Hak cipta komponen asal.** OpenProject GmbH; ChiliProject Team (2010–2013); Jean-Philippe Lang (2006–2013); serta komponen berlisensi MIT sebagaimana tercantum di `COPYRIGHT`.

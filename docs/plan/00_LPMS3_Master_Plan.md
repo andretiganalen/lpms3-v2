@@ -37,10 +37,10 @@ Karena itu setiap fitur di plan ini harus menjawab salah satu dari tujuh janji b
 
 | # | Keputusan | Isi |
 |---|---|---|
-| K1 | Platform aplikasi | OpenProject Community (branch `stable/17`, image dipin) + plugin **`openproject-lpms3`** (sidebar, halaman fase, formulir, WBS, Kurva-S, approval) + layanan **`lpms3-data`** (Python: ETL LKP, sinkron StarRocks, render PDF) |
+| K1 | Platform aplikasi | LPMS Community (branch `stable/17`, image dipin) + plugin **`openproject-lpms3`** (sidebar, halaman fase, formulir, WBS, Kurva-S, approval) + layanan **`lpms3-data`** (Python: ETL LKP, sinkron StarRocks, render PDF) |
 | K2 | URL | `http://192.168.125.14:5100` (TLS internal menyusul) |
 | K3 | **Database utama** | **StarRocks `default_catalog.lpms3`** di `192.168.125.29:9030` (JDBC `jdbc:mysql://192.168.125.29:9030/lpms3`; driver StarRocks/MySQL) — seluruh data domain LPMS3 (formulir, WBS, Kurva-S, LKP, mart, BI) |
-| K4 | Database runtime OpenProject | **PostgreSQL** (wajib; OpenProject tidak dapat berjalan di StarRocks). PG menjadi *system of entry* transaksional; setiap perubahan **disinkron ke StarRocks ≤ 1 menit** lewat outbox |
+| K4 | Database runtime LPMS | **PostgreSQL** (wajib; LPMS tidak dapat berjalan di StarRocks). PG menjadi *system of entry* transaksional; setiap perubahan **disinkron ke StarRocks ≤ 1 menit** lewat outbox |
 | K5 | Kredensial StarRocks | `root` hanya untuk inisialisasi oleh admin saat deployment; aplikasi memakai `lpms3_app`, ETL `lpms3_etl`, BI `lpms3_bi`. Password **hanya di `.env` VM / vault**, tidak pernah di Git |
 | K6 | WBS | **WBS Template LPMS** wajib: Level 0–7 (+ Activity), Weigh Factor relatif terhadap induk, Weight berantai, % Complete diskrit 0/25/50/75/100, Evidence Files per node → folder bukti |
 | K7 | Formulir | Dibangun dari **kamus data** (`spec_forms.py`) → DDL PG + DDL StarRocks + layar + PDF; formulir yang templatenya belum ada di folder ditangani sebagai dokumen terstruktur generik (§6.4) |
@@ -58,11 +58,11 @@ Karena itu setiap fitur di plan ini harus menjawab salah satu dari tujuh janji b
  Pengguna (browser, LAN Len) ──http://192.168.125.14:5100──┐
                                                              ▼
 ┌──────────────────────── VM Ubuntu 24.04 · 192.168.125.14 (Docker Compose "lpms3") ────────────────────────┐
-│ proxy(Caddy:80→5100) → web (OpenProject 17 + plugin openproject-lpms3) ── worker ── cron ── hocuspocus     │
+│ proxy(Caddy:80→5100) → web (LPMS 17 + plugin openproject-lpms3) ── worker ── cron ── hocuspocus     │
 │                              │ ActiveRecord                      │                                         │
 │                              ▼                                   ▼                                         │
 │                   PostgreSQL 17 (db, internal)          lpms3-data (Python, internal, tanpa port publik)   │
-│                   ├─ public.*  (OpenProject)            ├─ /extract  ETL LKP multi-format (§8)             │
+│                   ├─ public.*  (LPMS)            ├─ /extract  ETL LKP multi-format (§8)             │
 │                   ├─ lpms3.*   (org, WBS, baseline,      ├─ /render   PDF format resmi formulir           │
 │                   │            kapabilitas, outbox)      ├─ sync worker: outbox → StarRocks (≤ 1 menit)    │
 │                   └─ lpms3_form.* (18 formulir)          └─ rekonsiliasi harian jumlah baris PG vs SR      │
@@ -81,7 +81,7 @@ Karena itu setiap fitur di plan ini harus menjawab salah satu dari tujuh janji b
 
 | Data | Ditulis di | Dibaca dari | Alasan |
 |---|---|---|---|
-| User, proyek, work package, Gantt, lampiran | PG (OpenProject) | Aplikasi; mirror ringkas ke SR | Kebutuhan runtime OpenProject |
+| User, proyek, work package, Gantt, lampiran | PG (LPMS) | Aplikasi; mirror ringkas ke SR | Kebutuhan runtime LPMS |
 | Formulir BOP-001 (`lpms3_form.*`), WBS, baseline, organisasi | PG (transaksi, FK, CHECK) | Layar: PG · Laporan/BI: SR | Integritas saat input & approval |
 | LKP raw/stg/core, koreksi, approval LKP | **SR langsung** | SR | Volume & analitik; log approval append-only |
 | Mart (Dashboard, Project Health, Kurva-S, portofolio) | SR (view) | Aplikasi & BI | Agregasi cepat lintas proyek |
@@ -127,7 +127,7 @@ Sinkronisasi: trigger/hook plugin menulis `lpms3.sync_outbox` dalam transaksi ya
 - **Unduh template** dari layar WBS Generation (berkas resmi `WBS_Template_LPMS.xlsx` dengan dropdown `Settings`), isi di Excel, **unggah** → pratinjau & validasi baris per baris → simpan.
 - **Isi langsung** di grid ala Excel (tempel dari Excel, tab/enter, tarik untuk indent/outdent yang otomatis mengubah Level & kode).
 - **Salin** dari proyek sejenis atau dari LPMS 2 (Add New).
-- Setiap node otomatis menjadi **work package** OpenProject (Gantt, notifikasi, relasi), dan **folder bukti** dibuat.
+- Setiap node otomatis menjadi **work package** LPMS (Gantt, notifikasi, relasi), dan **folder bukti** dibuat.
 
 ### 3.4 Folder bukti = struktur WBS
 
@@ -171,7 +171,7 @@ Sinkronisasi: trigger/hook plugin menulis `lpms3.sync_outbox` dalam transaksi ya
 
 ### 4.2 Sistem desain
 
-- Komponen **Primer (OpenProject)** + token tema LPMS3 (warna korporat Len, font, logo dari Settings — §12 Buku Teknis); mode terang/gelap; ukuran sentuh ≥ 40 px; kontras WCAG AA.
+- Komponen **Primer (LPMS)** + token tema LPMS3 (warna korporat Len, font, logo dari Settings — §12 Buku Teknis); mode terang/gelap; ukuran sentuh ≥ 40 px; kontras WCAG AA.
 - Pola baku: *Page header* (judul, kode proyek, fase, status), *Stepper* fase, *Card* ringkasan, *Data grid*, *Side panel* detail (tanpa pindah halaman), *Wizard* untuk proses berlangkah (Add New, Kode Proyek, Closing), *Inbox approval*.
 - Status warna konsisten: abu (draf), biru (diajukan), kuning (perlu tindakan/peringatan), hijau (disetujui/on track), merah (ditolak/terlambat/risiko tinggi).
 - Microcopy Bahasa Indonesia baku, istilah BOP-001; tooltip definisi BOP-001 §3.0 pada istilah (Baseline, CCM, Scope Creep, dll.).
@@ -396,7 +396,7 @@ Prinsip: tabel **Primary Key** untuk data yang di-*upsert*, **Duplicate Key** un
 | D2 | `cp deploy/.env.example deploy/.env` → isi secret (SECRET_KEY_BASE, PG, **STARROCKS_ROOT_PASSWORD** hanya untuk langkah D4, password user `lpms3_app/etl/bi`) → `chmod 600` | `.env` tidak ter-track git |
 | D3 | `bash ops/compose_up.sh` (clone upstream `stable/17`, build image `lpms3/openproject` + `lpms3/data`, `docker compose up -d`) | `curl http://192.168.125.14:5100/health_checks/full` = PASSED |
 | D4 | `bash ops/starrocks_apply.sh` — menjalankan `db/starrocks/000→990` memakai root **sekali**, membuat `default_catalog.lpms3` & user aplikasi | `SHOW DATABASES` berisi `lpms3`; `SHOW TABLES` ≈ 80 objek; login `lpms3_app` berhasil |
-| D5 | `bash ops/pg_apply.sh` — menjalankan `db/010_lpms3_forms.sql`, `020_lpms3_core.sql`, `030_lpms3_seed_ref.sql` ke database OpenProject | jalankan 2× tanpa error; `select count(*) from lpms3_form.form_definition` = 18 |
+| D5 | `bash ops/pg_apply.sh` — menjalankan `db/010_lpms3_forms.sql`, `020_lpms3_core.sql`, `030_lpms3_seed_ref.sql` ke database LPMS | jalankan 2× tanpa error; `select count(*) from lpms3_form.form_definition` = 18 |
 | D6 | Hapus `STARROCKS_ROOT_PASSWORD` dari `.env` setelah D4 (root tidak dipakai aplikasi) | grep kosong |
 | D7 | Seed LPMS3 (tipe, status, workflow, template proyek) — Buku Teknis §5.10 | idempoten |
 | D8 | Muat struktur organisasi (SKEP, Nota 021, posisi, user) via Settings › User & Access atau impor HC | F01–F05 |

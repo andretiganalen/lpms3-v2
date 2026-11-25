@@ -1,6 +1,6 @@
 require_relative "00_data"
 # Pemicu LenO (1.37): peran global registrasi dan persetujuan proyek baru, serta atribut proyek "LPMS-2 Proyek ID". Idempoten.
-# Pemegang peran ditetapkan di Administrasi -> Pengguna -> Peran global. Admin OpenProject TIDAK otomatis berwenang.
+# Pemegang peran ditetapkan di Administrasi -> Pengguna -> Peran global. Admin LPMS TIDAK otomatis berwenang.
 { "Admin Fungsi Pelaksanaan Proyek" => :lpms3_register_project_trigger,
   "Pejabat Eselon 1 Fungsi Pelaksanaan Proyek" => :lpms3_approve_project_trigger }.each do |name, perm|
   unless OpenProject::AccessControl.permissions.map(&:name).include?(perm)

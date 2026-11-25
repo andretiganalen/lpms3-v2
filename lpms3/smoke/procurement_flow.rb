@@ -41,7 +41,7 @@ begin
     [ok, wp.errors.full_messages.join("; ")]
   end
 
-  # Unggah dokumen pendukung ke Work Package (lampiran standar OpenProject). Mengembalikan nama berkas tersimpan.
+  # Unggah dokumen pendukung ke Work Package (lampiran standar LPMS). Mengembalikan nama berkas tersimpan.
   docs = []
   upload = lambda do |wp, filename, body|
     path = File.join(Dir.tmpdir, "#{TAG}-#{SecureRandom.hex(4)}-#{filename}")

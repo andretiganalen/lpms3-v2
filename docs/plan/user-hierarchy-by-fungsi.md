@@ -114,7 +114,7 @@ Tahap selalu terlihat. Isi tidak naik ke atas sebelum disubmit, sehingga pejabat
 
 - **Status:** Draft, Reviu, Revisi, Disahkan, dari Dokumen Rencana yang sudah ada. Tidak ada status baru.
 - **Fungsi:** dipetakan ke `lpms3.fungsi_generik`. Induk fungsi dipakai untuk menentukan tingkat. Fungsi Direksi Operasi tidak punya induk.
-- **Peran akses di OpenProject:**
+- **Peran akses di LPMS:**
   - P1P, P2P, P3P, dan asisten P…A: peran global dengan lingkup project yang ditugaskan kepada Fungsinya.
   - P2S dan P2F: peran global lintas project dalam Fungsi Eselon 1.
   - P3S dan P3F: peran per project, dibatasi pada WP yang diberikan.

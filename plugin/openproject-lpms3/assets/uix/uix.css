@@ -72,7 +72,7 @@
   --uix-shadow-md: 0 0 0 1px rgba(16, 24, 40, .05), 0 4px 8px -2px rgba(16, 24, 40, .10), 0 12px 24px -4px rgba(16, 24, 40, .08);
 }
 
-/* Menyelaraskan variabel desain OpenProject dengan token UIx (menu Design OpenProject tidak dipakai). */
+/* Menyelaraskan variabel desain LPMS dengan token UIx (menu Design LPMS tidak dipakai). */
 :root:root {
   --primary-button-color: var(--uix-primary);
   --accent-color: var(--uix-primary);
@@ -82,7 +82,7 @@
   --header-border-bottom-color: var(--uix-border);
   --main-menu-bg-color: var(--uix-surface);
   --main-menu-bg-selected-background: var(--uix-surface-muted);
-  /* Font: OpenProject/Primer memasang font body lewat variabel ini, jadi aturan html/body di bawah saja tidak cukup. */
+  /* Font: LPMS/Primer memasang font body lewat variabel ini, jadi aturan html/body di bawah saja tidak cukup. */
   --body-font-family: var(--uix-font);
   --fontStack-sansSerif: var(--uix-font);
   /* Ukuran isi 13px (menu, tabel, input) */
@@ -296,7 +296,7 @@ html:root:root:root {
   --control-borderColor-warning: var(--uix-warning-text);
   --focus-outlineColor: var(--uix-focus-ring);
   --focus-outline: 3px solid var(--uix-focus-ring);
-  /* Tombol (kelas .button OpenProject dan Primer) */
+  /* Tombol (kelas .button LPMS dan Primer) */
   --button--background-color: var(--uix-surface);
   --button--background-hover-color: var(--uix-surface-muted);
   --button--font-color: var(--uix-text-body);
@@ -388,7 +388,7 @@ input:disabled, select:disabled, textarea:disabled { opacity: .5; }
 .op-toast .op-toast--content progress[value]::-webkit-progress-value { background-color: var(--uix-primary); }
 .op-toast .op-toast--content progress[value]::-moz-progress-bar { background-color: var(--uix-primary); }
 
-/* Loader UIx menggantikan animasi bawaan OpenProject (dua kotak hijau berputar) dan loading.gif:
+/* Loader UIx menggantikan animasi bawaan LPMS (dua kotak hijau berputar) dan loading.gif:
    cincin 3px abu-abu dengan busur merah korporat, titik pusat berdenyut; diam bila pengguna meminta gerakan dikurangi. */
 @keyframes uix-spin { to { transform: rotate(360deg); } }
 @keyframes uix-pulse { 0%, 100% { transform: scale(.6); opacity: .5; } 50% { transform: scale(1); opacity: 1; } }
@@ -428,7 +428,7 @@ input:disabled, select:disabled, textarea:disabled { opacity: .5; }
 #main-menu .main-menu--children > li > a.op-menu--item-action.selected { background: var(--uix-surface-muted); color: var(--uix-text-head); font-weight: 500; }
 #main-menu .main-menu--children > li > a.op-menu--item-action.selected svg { color: var(--uix-primary); }
 
-/* Status project (daftar project, Ikhtisar): warna dari token UIx saja, hanya menandai status; nama status tetap teks dari OpenProject. */
+/* Status project (daftar project, Ikhtisar): warna dari token UIx saja, hanya menandai status; nama status tetap teks dari LPMS. */
 .project-status--bulb.-on-track { border-color: var(--uix-success); }
 .project-status--bulb.-at-risk { border-color: var(--uix-warning-text); }
 .project-status--bulb.-off-track { border-color: var(--uix-danger); }
@@ -524,7 +524,7 @@ html:root:root:root {
 #lpms3-lang .lpms3-lang__btn.is-active { background: var(--uix-surface); color: var(--uix-primary); }
 .op-app-header .op-app-search input, .op-app-header .op-app-search .ng-select-container { background: rgba(255, 255, 255, .14); border-color: transparent; color: var(--leno-on-header); }
 .op-app-header .op-app-search input::placeholder { color: rgba(255, 255, 255, .75); }
-/* Lonceng bawaan OpenProject digantikan panel Notifikasi LPMS3 (data sama: notifikasi in-app yang belum dibaca). */
+/* Lonceng bawaan LPMS digantikan panel Notifikasi LPMS3 (data sama: notifikasi in-app yang belum dibaca). */
 .op-app-header--end .op-app-menu--item:has(> .op-ian-bell) { display: none; }
 
 /* Panel header: Reminder, Tasklist, Notifikasi */
@@ -616,7 +616,7 @@ body, #content-wrapper, #main, .content-overlay ~ #content-wrapper { background:
 .lpms3-seg a, .lpms3-seg button { padding: 6px 14px; border: 0; border-radius: var(--uix-radius-control); background: transparent; color: var(--uix-primary); font-size: 13px; text-decoration: none; cursor: pointer; }
 .lpms3-seg .is-active { background: var(--uix-primary-strong); color: var(--uix-on-primary); }
 .lpms3-tag { display: inline-flex; align-items: center; height: 18px; padding: 0 7px; border: 1px solid var(--uix-primary); border-radius: 999px; color: var(--uix-primary); font-size: 10px; background: var(--uix-surface); }
-/* Halaman LPMS3: isi di atas latar abu dengan kartu putih (LenO). Halaman bawaan OpenProject tetap di panel putih. */
+/* Halaman LPMS3: isi di atas latar abu dengan kartu putih (LenO). Halaman bawaan LPMS tetap di panel putih. */
 body[class*="controller-lpms3/"] #content { background: transparent; }
 /* Sidebar selebar penuh: item menu tanpa sisipan kiri/kanan; pemilih project tetap bersisip. */
 #main-menu #menu-sidebar { padding: 0 0 12px; }
@@ -900,7 +900,7 @@ html #main-menu ul.menu_root > li.open > .main-item-wrapper > .main-menu-toggler
 html #main-menu ul.menu_root > li.lpms3-acc > .main-item-wrapper > .main-menu-toggler::before,
 html #main-menu li.lpms3-grp.is-grp-open > .lpms3-grp-toggle::before { transform: rotate(180deg); }
 
-/* Panel anak: latar #fafafa, tinggi mengikuti isi, tanpa header "kembali" bawaan OpenProject */
+/* Panel anak: latar #fafafa, tinggi mengikuti isi, tanpa header "kembali" bawaan LPMS */
 html #main-menu ul.menu_root > li > .main-menu--children-menu-header { display: none !important; }
 html #main-menu ul.menu_root > li > ul.main-menu--children { display: none; height: auto !important; margin: 0; padding: 0 !important; overflow: visible;
   background: var(--leno-menu-sub-bg); border-top: 0; }
@@ -930,9 +930,9 @@ html #main-menu .lpms3-steps__item:not(:last-child)::after { content: none; }
 html #main-menu .lpms3-steps__item.is-next > a { font-weight: 400; }
 html #main-menu .lpms3-steps__item.is-done > a { opacity: 1; }
 html #main-menu .lpms3-steps__all > a { font-style: normal; opacity: 1; }
-/* Daftar query di submenu OpenProject (Paket-Penugasan, dll.) mengikuti tingkat 3 */
+/* Daftar query di submenu LPMS (Paket-Penugasan, dll.) mengikuti tingkat 3 */
 html #main-menu .main-menu--children .op-sidemenu--item-action { min-height: 40px; padding-left: var(--leno-menu-pad-l2); font-size: 12px; }
-/* v3: kelompok submenu fase = blok biasa (bawaan OpenProject memakai flex baris), anchor tanpa margin bawaan */
+/* v3: kelompok submenu fase = blok biasa (bawaan LPMS memakai flex baris), anchor tanpa margin bawaan */
 html #main-menu li.lpms3-grp, html #main-menu ul.main-menu--children > li { display: block; min-height: 0; }
 html #main-menu a.op-menu--item-action { margin: 0; flex: none; }
 html #main-menu li.lpms3-grp > a.op-menu--item-action { width: 100%; }
@@ -950,7 +950,7 @@ html #main-menu .main-item-wrapper, html #main-menu .main-item-wrapper:has(> a.o
 html #main-menu a.op-menu--item-action .op-menu--item-title { flex: 1 1 auto; }
 html #main-menu .lpms3-sub > li { display: block; width: 100%; }
 html #main-menu .lpms3-sub a { width: 100%; box-sizing: border-box; }
-/* v3: OpenProject memberi border kiri 5 px pada item terpilih (menggeser label); LenO tidak */
+/* v3: LPMS memberi border kiri 5 px pada item terpilih (menggeser label); LenO tidak */
 html #main-menu a.op-menu--item-action.selected, html #main-menu ul.main-menu--children li > a.selected { border: 0 !important; }
 /* v3: fase yang hanya dibuka (tanpa anak terpilih) tetap bertinta netral, seperti submenu terbuka LenO */
 html #main-menu ul.menu_root > li.open:not(:has(a.selected)) > .main-item-wrapper > a.op-menu--item-action,
@@ -1029,7 +1029,7 @@ table.generic-table td a:not(.button):not(.Button) { color: var(--uix-primary); 
 .op-uc-container table, .op-uc-container .op-uc-table, .work-package--description table { width: 100%; table-layout: fixed; border-collapse: collapse; border: 1px solid var(--leno-panel-border); border-radius: var(--uix-radius-control); font-size: 12px; margin: 8px 0; }
 .op-uc-container table th, .work-package--description table th { background: var(--leno-table-head); color: var(--leno-text); font-weight: 600; text-align: left; padding: 8px 10px; border: 1px solid var(--leno-table-line); }
 .op-uc-container table td, .work-package--description table td { padding: 8px 10px; vertical-align: top; border: 1px solid var(--leno-table-line); color: var(--leno-text); overflow-wrap: anywhere; }
-/* Tabel markdown OpenProject (op-uc-table): muat selebar kolom, tanpa gulir mendatar; teks panjang turun baris */
+/* Tabel markdown LPMS (op-uc-table): muat selebar kolom, tanpa gulir mendatar; teks panjang turun baris */
 .op-uc-figure--content { display: block; overflow: visible; }
 .op-uc-table { width: 100%; max-width: 100%; table-layout: fixed; }
 .op-uc-table--cell { min-width: 0; padding: 8px 10px; overflow-wrap: anywhere; word-break: normal; font-size: 12px; vertical-align: top; }

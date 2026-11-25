@@ -33,7 +33,7 @@ Tahap ketiga `docs/plan/RANCANGAN-WBS-BOBOT-MEMBER.md` §6.
 - **Kurva-S**: aktivasi baseline mengisi `lpms3.scurve_plan` (bulanan, linear).
 - **Ringkasan ikut berubah**: Portfolio (Rencana % dari baseline aktif, Aktual % = % Progress Level 0, Kenaikan dari riwayat WP × weight, chip baseline/draft), kartu "WBS & Baseline" di Ikhtisar fase Perencanaan/Eksekusi/Pengawasan, Tugas & Notifikasi + Tasklist header ("Draft Baseline WBS — ajukan CR" untuk Pimpro). Gantt/Kalender tetap mengikuti WP aktivitas.
 - **Sidebar fase**: dua submenu dropdown — **Ringkasan Fase** (Ringkasan, Gerbang, Aspek, Register, WBS & Bobot, Pengadaan) dan **Langkah BOP-001** (klik membuka daftar langkah project berurutan predecessor → successor, ✓ selesai / ● berikutnya / ○ belum; tanpa relasi agar jadwal tidak digeser).
-- **Perbaikan**: WP aktivitas WBS kini `ignore_non_working_days` — sebelumnya tanggal akhir pekan digeser OpenProject sehingga setiap edit WBS menulis ulang WP dan mengirim notifikasi berulang ke PIC (hingga ~100 per aktivitas).
+- **Perbaikan**: WP aktivitas WBS kini `ignore_non_working_days` — sebelumnya tanggal akhir pekan digeser LPMS sehingga setiap edit WBS menulis ulang WP dan mengirim notifikasi berulang ke PIC (hingga ~100 per aktivitas).
 - **Workflow register** (seed `00_data`/`50_workflows`): fungsi pemilik register mendapat transisi penuh — Risiko/Isu (Fungsi Manajemen Risiko), Bahaya K3L (Fungsi K3 & LH), Inspeksi Mutu/NCR (Fungsi Penjaminan Mutu), Item Pengadaan, Stakeholder, Action Item/Lesson Learned (fungsi kontributor).
 - Migrasi `20261125000001`/`…02`: status baseline + indeks unik draft/aktif per proyek, struktur `baseline_item`, `wbs_done_snapshot`.
 - Smoke `lpms3/smoke/wbs_baseline.rb` 33/33; regresi wbs_editor 34/34, tim proyek 22/22, registrasi pemicu 33/33, bahasa & menu 27/27.
@@ -59,15 +59,15 @@ Tahap pertama `docs/plan/RANCANGAN-WBS-BOBOT-MEMBER.md` (editor WBS bobot cascad
 
 ## 17.9.7-lpms3.1.38 — tampilan LenO: header Reminder/Tasklist/Notifikasi, profil, sidebar (23 Nov 2026)
 Mengikuti template `docs/image/template-uix-leno/` (10 tangkapan layar LenO).
-- **Header**: bilah merah bergradasi, blok logo putih selebar sidebar, ikon putih. Tiga panel tarik-turun dengan badge jumlah: **Reminder** (pengingat work package buatan pengguna + WP miliknya jatuh tempo ≤3 hari/terlambat), **Tasklist** (Tugas & Notifikasi LPMS3: persetujuan, Kick-Off, masukan, tembusan, pemicu LenO; "Lihat dalam grid"), **Notifikasi** (notifikasi in-app OpenProject belum dibaca; "Tandai sudah dibaca", "Lihat semua"; lonceng bawaan disembunyikan). Data dirender saat halaman dimuat dan disegarkan tiap 60 dtk / saat panel dibuka (`GET /lpms3/header/ringkasan`, `POST /lpms3/header/notifikasi/baca`; login wajib; hanya data milik pengguna). Esc menutup panel.
+- **Header**: bilah merah bergradasi, blok logo putih selebar sidebar, ikon putih. Tiga panel tarik-turun dengan badge jumlah: **Reminder** (pengingat work package buatan pengguna + WP miliknya jatuh tempo ≤3 hari/terlambat), **Tasklist** (Tugas & Notifikasi LPMS3: persetujuan, Kick-Off, masukan, tembusan, pemicu LenO; "Lihat dalam grid"), **Notifikasi** (notifikasi in-app LPMS belum dibaca; "Tandai sudah dibaca", "Lihat semua"; lonceng bawaan disembunyikan). Data dirender saat halaman dimuat dan disegarkan tiap 60 dtk / saat panel dibuka (`GET /lpms3/header/ringkasan`, `POST /lpms3/header/notifikasi/baca`; login wajib; hanya data milik pengguna). Esc menutup panel.
 - **Profil**: nama tebal + jabatan kecil (grup Fungsi pengguna, lalu peran global) di kiri avatar.
 - **Sidebar** putih selebar penuh, teks 12px, item aktif merah muda + teks merah + penanda kanan merah, submenu berbulatan. Halaman global LPMS3 (Tugas, Pemicu, Mata uang, Portofolio, Panduan, Pengadaan lintas project) memakai layout `global` sehingga sidebar selalu tampil.
 - **Halaman**: latar abu muda, kartu putih bersudut 4px, judul halaman 22px tipis, tombol aksi merah. Komponen untuk halaman berikutnya: `.lpms3-searchbar`, `.lpms3-fchips`/`.lpms3-fchip`, `.lpms3-seg`, `.lpms3-panel` (header merah), `.lpms3-tag`.
-- Modul `OpenProject::Lpms3::HeaderSummary`, `Lpms3::HeaderController`; token warna `--leno-*` di `uix.css`. Regresi: smoke pemicu 22/22, registrasi 33/33.
+- Modul `LPMS::Lpms3::HeaderSummary`, `Lpms3::HeaderController`; token warna `--leno-*` di `uix.css`. Regresi: smoke pemicu 22/22, registrasi 33/33.
 
 ## 17.9.7-lpms3.1.37 — registrasi dan persetujuan proyek dari pemicu LenO (23 Nov 2026)
 Tahap ketiga `docs/plan/RANCANGAN-PEMICU-LENO.md` (1.36, pembaca LPMS-2, menunggu akses DB). Keputusan: template dipilih Admin.
-- **Peran global baru** (seed `80_pemicu_roles.rb`): "Admin Fungsi Pelaksanaan Proyek" (`lpms3_register_project_trigger`) dan "Pejabat Eselon 1 Fungsi Pelaksanaan Proyek" (`lpms3_approve_project_trigger`). Wewenang dibaca dari keanggotaan peran global (langsung atau lewat grup); **admin OpenProject tidak otomatis berwenang**.
+- **Peran global baru** (seed `80_pemicu_roles.rb`): "Admin Fungsi Pelaksanaan Proyek" (`lpms3_register_project_trigger`) dan "Pejabat Eselon 1 Fungsi Pelaksanaan Proyek" (`lpms3_approve_project_trigger`). Wewenang dibaca dari keanggotaan peran global (langsung atau lewat grup); **admin LPMS tidak otomatis berwenang**.
 - **Halaman pemicu** `/lpms3/pemicu/:id`: Admin memilih template (Prediktif/Hibrid/Purnajual), nama proyek, Kode Proyek LPMS3 (format atribut Kode Proyek, unik terhadap proyek dan pemicu lain), Pimpro, VP Fungsi Pelaksanaan Proyek. Pejabat Eselon 1 menyetujui atau mengembalikan (catatan wajib); **pengusul tidak dapat memutus usulannya sendiri** walau memegang dua peran. Admin dapat membatalkan pemicu (alasan wajib). Semua langkah masuk riwayat append-only.
 - **Proyek dibuat di job** `Lpms3::BuatProyekDariPemicuJob` (±7 dtk): salin template (anggota, WP, wiki), Pimpro dan VP menjadi anggota (peran Pimpro / Fungsi Pelaksanaan Proyek (Struktural)), semua atribut proyek diaktifkan, diisi Kode Proyek, LPMS-2 Proyek ID (atribut baru), Pimpro, Fungsi Pelaksanaan Proyek, Pendekatan Delivery. Idempoten (tidak pernah ganda); gagal = dibatalkan seluruhnya, galat tercatat, Admin dapat "Coba buat proyek lagi". Kick-Off **tidak** dibuat di sini (tetap setelah Dokumen Inisiasi disetujui Final).
 - **Tugas & Notifikasi**: bagian "Proyek baru dari LenO" (dari, kapan, harus apa) dan jumlahnya ikut di badge. Administrasi → Pemicu LenO menautkan ke halaman pemicu.
@@ -83,13 +83,13 @@ Tahap pertama `docs/plan/RANCANGAN-PEMICU-LENO.md`: menerima dan mencatat; pemba
 - Keputusan 23 Nov 2026: Kick-Off tetap dibuat setelah Dokumen Inisiasi disetujui Final; pemicu LenO tidak membuat Kick-Off.
 
 ## 17.9.7-lpms3.1.34 — status keputusan hanya lewat rantai persetujuan (23 Nov 2026)
-Menutup temuan audit P0 #2 (status keputusan bisa dicapai langsung dari form OpenProject).
+Menutup temuan audit P0 #2 (status keputusan bisa dicapai langsung dari form LPMS).
 - **Workflow tipe keputusan disinkron penuh** (`DECISION_FLOWS` di `seed/00_data.rb`, dipakai `50_workflows.rb`): untuk Dokumen Rencana, Top Up Anggaran, dan Deliverable hanya transisi di daftar itu yang boleh ada; sisanya dihapus. Dokumen Rencana: form hanya New/Revisi → Draft, dan Pimpro dapat menandai Diganti; Reviu, Revisi, Disahkan hanya lewat `Lpms3::ApprovalTask` (42 transisi lama dihapus). Seed idempoten.
 - **Aspek PMP**: "Ajukan" membuat tugas di rantai persetujuan (`ApprovalTask.ajukan!`), bukan mengubah status langsung. "Minta revisi" hanya untuk yang berwenang memutus tugas yang sedang menunggu (`actions_for` → `revisi`), sehingga tugas tidak tertinggal "menunggu" setelah dokumen dikembalikan.
 
 ## 17.9.7-lpms3.1.33 — satu pintu login IDS, rilis 1.31–1.33 masuk git (dicatat 23 Nov 2026)
 Rilis 1.31–1.33 sudah terpasang di `:5100` sejak 16–17 Nov 2026 (image dibangun dari *working tree*). Entri ini mencatatnya ke git agar rilis yang berjalan bisa dibangun ulang (temuan audit P0 #3).
-- **Satu pintu login IDS (20 Nov 2026):** akun lokal tertanam dan `/ids/local` dihapus dari `Lpms3.IdsLogin`; proxy mengalihkan `/ids/local` ke `/ids/login`. Tidak ada pilihan Pengguna/Admin. Admin dan peran ditentukan di aplikasi, tidak dari klaim IDS (`AdminRoles`/`AdminEmails` dibuang). Akun yang dikunci di LPMS3 tetap ditolak. `back_url` OpenProject dibawa lewat login (hanya jalur lokal, cegah open redirect). Halaman galat UIx dengan "Coba lagi"/"Keluar".
+- **Satu pintu login IDS (20 Nov 2026):** akun lokal tertanam dan `/ids/local` dihapus dari `Lpms3.IdsLogin`; proxy mengalihkan `/ids/local` ke `/ids/login`. Tidak ada pilihan Pengguna/Admin. Admin dan peran ditentukan di aplikasi, tidak dari klaim IDS (`AdminRoles`/`AdminEmails` dibuang). Akun yang dikunci di LPMS3 tetap ditolak. `back_url` LPMS dibawa lewat login (hanya jalur lokal, cegah open redirect). Halaman galat UIx dengan "Coba lagi"/"Keluar".
 - **9 Aspek PMP** di halaman fase (`aspects.rb`, `Lpms3::AspectsController`): tabel isian, bilah "Ajukan Semua Aspek", masukan pembaca per baris, unduh PDF.
 - **Persetujuan berjenjang** (`Lpms3::ApprovalTask`, menu "Tugas & Notifikasi" `/lpms3/tugas`): Staff → Pimpro → Eselon 2 → Eselon 1, bypass Eselon 2, tembusan Direksi, masukan (`Lpms3::Feedback`) tercatat di aktivitas WP. Migrasi `20261117000001..03`.
 - **Kick-Off** (`Lpms3::Kickoff`, migrasi `20261117000004`).
@@ -105,7 +105,7 @@ Rilis 1.31–1.33 sudah terpasang di `:5100` sejak 16–17 Nov 2026 (image diban
 - **Hak akses**: izin global baru `manage_currency_rates`; seed `lpms3/seed/90_currency.rb` membuat **peran global "Keuangan"**. Admin dan akun Keuangan dapat mengubah mata uang dan kurs; pengguna lain hanya melihat dan mengonversi (403 bila mengubah). Sumber eksternal hanya dapat diatur admin.
 - **Kurs append-only**: setiap perubahan = baris riwayat baru (siapa, kapan, sumber, catatan); tidak dapat diubah atau dihapus. Kurs berlaku sejak tanggal efektif; pada tanggal sama yang terakhir diisi menang. Konversi lewat mata uang dasar dengan BigDecimal; pasangan tanpa kurs menghasilkan "belum ada kurs", bukan angka palsu.
 - **Sumber kurs yang direkomendasikan**: ECB via Frankfurter (`api.frankfurter.dev`), **nonaktif secara bawaan** (tidak ada panggilan eksternal sampai admin mengaktifkan; host tetap, bukan input pengguna). Tombol "Ambil kurs sekarang" dan opsional otomatis hari kerja 09.10 (`Lpms3::FxFetchJob`).
-- **Budget**: mata uang budget OpenProject diselaraskan ke mata uang dasar (`Rp`, format awalan, tombol "Pakai Rp sebagai mata uang budget"); tabel budget project yang boleh dilihat pengguna dikonversi ke mata uang dan tanggal pilihan.
+- **Budget**: mata uang budget LPMS diselaraskan ke mata uang dasar (`Rp`, format awalan, tombol "Pakai Rp sebagai mata uang budget"); tabel budget project yang boleh dilihat pengguna dikonversi ke mata uang dan tanggal pilihan.
 - Tabel `lpms3_currencies` dan `lpms3_exchange_rates` (migrasi plugin). Nama mata uang adalah isian pengguna (tidak diterjemahkan saat ganti bahasa). Uji: `lpms3/smoke/currency.rb` (`run_currency.sh`, 37 PASS, masuk `ops/verify.sh`).
 
 ## 17.9.7-lpms3.1.28 — menu fase induk-anak tersorot, panduan untuk tamu
@@ -117,12 +117,12 @@ Rilis 1.31–1.33 sudah terpasang di `:5100` sejak 16–17 Nov 2026 (image diban
 - **Terjemahan Indonesia**: 3.705 kunci tambahan (Angular `js.*` dan Rails: label model/atribut, pengaturan project, tipe, jurnal, ekspor, dll.) di `config/lpms3_id_overrides.yml` (total 3.918). Kunci fitur yang dimatikan (Jira, storage, Enterprise, SCIM) sengaja tidak diterjemahkan.
 - **Panduan internal** kini halaman aplikasi `/lpms3/panduan` yang mengikuti bahasa akun (ID/EN); `/panduan-internal` dialihkan ke sana, tombol bantuan "?" menunjuk ke sana. Folder statis `deploy/panduan` dihapus.
 - **Isian pengguna tidak diterjemahkan**: nama project, subjek/deskripsi paket-penugasan, komentar tetap persis. Diuji oleh `lpms3/smoke/lang_switch.rb` (`run_lang.sh`, masuk `ops/verify.sh`).
-- **UIx total** (`uix.css`): variabel Primer/OpenProject dipetakan ke token UIx (ukuran font 12/13/16/18/20, bobot 400/500/600, radius 6/8/12, tinggi kontrol 30/34/38, bayangan xs/md/lg/xl, warna semantik, tombol, kolom isian, dropdown, modal). Notifikasi (toast, flash, banner, galat formulir) putih dengan penanda status 3px dan ikon berwarna status. **Loader** bawaan OpenProject (dua kotak hijau berputar, loading.gif) diganti cincin UIx dengan busur merah dan titik berdenyut; menghormati `prefers-reduced-motion`.
+- **UIx total** (`uix.css`): variabel Primer/LPMS dipetakan ke token UIx (ukuran font 12/13/16/18/20, bobot 400/500/600, radius 6/8/12, tinggi kontrol 30/34/38, bayangan xs/md/lg/xl, warna semantik, tombol, kolom isian, dropdown, modal). Notifikasi (toast, flash, banner, galat formulir) putih dengan penanda status 3px dan ikon berwarna status. **Loader** bawaan LPMS (dua kotak hijau berputar, loading.gif) diganti cincin UIx dengan busur merah dan titik berdenyut; menghormati `prefers-reduced-motion`.
 - Rujukan: `ops/monitor.sh` dan `ops/verify.sh` memeriksa `/lpms3/panduan`.
 - **Homework tetap**: SMTP ditunda (notifikasi internal saja).
 
 ## 17.9.7-lpms3.1.25 — menu per fase BOP-001 dan sidebar yang tidak dimuat ulang
-- **Menu project dikelompokkan per 5 fase BOP-001** (Inisiasi, Perencanaan, Eksekusi, Pengawasan & Kendali, Penutupan) sebagai container di bawah Ikhtisar, masing-masing berisi Ringkasan fase, Gerbang, Langkah, Register. Dibangun di plugin (`OpenProject::Lpms3::Phases`, `Lpms3::PhasesController`, rute `/projects/:id/lpms3/fase/:fase`).
+- **Menu project dikelompokkan per 5 fase BOP-001** (Inisiasi, Perencanaan, Eksekusi, Pengawasan & Kendali, Penutupan) sebagai container di bawah Ikhtisar, masing-masing berisi Ringkasan fase, Gerbang, Langkah, Register. Dibangun di plugin (`LPMS::Lpms3::Phases`, `Lpms3::PhasesController`, rute `/projects/:id/lpms3/fase/:fase`).
 - **Halaman fase** (UIx): stepper 5 fase dengan progres selesai/total, gerbang G1–G4 (G3 menutup Eksekusi dan Pengawasan), tabel langkah `[T1-..]`..`[T6-..]`, register per tipe dengan tautan ke tabel paket-penugasan, tombol "Buka di tabel paket-penugasan". Akses: harus punya izin lihat paket-penugasan; non-anggota 404.
 - **Sidebar tidak dimuat ulang** saat berpindah halaman (Turbo Drive): `#main-menu` ditandai `data-turbo-permanent` selama konteks sama; item terpilih disinkronkan; konteks berbeda (pindah project/Administrasi) memakai sidebar baru. Diverifikasi di Chrome: penanda dokumen tetap, elemen sidebar sama, menu bawah bertahan.
 - Baru: `lpms3/smoke/fase_walkthrough.rb` + `run_fase.sh` (alur 5 fase pada proyek uji: langkah, dokumen, gerbang, progres, arsip; 30 PASS, 0 FAIL, 1 N/A) dan masuk `ops/verify.sh`.
@@ -139,7 +139,7 @@ Rilis 1.31–1.33 sudah terpasang di `:5100` sejak 16–17 Nov 2026 (image diban
 
 ## 17.9.7-lpms3.1.17 — audit kepatuhan BOP-001 dan penutupan risiko
 - `OPENPROJECT_DROP__OLD__SESSIONS__ON__LOGOUT` dikembalikan ke `true`; `OPENPROJECT_SHOW__PRODUCT__VERSION=false` (menghilangkan tautan versi/commit ke github.com).
-- Plugin: `pagination_guard.rb` — halaman di luar rentang (mis. `/projects?page=99`) kini dialihkan ke halaman 1, bukan HTTP 500 bawaan OpenProject.
+- Plugin: `pagination_guard.rb` — halaman di luar rentang (mis. `/projects?page=99`) kini dialihkan ke halaman 1, bukan HTTP 500 bawaan LPMS.
 - Baru: `ops/monitor.sh` (dipasang di cron tiap 5 menit), `ops/audit_bop001.sh` (48 PASS / 9 GAP / 1 FAIL), `docs/COMPLIANCE-BOP001.md` (dasbor, janji J1–J7, telusur §15, matriks UAT U01–U31, registri bukti, kesenjangan). Checklist D12, DEPLOY_SOP, dan plan diperbarui.
 - Temuan keamanan: `.env` di root repo berisi kredensial root StarRocks dalam teks biasa (izin 664 → 600); rotasi password diperlukan.
 - Ditunda atas keputusan pemilik: SMTP (homework).
@@ -149,7 +149,7 @@ Rilis 1.31–1.33 sudah terpasang di `:5100` sejak 16–17 Nov 2026 (image diban
 - Perbaikan: `/panduan-internal` (tombol bantuan) 404 → halaman statis `deploy/panduan/index.html` (placeholder) lewat Caddy + mount di `docker-compose.stock.yml`.
 - Pesan log guard IDS diperjelas (login lewat IdsLogin bridge).
 - Baru: `ops/verify.sh` + `ops/audit_mod08.rb` (36 pemeriksaan); `DEPLOY_SOP.md` ditulis ulang; plan `openproject_custom_plan.md` disinkronkan (Bagian 0A status & risiko, Bagian 4, MOD-03, MOD-08).
-- Temuan terbuka: SMTP (812 job gagal ECONNREFUSED localhost:25, sudah ada sebelum MOD-01), keputusan `DROP_OLD_SESSIONS_ON_LOGOUT`, merge ke `main`, `/admin/roles?page=N` di luar rentang → 500 (bawaan OpenProject).
+- Temuan terbuka: SMTP (812 job gagal ECONNREFUSED localhost:25, sudah ada sebelum MOD-01), keputusan `DROP_OLD_SESSIONS_ON_LOGOUT`, merge ke `main`, `/admin/roles?page=N` di luar rentang → 500 (bawaan LPMS).
 
 ## 17.9.7-lpms3.1.15 — MOD-08 (audit) + perbaikan 1.14/1.15
 - **Perbaikan bug 1.8–1.13:** ikon menu "Modul Fitur Internal" `settings` tidak valid → seluruh halaman Administration HTTP 500. Diganti `gear` (1.14). Ditemukan oleh audit MOD-08.
@@ -159,7 +159,7 @@ Rilis 1.31–1.33 sudah terpasang di `:5100` sejak 16–17 Nov 2026 (image diban
 ## 17.9.7-lpms3.1.13 — MOD-07
 - Seed `80_settings.rb`: `organization_name` = "PT Len Industri (Persero)" (nama organisasi ini asumsi; ubah di seed bila keliru), `emails_footer` id/en tanpa tautan. `app_title` sudah "LPMS3".
 - `deploy/patch_mod07.rb` (build): default bawaan `app_title`/`organization_name` diganti, dan `text_powered_by` (en, id) menjadi teks netral tanpa `%{link}`. Override via plugin tidak berlaku (locale inti menang), jadi dipatch langsung.
-- Temuan: layout email OpenProject 17.9.7 tidak memuat tautan vendor; `text_powered_by` tidak dipakai kode aplikasi. Email uji berisi hanya tautan ke host internal.
+- Temuan: layout email LPMS 17.9.7 tidak memuat tautan vendor; `text_powered_by` tidak dipakai kode aplikasi. Email uji berisi hanya tautan ke host internal.
 
 ## 17.9.7-lpms3.1.11 — MOD-06
 - Gravatar: sebelumnya AKTIF (`enable_gravatars=true`); kini `engine.rb` default `false` dan `AvatarManager.gravatar_enabled?` selalu `false`. Avatar lokal tetap aktif.
@@ -180,8 +180,8 @@ Rilis 1.31–1.33 sudah terpasang di `:5100` sejak 16–17 Nov 2026 (image diban
 - Tidak mengubah `EnterpriseToken`. Langkah 8 plan (hapus tampilan fitur Enterprise terkunci) belum dikerjakan.
 
 ## 17.9.7-lpms3.1.7 — MOD-02 (revisi in-house)
-- Plugin: `OpenProject::Lpms3::Features` (katalog 35 kunci, klaster A-F, `IMPLEMENTED` awalnya kosong) dan setting `internal_enabled_features` (default `[]`, tabel `settings`).
-- `EnterpriseToken` tidak diubah; gerbang lisensi OpenProject tetap tertutup (diverifikasi: `allows_to?(:board_view)` tetap `false` sebelum/sesudah).
+- Plugin: `LPMS::Lpms3::Features` (katalog 35 kunci, klaster A-F, `IMPLEMENTED` awalnya kosong) dan setting `internal_enabled_features` (default `[]`, tabel `settings`).
+- `EnterpriseToken` tidak diubah; gerbang lisensi LPMS tetap tertutup (diverifikasi: `allows_to?(:board_view)` tetap `false` sebelum/sesudah).
 - Plan MOD-02/MOD-03 direvisi: fitur dikembangkan sendiri di plugin, menu tetap sebagai kerangka. Penghapusan tampilan fitur Enterprise terkunci dijadwalkan di MOD-03 langkah 8 (belum dikerjakan).
 
 ## 17.9.7-lpms3.1.6 — MOD-01
@@ -215,7 +215,7 @@ Rilis 1.31–1.33 sudah terpasang di `:5100` sejak 16–17 Nov 2026 (image diban
 - Image: `lpms3/openproject:17.9.7-lpms3.1.2` (`0a2bc899c97d`); idslogin dan data sama dengan 1.1.
 
 ## 2026-11-14 — Rilis 17.9.7-lpms3.1.1 (login wajib IDS)
-- Semua pintu login, registrasi, aktivasi, dan reset password bawaan OpenProject di `:5100` dialihkan ke IDS (`deploy/Caddyfile.landing`); `/logout` → `/ids/logout`.
+- Semua pintu login, registrasi, aktivasi, dan reset password bawaan LPMS di `:5100` dialihkan ke IDS (`deploy/Caddyfile.landing`); `/logout` → `/ids/logout`.
 - IdsLogin: `/ids/logout` menghapus cookie `_open_project_session` sebelum keluar dari IDS, supaya logout tidak otomatis masuk lagi.
 - Image: `lpms3-idslogin:17.9.7-lpms3.1.1` (`042d373b9ea6`); image lain sama dengan 1.0 (tag 1.1 menunjuk image ID yang sama). Tag `17.9.7-lpms3.1.0` tetap menunjuk image teruji lama (`11f8fe7eb8dc`).
 - Verifikasi: 9 path login bawaan + POST `/login` → 302 `/ids/login`; `/ids/login` → IDS authorize; bridge login internal 302 dan sesi membuka `/projects` lewat `:5100` (200); health check penuh 6/6 PASSED.
@@ -227,10 +227,10 @@ Rilis 1.31–1.33 sudah terpasang di `:5100` sejak 16–17 Nov 2026 (image diban
   - `postgres:17.11@sha256:ff87138949ad…`, `memcached:1.6.45@sha256:a395a1bcf5e0…`, `openproject/hocuspocus:17.9.7`
   - `openproject/proxy` dibangun lokal dari `upstream/proxy` (`cca8d78b5734`).
 - `OP_TAG` dikoreksi 17.9.6 → 17.9.7 (versi yang benar-benar berjalan). `ops/build_image.sh` kini membaca `LPMS3_IMAGE_TAG` dari `deploy/.env`.
-- Verifikasi pascadeploy: health check penuh PASSED, data identik, outbox 0, smoke PASS=22 FAIL=0 N/A=5, alur bridge IDS→OpenProject→/projects OK.
+- Verifikasi pascadeploy: health check penuh PASSED, data identik, outbox 0, smoke PASS=22 FAIL=0 N/A=5, alur bridge IDS→LPMS→/projects OK.
 
 ## 2026-11-09 — Master Plan v2.0
 - Master plan BOP-001 Inisiasi→Closing, WBS Template LPMS, UX, kamus data 18 formulir (43 tabel, 509 kolom), tabel SOP.
-- Database utama StarRocks default_catalog.lpms3 (192.168.125.29:9030); PostgreSQL tetap untuk runtime OpenProject.
+- Database utama StarRocks default_catalog.lpms3 (192.168.125.29:9030); PostgreSQL tetap untuk runtime LPMS.
 - DDL PostgreSQL (diuji PG16) & StarRocks; skrip deploy/ops.
 - Buku Teknis v1.3 (deploy, sidebar, LKP ETL & approval, fungsi & kapabilitas).

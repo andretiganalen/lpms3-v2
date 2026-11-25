@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Membangun image OpenProject + plugin LPMS3 (lpms3/openproject:${LPMS3_IMAGE_TAG:-local}). Cepat (tanpa compile aset).
+# Membangun image LPMS + plugin LPMS3 (lpms3/openproject:${LPMS3_IMAGE_TAG:-local}). Cepat (tanpa compile aset).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"; cd "$ROOT"
 # Tag diambil dari deploy/.env (sumber yang sama dengan compose) agar image yang dibangun = image yang dijalankan.

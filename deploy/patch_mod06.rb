@@ -1,4 +1,4 @@
-# LPMS3 MOD-06: dijalankan saat build image. Setiap penggantian wajib kena (abort bila source OpenProject berubah).
+# LPMS3 MOD-06: dijalankan saat build image. Setiap penggantian wajib kena (abort bila source LPMS berubah).
 def patch(path, from, to)
   s = File.read(path)
   abort "MOD-06: pola tidak ditemukan di #{path}: #{from.inspect}" unless s.include?(from)

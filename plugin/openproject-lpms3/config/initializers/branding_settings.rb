@@ -14,7 +14,7 @@
 # See COPYRIGHT and LICENSE files for more details.
 #++
 
-# LPMS3: pengaturan tampilan in-house (lihat OpenProject::Lpms3::Branding). Default kosong = tampilan bawaan.
+# LPMS3: pengaturan tampilan in-house (lihat LPMS::Lpms3::Branding). Default kosong = tampilan bawaan.
 Rails.application.config.after_initialize do
   require "open_project/lpms3/branding"
   OpenProject::Lpms3::Branding::KEYS.each do |key|

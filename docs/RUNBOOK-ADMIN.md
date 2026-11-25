@@ -3,11 +3,11 @@
 Akses: http://192.168.125.14:5100 · Folder repo: `~/lpms3-v2` · Docker project: `lpms3`
 
 ## 1. Arsitektur singkat
-- **Caddy (proxy)** memegang port 5100: landing IdsLogin di depan, OpenProject di belakang.
-- **IdsLogin** (.NET): login User/Admin via IDS OIDC, lalu *bridge* membuat/memakai akun OpenProject (via API key `lpms3-bridge`).
-- **OpenProject 17** (web, worker, cron, hocuspocus, cache, db PostgreSQL 17).
+- **Caddy (proxy)** memegang port 5100: landing IdsLogin di depan, LPMS di belakang.
+- **IdsLogin** (.NET): login User/Admin via IDS OIDC, lalu *bridge* membuat/memakai akun LPMS (via API key `lpms3-bridge`).
+- **LPMS 17** (web, worker, cron, hocuspocus, cache, db PostgreSQL 17).
 - **StarRocks** `192.168.123.13:9030`, database `medallion_lpms` (eksternal, bukan container).
-- Catatan: login SSO bawaan OpenProject butuh Enterprise Edition, jadi IDS dijalankan lewat IdsLogin + bridge.
+- Catatan: login SSO bawaan LPMS butuh Enterprise Edition, jadi IDS dijalankan lewat IdsLogin + bridge.
 
 ## 2. Lokasi penting
 | Item | Path |
@@ -16,7 +16,7 @@ Akses: http://192.168.125.14:5100 · Folder repo: `~/lpms3-v2` · Docker project
 | Compose override | `deploy/docker-compose.stock.yml` |
 | Secret lokal | `deploy/secrets/` (`bridge.key`, `openproject-admin.txt`) |
 | Data PostgreSQL | `data/pgdata` |
-| Aset OpenProject | `data/opdata` |
+| Aset LPMS | `data/opdata` |
 | File mentah LKP | `data/lkp-raw` |
 | Backup | `data/backup/<timestamp>/` |
 
@@ -55,13 +55,13 @@ Restore drill (non-destruktif, tidak menyentuh produksi): `bash ops/restore_dril
 Pemulihan mirror StarRocks: mirror dapat dibangun ulang dari PG. Setelah PG dipulihkan, jalankan `select lpms3.sync_backfill();` di PG; layanan `lpms3-data` mengisi ulang mirror (tabel PK bersifat upsert, aman diulang). Rekonsiliasi harian menjalankannya otomatis bila jumlah baris berbeda.
 
 ## 5. Akun & login
-- **User biasa**: tombol Login User di landing, autentikasi IDS, akun OpenProject dibuat otomatis oleh bridge.
+- **User biasa**: tombol Login User di landing, autentikasi IDS, akun LPMS dibuat otomatis oleh bridge.
 - **Admin**: Login Admin via IDS, hanya untuk role di `IDS_ADMIN_ROLES` (default `admin,administrator`) atau email di `IDS_ADMIN_EMAILS` (pisah koma); ubah di `deploy/.env`.
-- **Login wajib lewat IDS (sejak 2026-11-14):** proxy (`deploy/Caddyfile.landing`) mengalihkan `/login`, `/login/*`, `/auth/*`, `/account/lost_password`, `/account/password_recovery`, `/account/set_recovered_password`, `/account/register`, `/account/activate` ke `/ids/login`, dan `/logout` ke `/ids/logout` (keluar dari IDS sekaligus menghapus cookie sesi OpenProject). Login password lokal OpenProject **tidak bisa** dipakai dari `:5100`. Bridge tetap login ke `web:8080` secara internal.
+- **Login wajib lewat IDS (sejak 2026-11-14):** proxy (`deploy/Caddyfile.landing`) mengalihkan `/login`, `/login/*`, `/auth/*`, `/account/lost_password`, `/account/password_recovery`, `/account/set_recovered_password`, `/account/register`, `/account/activate` ke `/ids/login`, dan `/logout` ke `/ids/logout` (keluar dari IDS sekaligus menghapus cookie sesi LPMS). Login password lokal LPMS **tidak bisa** dipakai dari `:5100`. Bridge tetap login ke `web:8080` secara internal.
 - **Darurat bila IDS mati:** tidak ada jalur login lokal lewat `:5100`. Administrasi lewat `docker compose -p lpms3v2 exec web bin/rails console` di server, atau sementara hapus blok `@oplogin`/`@oplogout` di Caddyfile lalu `docker compose -p lpms3v2 restart proxy` (kembalikan setelah selesai).
-- **Admin lokal OpenProject / akun bridge**: kredensial ada di `deploy/secrets/`. Akun `lpms3-bridge` adalah admin layanan, jangan dihapus atau dinonaktifkan.
-- Rotasi API key bridge: buat key baru di akun `lpms3-bridge` (OpenProject → My account → Access tokens), simpan ke `LPMS3_BRIDGE_API_KEY` di `deploy/.env` dan `deploy/secrets/bridge.key`, lalu `ops/compose_up.sh`.
-- Rails runner di image ini (Rails 8.1/Ruby 4.0) bisa gagal; kebijakan password OpenProject berlaku untuk akun yang dibuat manual.
+- **Admin lokal LPMS / akun bridge**: kredensial ada di `deploy/secrets/`. Akun `lpms3-bridge` adalah admin layanan, jangan dihapus atau dinonaktifkan.
+- Rotasi API key bridge: buat key baru di akun `lpms3-bridge` (LPMS → My account → Access tokens), simpan ke `LPMS3_BRIDGE_API_KEY` di `deploy/.env` dan `deploy/secrets/bridge.key`, lalu `ops/compose_up.sh`.
+- Rails runner di image ini (Rails 8.1/Ruby 4.0) bisa gagal; kebijakan password LPMS berlaku untuk akun yang dibuat manual.
 
 ## 6. Troubleshooting
 | Gejala | Penyebab/tindakan |
@@ -72,8 +72,8 @@ Pemulihan mirror StarRocks: mirror dapat dibangun ulang dari PG. Setelah PG dipu
 | Login IDS gagal | Cek `logs idslogin`; pastikan `IDS_CLIENT_ID/SECRET` benar dan `dev-ids-intern.len.co.id` terjangkau dari VM. |
 | Bridge HTTP 400/401 | API key salah/kedaluwarsa, atau host_name salah (lihat atas). |
 | Koneksi StarRocks gagal | Uji `mysql -h 192.168.123.13 -P 9030 -u root`; cek `STARROCKS_*` di `.env`. Gunakan `replication_num=1`. |
-| `/ids/enter` HTTP 500, log `OP-LOGIN ... location=.../two_factor_authentication/request cookies=0` | 2FA OpenProject aktif. Dinonaktifkan (`disabled=true` pada `plugin_openproject_two_factor_authentication`) karena login sudah diautentikasi IDS. Bila terulang, set ulang lewat `rails runner`. |
-| Login OpenProject HTTP 429 "Too many login attempts" | Ban per-username 30 menit bila >20 POST `/login` per menit. Jangan uji berulang cepat; hapus ban dengan menghapus key `rack::attack:allow2ban:ban:login:<email>`. |
+| `/ids/enter` HTTP 500, log `OP-LOGIN ... location=.../two_factor_authentication/request cookies=0` | 2FA LPMS aktif. Dinonaktifkan (`disabled=true` pada `plugin_openproject_two_factor_authentication`) karena login sudah diautentikasi IDS. Bila terulang, set ulang lewat `rails runner`. |
+| Login LPMS HTTP 429 "Too many login attempts" | Ban per-username 30 menit bila >20 POST `/login` per menit. Jangan uji berulang cepat; hapus ban dengan menghapus key `rack::attack:allow2ban:ban:login:<email>`. |
 | `Unprotect ticket failed` | Kunci data-protection IdsLogin kini dipersist di `data/idslogin-keys` (sesi bertahan setelah restart). Bila folder itu dihapus, hapus cookie / pakai incognito. Sesi lama sebelum 2026-11-13 harus login ulang sekali. |
 | Container mati sendiri | `autoheal` me-restart yang unhealthy; lihat `docker logs` sebelum restart manual berulang. |
 
@@ -92,7 +92,7 @@ Pemulihan mirror StarRocks: mirror dapat dibangun ulang dari PG. Setelah PG dipu
 - D7 seed LPMS3 (parsial) via `lpms3/seed/run.sh` (idempoten, dijalankan 2×): 55 status, 16 peran proyek, 16 tipe WP, 1028 workflow (CR per peran §5.5, termasuk New→status awal). Workflow di OP 17 memakai `type_variant_id`. Custom field (`40_custom_fields.rb`): 19 atribut proyek dalam 5 section, 76 field WP termasuk Supporting (S)/Consulted (C) untuk 16 tipe (idempoten, dijalankan 2×). Lifecycle (`60_lifecycle.rb`): 4 fase P1–P4 dengan gate penutup G1–G4 (memakai 4 definisi bawaan OP, diganti nama). Template (`70_templates.rb`): 3 template proyek (Prediktif, Hibrid, Purnajual), 31 grup fungsi, 35 WP aktivitas BOP-001 dengan RASCI (`lpms3/templates/rasci.yml`, juga di `lpms3.ref_rasci`, `db/050`), 9 Dokumen Rencana, 4 milestone gate, 14 query, 5 halaman wiki. Belum: meeting template, pengisian S/C sebagai field user, penataan form tipe.
 - D9 selesai (2026-11-14): trigger outbox `db/060` + layanan `lpms3-data` (`etl/`, container `lpms3v2-lpms3-data-1`) menyinkronkan PG→StarRocks (`medallion_lpms`, host 192.168.123.13). Proyek uji muncul di mirror dalam 3 detik; update dan delete juga tersinkron; outbox 0 tertunda. Nama database StarRocks sebenarnya `medallion_lpms` (bukan `lpms3`). Kolom `jenis_kode`, `kelas_kontrak`, `lini_bisnis`, `current_phase` masih NULL (belum ada sumber).
 - D10 smoke test (2026-11-14, `lpms3/smoke/run.sh`; proyek uji dibuat lalu dihapus otomatis): PASS=22 FAIL=0 N/A=5. Lulus: U01 (template 35 WP/9 dokumen/4 gate), U06 (alur CR penuh + transisi terlarang ditolak), U08–U12/U14/U15 (siklus status tiap tipe), U16 (arsip read-only), U18 (hak Pembaca), D9. N/A (butuh plugin): U02 due date +14 hari, U03 validasi kriteria gate, U11/U12 validasi sistem, U16 sub-project purnajual. Belum diuji: U04, U05, U07, U13, U17, U19 (SMTP belum dikonfigurasi, D2), U20–U31. Temuan status awal sudah diperbaiki: WP baru berstatus default "New"; `50_workflows.rb` kini menambah transisi New→status awal tiap tipe (CR: hanya Pimpro; tipe lain: peran umum), total 1028 workflow (982+46), idempoten.
-- D11 restore drill (2026-11-14): backup manual 3 detik; restore `openproject.dump` ke container sementara 9–19 detik (jauh di bawah RTO 2 jam); jumlah baris identik dengan live (6 proyek, 182 WP, 38 user, 2564 workflow, 18 form, 66 org_unit, 312 RASCI, 95 custom field); arsip `opdata`, `lkp-raw`, `idslogin-keys` utuh; kunci `env.backup` sama dengan `deploy/.env`. Catatan: `opdata` hampir kosong (belum ada lampiran). Belum diuji: menjalankan OpenProject penuh di atas DB hasil restore (U20 lengkap). **StarRocks tidak punya repository BACKUP** (`SHOW REPOSITORIES` kosong): snapshot harian butuh admin StarRocks; sementara itu mirror dapat dibangun ulang dari PG.
+- D11 restore drill (2026-11-14): backup manual 3 detik; restore `openproject.dump` ke container sementara 9–19 detik (jauh di bawah RTO 2 jam); jumlah baris identik dengan live (6 proyek, 182 WP, 38 user, 2564 workflow, 18 form, 66 org_unit, 312 RASCI, 95 custom field); arsip `opdata`, `lkp-raw`, `idslogin-keys` utuh; kunci `env.backup` sama dengan `deploy/.env`. Catatan: `opdata` hampir kosong (belum ada lampiran). Belum diuji: menjalankan LPMS penuh di atas DB hasil restore (U20 lengkap). **StarRocks tidak punya repository BACKUP** (`SHOW REPOSITORIES` kosong): snapshot harian butuh admin StarRocks; sementara itu mirror dapat dibangun ulang dari PG.
 - Belum: D10 (sisa U di atas), snapshot harian StarRocks, D12 go-live.
 
 
@@ -102,4 +102,4 @@ Pemulihan mirror StarRocks: mirror dapat dibangun ulang dari PG. Setelah PG dipu
 - **Memberi akses Keuangan**: Administrasi → Pengguna → pilih akun → tab *Peran global* → tambahkan peran **Keuangan** (dibuat oleh `lpms3/seed/run.sh lpms3/seed/90_currency.rb`; izin `manage_currency_rates`). Akun Keuangan dapat mengisi kurs dan mengelola mata uang; admin juga.
 - **Mengisi kurs**: pilih mata uang, isi nilai 1 unit dalam IDR (koma atau titik desimal), tanggal berlaku, catatan. Riwayat tidak dapat diubah atau dihapus; koreksi = isi kurs baru dengan tanggal yang sama (yang terakhir menang).
 - **Sumber otomatis** (hanya admin): pilih "ECB via Frankfurter" untuk mengizinkan pengambilan kurs; tanpa itu tidak ada panggilan keluar. Pilih "otomatis" bila ingin diambil tiap hari kerja 09.10. Kegagalan jaringan tidak mengubah kurs yang ada.
-- **Budget**: tombol "Pakai Rp sebagai mata uang budget" menyelaraskan pengaturan biaya OpenProject; budget tetap disimpan dalam IDR dan tabel di halaman ini menampilkan konversinya.
+- **Budget**: tombol "Pakai Rp sebagai mata uang budget" menyelaraskan pengaturan biaya LPMS; budget tetap disimpan dalam IDR dan tabel di halaman ini menampilkan konversinya.

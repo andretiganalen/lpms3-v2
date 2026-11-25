@@ -14,7 +14,7 @@ module OpenProject::Lpms3
 
     include OpenProject::Plugins::ActsAsOpEngine
 
-    # Didaftarkan di to_prepare (seperti izin inti) karena OpenProject::AccessControl baru dapat di-autoload setelah initializer plugin.
+    # Didaftarkan di to_prepare (seperti izin inti) karena LPMS::AccessControl baru dapat di-autoload setelah initializer plugin.
     config.to_prepare do
       OpenProject::AccessControl.map do |map|
         unless OpenProject::AccessControl.permissions.any? { |pm| pm.name == :manage_currency_rates }
@@ -153,7 +153,25 @@ module OpenProject::Lpms3
     end
 
     config.to_prepare do
-      # Daftar proyek OpenProject: Kode Proyek tampil sebelum judul proyek (1.48).
+      # Kolom Project di tabel Work Package (dan setiap tautan proyek di API v3): "KODE · Judul" (1.49).
+      if defined?(::API::Decorators::LinkObject) && !::API::Decorators::LinkObject.instance_variable_get(:@lpms3_kode)
+        ::API::Decorators::LinkObject.instance_variable_set(:@lpms3_kode, true)
+        ::API::Decorators::LinkObject.prepend(Module.new do
+          def title
+            t = super
+            rep = represented
+            return t unless rep.is_a?(::Project) && @title_attribute == :name && t == rep.name
+
+            ::Lpms3::KodeProyek.judul(rep)
+          rescue StandardError
+            t
+          end
+        end)
+      end
+    end
+
+    config.to_prepare do
+      # Daftar proyek LPMS: Kode Proyek tampil sebelum judul proyek (1.48).
       if defined?(::Projects::RowComponent) && !::Projects::RowComponent.instance_variable_get(:@lpms3_kode)
         ::Projects::RowComponent.instance_variable_set(:@lpms3_kode, true)
         ::Projects::RowComponent.prepend(Module.new do

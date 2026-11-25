@@ -2,7 +2,7 @@
 
 module Lpms3
   module Widgets
-    # Pengganti kartu Member OpenProject di Beranda semua workspace: pohon garis komando berbasis orang
+    # Pengganti kartu Member LPMS di Beranda semua workspace: pohon garis komando berbasis orang
     # (Direktur Operasional → Pejabat Eselon 1 tiap Fungsi → Admin/Spesialis/Staff → Pejabat Eselon 2 → …), setiap cabang
     # dapat dibuka/ditutup. Format: docs/template-bop001/tampilan-widget-project-member.md. Data: Lpms3::MemberHierarki.
     class MemberHierarki < ::Grids::WidgetComponent

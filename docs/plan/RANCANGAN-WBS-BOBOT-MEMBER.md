@@ -22,7 +22,7 @@ Status: disepakati pemilik 23 Nov 2026. Lingkup hanya v2 (:5100).
 | Rilis | Isi |
 | :-- | :-- |
 | 1.39 | Jabatan pengguna (`position`/`user_position`: admin UI + impor CSV), resolver hierarki, member default berjenjang, Eselon 2 otomatis saat Pimpro ditetapkan. |
-| 1.40 | Editor WBS (tabel inline) di atas `lpms3.wbs_node` ↔ work package OpenProject; bobot cascading + bell curve; validasi 100 %; aturan PIC. |
+| 1.40 | Editor WBS (tabel inline) di atas `lpms3.wbs_node` ↔ work package LPMS; bobot cascading + bell curve; validasi 100 %; aturan PIC. |
 | 1.41 | Baseline draft otomatis + aktivasi lewat CR, snapshot pekerjaan Done, sinkron ringkasan Portfolio/Gantt/Fase/Kalender. |
 
 ## 3. Hierarki (1.39)

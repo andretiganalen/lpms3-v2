@@ -16,7 +16,7 @@
 
 # LPMS3 MOD-03: metadata 35 fitur in-house (30 utama + 5 kompatibilitas) dari Bagian 3
 # docs/plan/openproject_custom_plan.md. Klaster F hanya punya deskripsi di plan; tujuan dan output
-# klaster F ditulis oleh tim LPMS3. Ini data tampilan saja; BUKAN gerbang lisensi OpenProject.
+# klaster F ditulis oleh tim LPMS3. Ini data tampilan saja; BUKAN gerbang lisensi LPMS.
 class InhouseFeatureCatalog
   Feature = Struct.new(:key, :cluster, :title, :menu_location, :description, :objective, :expected_output,
                        keyword_init: true) do

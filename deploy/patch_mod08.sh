@@ -1,5 +1,5 @@
 #!/bin/sh
-# MOD-08: ganti seluruh logo/favicon OpenProject dengan logo Len 2023 (aset di deploy/brand).
+# MOD-08: ganti seluruh logo/favicon LPMS dengan logo Len 2023 (aset di deploy/brand).
 # Berkas .gz dihapus agar tidak ikut tersaji (Rails melayani .gz bila ada).
 set -e
 B=/tmp/brand
@@ -23,7 +23,7 @@ rep logo-wide.png "$A/bim/logo_openproject_bim_big_coloured-233fba69d6f39a54c58e
 rep logo-narrow.svg "$A/logo_openproject_narrow-b109a77c87bd36817399515b9b09c508e8beaba76a57f2c40fd484d8aa25fa15.svg"
 rep icon-logo.svg "$A/icon_logo-955af4346e973d13afd9f5a3d0d4c63f8002be1125bcd41d8036ff67ee1cdd51.svg"
 rep icon-logo-white.svg "$A/icon_logo_white-8e3e74afd4629f3f6fed8e229bbc0dfd926fc196d8b8d0f7bf3be3eca9574fb7.svg"
-# Pemeriksaan: tidak ada aset logo OpenProject yang tersisa dengan isi lama.
+# Pemeriksaan: tidak ada aset logo LPMS yang tersisa dengan isi lama.
 for f in favicon-939cbdbd3b0f071269abd28ddfcb2f922d6257ce6ef70ba4941ea1708a564ab3.ico logo_openproject-0ac721deb10b0ac88e34c3a066dc8ce283e9d2601c805ae71fc8dc9548fc0582.png; do
   cmp -s "$B/$( [ "${f##*.}" = ico ] && echo favicon.ico || echo logo-wide.png )" "$A/$f" || { echo "MOD-08 gagal: $f"; exit 1; }
 done

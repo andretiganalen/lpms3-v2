@@ -32,3 +32,8 @@ RUN sh /tmp/patch_mod08.sh && rm -rf /tmp/brand /tmp/patch_mod08.sh
 # MOD-09: hapus Edisi Enterprise dan Link Eksternal (menu, route, dan setting capture link).
 COPY --chown=app:app deploy/patch_mod09.rb /tmp/patch_mod09.rb
 RUN ruby /tmp/patch_mod09.rb && rm /tmp/patch_mod09.rb && ruby -c /app/config/initializers/menus.rb && ruby -c /app/config/routes.rb && ruby -c /app/config/constants/settings/definition.rb
+# 1.49: teks UI frontend (bahasa id & en) tanpa "OpenProject"; tautan situs openproject.org/.com -> "/" (identifier JS window.OpenProject tidak disentuh).
+RUN cd /app/public/assets/frontend \
+ && sed -i -E 's#https?://([a-z0-9-]+\.)*openproject\.(org|com)[^"'"'"'`) <>\\]*#/#g' $(grep -rlE 'openproject\.(org|com)' . || true) \
+ && sed -i 's/OpenProject/LPMS/g' src/locales/id-*.js src/locales/en-*.js src/locales/en.js 2>/dev/null || true \
+ && ! grep -l "OpenProject" src/locales/id-*.js

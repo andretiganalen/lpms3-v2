@@ -36,7 +36,7 @@ LenO ──POST /lpms3/api/pemicu-proyek──► Caddy ──► web (plugin LP
 
 Alasan pembaca LPMS-2 ditaruh di `lpms3-data`, bukan di Rails:
 - `lpms3-data` sudah punya PyMySQL dan loop polling PostgreSQL (pola `sync_outbox`).
-- Driver MySQL dan kredensial LPMS-2 tidak masuk image OpenProject.
+- Driver MySQL dan kredensial LPMS-2 tidak masuk image LPMS.
 - Firewall ke DB LPMS-2 cukup dibuka untuk satu container.
 - Kalau LPMS-2 lambat atau mati, request LenO tetap cepat dijawab (202), tidak menunggu kueri.
 
@@ -80,7 +80,7 @@ Jawaban:
 
 - Kunci di `deploy/.env` (`LPMS3_LENO_KEYS`, boleh dua nilai dipisah koma agar rotasi tanpa putus). Dibandingkan *constant-time*. Kosong = semua permintaan 401.
 - Controller tanpa sesi login, tanpa CSRF, hanya dua aksi di atas (`ActionController::API`). Tidak ada `User.current`; kejadian dari LenO dicatat dengan sumber `leno` tanpa akun pengguna (tidak ada akun layanan yang bisa disalahgunakan).
-- Caddy: tidak perlu aturan baru (path diteruskan ke web). OpenProject hanya menerima host resmi (`OPENPROJECT_HOST__NAME`), jadi LenO memanggil alamat itu. Opsional daftar IP LenO di Caddy.
+- Caddy: tidak perlu aturan baru (path diteruskan ke web). LPMS hanya menerima host resmi (`OPENPROJECT_HOST__NAME`), jadi LenO memanggil alamat itu. Opsional daftar IP LenO di Caddy.
 - Log mencatat waktu, alamat, kode proyek, status; **tidak** mencatat kunci atau body mentah.
 
 ## 5. Data
@@ -143,7 +143,7 @@ Pemegangnya ditetapkan di Administrasi. Sesuai hierarki per Fungsi (`user-hierar
 - Koneksi: `LPMS2_DATABASE_URL` di `deploy/.env`, akun **`lpms3_ro`** (hanya `SELECT`), dibuka per batch lalu ditutup. Kode hanya menerima satu pernyataan `SELECT` (seperti `DirectSqlExecutor` v1).
 - Sumber (sama dengan yang dibaca v1): `lpms_proyek` (dicari lewat `kodeproyek`, `recordstatus` aktif), `lpms_requestplanning`, `lpms_proyekruanglingkup`, `lpms_proyektermin`, `lpms_proyekjaminan`, `lpms_pis`, `lpms_datasph`, `lpms_kursproyek`. Lebih baik lagi bila DBA LPMS-2 menyediakan view `v_lpms3_project` dan kawan-kawan (§12.7) sebagai kontrak.
 - Pemetaan kolom di `lpms3/templates/lpms2_mapping.yml`, bisa diubah tanpa ubah kode.
-- Hasil: `snapshot` JSON per tabel + daftar tabel yang gagal dibaca. Tidak ada tulisan langsung ke tabel OpenProject; pembuatan proyek tetap di Rails.
+- Hasil: `snapshot` JSON per tabel + daftar tabel yang gagal dibaca. Tidak ada tulisan langsung ke tabel LPMS; pembuatan proyek tetap di Rails.
 
 ## 8. Pengujian
 
@@ -151,7 +151,7 @@ Smoke `lpms3/smoke/pemicu_leno.rb` (data uji dihapus di akhir) dan uji Python un
 - 401 tanpa kunci / kunci salah; 202 pertama; kiriman ulang `id_kiriman` sama → 202, tidak ada baris ganda; `lpms2_proyek_id` beda → 409; body > 16 KB → 413; 61 permintaan/menit → 429.
 - Baris `diterima` macet > 10 menit diklaim ulang oleh kiriman ulang.
 - LPMS-2 tidak terjangkau → `data_gagal`, alur tetap bisa lanjut, coba ulang berhasil.
-- Pengusul yang juga Eselon 1 tidak bisa menyetujui usulannya sendiri; admin OpenProject tanpa peran global juga tidak bisa.
+- Pengusul yang juga Eselon 1 tidak bisa menyetujui usulannya sendiri; admin LPMS tanpa peran global juga tidak bisa.
 - Proyek dibuat sekali walau tombol setujui ditekan dua kali; Kode Proyek dan LPMS-2 Proyek ID terisi; anggota Pimpro terpasang.
 - Mirror StarRocks menerima `lpms2_project_id`.
 

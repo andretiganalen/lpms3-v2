@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Smoke test API pemicu LenO (rilis 1.35) lewat proxy :5100. Data uji (kode UJI-SMOKE-*) dihapus di akhir.
 # Pemakaian: lpms3/smoke/pemicu_leno.sh [base_url]   (bawaan http://$OPENPROJECT_HOST__NAME dari deploy/.env;
-# OpenProject menolak host lain, termasuk localhost)
+# LPMS menolak host lain, termasuk localhost)
 # Uji batas laju dijalankan terakhir karena mengunci alamat ini selama satu menit.
 set -uo pipefail
 cd "$(dirname "$0")/../.."

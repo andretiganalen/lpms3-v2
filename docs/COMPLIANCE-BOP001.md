@@ -2,7 +2,7 @@
 
 - **Tanggal audit:** 2026-11-15 · **Rilis:** `17.9.7-lpms3.1.17` · **Branch:** `feat/inhouse-enterprise-hardening`
 - **Acuan:** BOP-001 rev.01 beserta turunan dan dependensinya: formulir (`docs/template-bop001/form`, 27 berkas), prosedur (`docs/template-bop001/procedure`, 53 berkas), Nota 021/N/UQ/VIII/2026 (organisasi), CLP-001 (35 fungsi generik), FOP-700/705, SOP-004/009, BOG-003, Master Plan §0 J1–J7 dan §15, Buku Teknis §7.4 (go-live), `docs/CHECKLIST-GOLIVE-D12.md`.
-- **Dependensi non-BOP yang ikut diaudit:** IDS (login), StarRocks (mirror), lisensi OpenProject GPLv3 (`docs/plan/LEGAL_NOTICES.md`), hardening (`docs/plan/AUDIT_VERIFICATION_REPORT.md`).
+- **Dependensi non-BOP yang ikut diaudit:** IDS (login), StarRocks (mirror), lisensi LPMS GPLv3 (`docs/plan/LEGAL_NOTICES.md`), hardening (`docs/plan/AUDIT_VERIFICATION_REPORT.md`).
 - **Cara memverifikasi ulang:** `bash ops/audit_bop001.sh` (bukti data/konfigurasi, hanya membaca), `bash ops/verify.sh` (aplikasi), `bash lpms3/smoke/run.sh` (alur proyek uji), `bash ops/monitor.sh -v` (kesehatan).
 
 ## 1. Dasbor status
@@ -72,7 +72,7 @@ Legenda: ✅ lulus penuh · 🟡 lulus sebagian (alur status lulus, aturan tamba
 | U17 | Penutupan Terminasi | ⛔ | |
 | U18 | Hak akses Pembaca | ✅ | |
 | U19 | Notifikasi email | ⛔ | **Terblokir SMTP** |
-| U20 | Backup → restore ≤ 2 jam | 🟡 | Drill 2026-11-14: 9–19 dtk, jumlah baris identik; OpenProject penuh di atas DB restore belum |
+| U20 | Backup → restore ≤ 2 jam | 🟡 | Drill 2026-11-14: 9–19 dtk, jumlah baris identik; LPMS penuh di atas DB restore belum |
 | U21–U26 | Sidebar, Add New, Procurement Pipeline, LKP L0→L5, Return, Backfill | ⛔ | Sidebar/plugin belum dibangun |
 | U27–U31 | WBS Template, FLP-01 per jenis kode, BOG-003 tiga ambang, FFR-710, Closing FOP-705 | ⛔ | |
 
@@ -100,7 +100,7 @@ Legenda: ✅ lulus penuh · 🟡 lulus sebagian (alur status lulus, aturan tamba
 | 3 | Aturan sistem: due date +14 hari (U02), kriteria gate (U03), blokir NCR kritikal (U11), lampiran BA (U12), purnajual otomatis (U16) | Tinggi | Pengembangan | Implementasi di plugin; ubah N/A smoke menjadi PASS |
 | 4 | UAT penuh U01–U31 dan BA UAT/G-SB | Tinggi | PMO + TI | Jalankan setelah butir 2–3 |
 | 5 | Backup terjadwal ≥ 7 hari berturut-turut | Sedang | TI | Otomatis; terpenuhi **2026-11-20 02:00** bila tidak ada hari terlewat (terjadwal: 14, 15 Nov) |
-| 6 | 2FA admin (D12 butir 3) | Sedang | Tim IDS | Aktifkan di IDS; **tidak** di OpenProject (menghentikan login bridge, RUNBOOK §6) |
+| 6 | 2FA admin (D12 butir 3) | Sedang | Tim IDS | Aktifkan di IDS; **tidak** di LPMS (menghentikan login bridge, RUNBOOK §6) |
 | 7 | Saluran alert monitoring (email/Slack/telepon) | Sedang | TI | Tentukan saluran; `monitor.sh` kini hanya mencatat ke log |
 | 8 | Template **Program** (tailoring §15) | Sedang | PMO | Putuskan perlu atau tidak; bila perlu tambah di `70_templates.rb` |
 | 9 | Data HC: posisi dan user (D8); konfirmasi jenjang SKEP 001/2026 | Sedang | SDM + PMO | Muat dari data HC |
@@ -129,7 +129,7 @@ Legenda: ✅ lulus penuh · 🟡 lulus sebagian (alur status lulus, aturan tamba
 | :-- | :-- |
 | `hariyadi.maramis@len.co.id`, `ilham.nugraha@len.co.id`, `kristian@len.co.id`, `andre.tigana@len.co.id` | **Belum terdaftar di IDS** — IDS (`dev-ids-intern.len.co.id`) bukan bagian repo ini dan agen tidak memiliki akses admin IDS (hanya `client_id/secret` untuk login OIDC). Perlu didaftarkan oleh admin IDS. |
 
-- Di sisi LPMS3 tidak ada yang perlu dibuat: IdsLogin membuat akun OpenProject otomatis pada login IDS pertama (selalu non-admin). Sejak 20 Nov 2026 hanya ada satu pintu login (tanpa pilihan Pengguna/Admin, tanpa akun lokal); admin dan peran ditentukan di aplikasi (Administrasi › Pengguna) dan tidak pernah diubah oleh klaim IDS; akun yang dikunci di aplikasi ditolak saat login. Password lokal OpenProject diacak dan tidak dipakai.
+- Di sisi LPMS3 tidak ada yang perlu dibuat: IdsLogin membuat akun LPMS otomatis pada login IDS pertama (selalu non-admin). Sejak 20 Nov 2026 hanya ada satu pintu login (tanpa pilihan Pengguna/Admin, tanpa akun lokal); admin dan peran ditentukan di aplikasi (Administrasi › Pengguna) dan tidak pernah diubah oleh klaim IDS; akun yang dikunci di aplikasi ditolak saat login. Password lokal LPMS diacak dan tidak dipakai.
 - Kata sandi awal bersama tidak dicatat di repo. Disarankan memaksa ganti saat login pertama di IDS.
 - `andre.tigana@len.co.id` (akun baru) berbeda dari admin `andre.tigana.k@len.co.id`; pastikan peruntukannya jelas agar tidak membingungkan.
 - Penempatan posisi/fungsi (`lpms3.position`, `lpms3.user_position`; saat ini kosong) ditentukan admin `andre.tigana.k@len.co.id`.

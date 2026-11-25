@@ -1,4 +1,4 @@
-# Landing page IDS di :5100; selebihnya ke OpenProject.
+# Landing page IDS di :5100; selebihnya ke LPMS.
 :80 {
     # Akun lokal sudah dihapus dari IdsLogin (20 Nov 2026); blok ini menjaga tautan lama tetap ke satu pintu login IDS.
     @idslocal path /ids/local /ids/local/*
@@ -11,7 +11,7 @@
     handle @ids {
         reverse_proxy idslogin:5100
     }
-    # Login wajib lewat IDS: semua pintu login/registrasi/reset password bawaan OpenProject ditutup di proxy.
+    # Login wajib lewat IDS: semua pintu login/registrasi/reset password bawaan LPMS ditutup di proxy.
     # Bridge IdsLogin login ke web:8080 langsung (tidak lewat proxy), jadi tidak terpengaruh.
     # Panduan internal (tombol bantuan "?"): dilayani aplikasi (mengikuti bahasa akun) di /lpms3/panduan.
     @panduan path /panduan-internal /panduan-internal/*
@@ -29,7 +29,7 @@
     }
     @oplogin path /login /login/* /auth/* /account/lost_password* /account/password_recovery* /account/set_recovered_password* /account/register* /account/activate*
     handle @oplogin {
-        # {query} membawa back_url OpenProject agar pengguna kembali ke halaman yang dituju sesudah login.
+        # {query} membawa back_url LPMS agar pengguna kembali ke halaman yang dituju sesudah login.
         redir * /ids/login?{query} 302
     }
     handle {

@@ -50,7 +50,7 @@ module OpenProject::Lpms3
 
       list = steps(project, phase)
       nxt = list.find { |wp| !wp.status&.is_closed? }
-      # Hanya tautan work package: OpenProject memeriksa izin tiap anak dinamis lewat peta izin controller.
+      # Hanya tautan work package: LPMS memeriksa izin tiap anak dinamis lewat peta izin controller.
       # Tautan "Tabel seluruh langkah" ditambahkan JS sidebar dari URL submenu Langkah BOP-001.
       items = []
       list.each_with_index do |wp, i|

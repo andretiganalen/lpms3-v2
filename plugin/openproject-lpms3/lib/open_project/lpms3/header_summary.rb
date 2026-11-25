@@ -90,7 +90,7 @@ module OpenProject::Lpms3
       list.sort_by { |i| i[:at].to_s }.reverse
     end
 
-    # Pengingat work package OpenProject buatan pengguna yang belum selesai, ditambah WP miliknya yang jatuh tempo <= 3 hari
+    # Pengingat work package LPMS buatan pengguna yang belum selesai, ditambah WP miliknya yang jatuh tempo <= 3 hari
     # atau sudah lewat (status belum tertutup).
     def reminders(user)
       list = ::Reminder.where(creator_id: user.id, completed_at: nil).where(remindable_type: "WorkPackage")
@@ -113,7 +113,7 @@ module OpenProject::Lpms3
       list
     end
 
-    # Alasan notifikasi OpenProject dalam bahasa Indonesia (kunci tak dikenal: terjemahan OpenProject, lalu nama mentah).
+    # Alasan notifikasi LPMS dalam bahasa Indonesia (kunci tak dikenal: terjemahan LPMS, lalu nama mentah).
     REASONS = { "mentioned" => "menyebut Anda", "assigned" => "menugaskan kepada Anda", "responsible" => "menjadikan Anda penanggung jawab",
                 "watched" => "pembaruan yang Anda pantau", "commented" => "komentar baru", "created" => "dibuat", "processed" => "diproses",
                 "prioritized" => "diprioritaskan", "scheduled" => "dijadwalkan", "subscribed" => "pembaruan langganan",

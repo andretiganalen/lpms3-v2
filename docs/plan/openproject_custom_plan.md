@@ -1,8 +1,8 @@
-# OpenProject Custom Plan: In-House Enterprise Architecture, IDS SSO & Dynamic Feature Toggle
+# LPMS Custom Plan: In-House Enterprise Architecture, IDS SSO & Dynamic Feature Toggle
 
 > **Lokasi File Wajib:** `docs/plan/openproject_custom_plan.md`
 > **Target Eksekutor:** Claude Sonnet 5.5 (Low Effort Mode — Deterministic Atomic Execution)
-> **Basis Kode Minimum:** OpenProject Community Source $\ge$ v17.1.0 / v17.6.0+ (PostgreSQL)
+> **Basis Kode Minimum:** LPMS Community Source $\ge$ v17.1.0 / v17.6.0+ (PostgreSQL)
 > **Status Kepatuhan:** 100% GNU GPLv3 Compliant, Zero Outbound Telemetry, White-Labeled Internal Portal, Centralized IDS SSO, Dynamic Admin Feature Switcher
 
 ---
@@ -35,9 +35,9 @@ Anda **WAJIB BERHENTI (`HALT`)** seketika dan membatalkan perubahan sementara (`
 ## 0A. STATUS REALISASI & PRINSIP REVISI (hasil audit 2026-11-15)
 
 **Prinsip yang berlaku (mengalahkan teks lama di bawah bila bertentangan):**
-1. **Tidak ada penimpaan lisensi.** `EnterpriseToken` tidak diubah (Community Edition, token kosong). Fitur Enterprise bawaan OpenProject tetap terkunci; fitur dikembangkan in-house di plugin `plugin/openproject-lpms3` (lihat Bagian 4 yang direvisi).
-2. **Source OpenProject tidak ada di repo** (hanya di image `openproject/openproject:17-slim@sha256:4e97…`). Path seperti `app/models/...`, `config/initializers/...` pada modul lama dibaca sebagai path di dalam image. Perubahan dilakukan lewat (a) plugin LPMS3, (b) env di `deploy/docker-compose.stock.yml`, (c) patch saat build (`deploy/patch_mod06.rb`, `deploy/patch_mod07.rb`, `RUN sed` di `deploy/Dockerfile`) yang **membatalkan build bila pola source berubah**, (d) Caddy `deploy/Caddyfile.landing`.
-3. **Tidak ada kontak ke OpenProject/afiliasi** (keputusan pemilik): tanpa trial, tanpa unduh source frontend dari repo vendor.
+1. **Tidak ada penimpaan lisensi.** `EnterpriseToken` tidak diubah (Community Edition, token kosong). Fitur Enterprise bawaan LPMS tetap terkunci; fitur dikembangkan in-house di plugin `plugin/openproject-lpms3` (lihat Bagian 4 yang direvisi).
+2. **Source LPMS tidak ada di repo** (hanya di image `openproject/openproject:17-slim@sha256:4e97…`). Path seperti `app/models/...`, `config/initializers/...` pada modul lama dibaca sebagai path di dalam image. Perubahan dilakukan lewat (a) plugin LPMS3, (b) env di `deploy/docker-compose.stock.yml`, (c) patch saat build (`deploy/patch_mod06.rb`, `deploy/patch_mod07.rb`, `RUN sed` di `deploy/Dockerfile`) yang **membatalkan build bila pola source berubah**, (d) Caddy `deploy/Caddyfile.landing`.
+3. **Tidak ada kontak ke LPMS/afiliasi** (keputusan pemilik): tanpa trial, tanpa unduh source frontend dari repo vendor.
 4. **Scope hanya `:5100`**, stack compose `lpms3v2`.
 5. **Rilis:** nomor rilis `17.9.7-lpms3.1.N` naik setiap deploy; ritual = backup → ubah `LPMS3_IMAGE_TAG` → `ops/compose_up.sh` → `ops/verify.sh` (lihat `DEPLOY_SOP.md`).
 
@@ -57,11 +57,11 @@ Anda **WAJIB BERHENTI (`HALT`)** seketika dan membatalkan perubahan sementara (`
 - Caddy memblokir `/admin/enterprise/save_trial_key`, padahal rute sebenarnya `/admin/enterprise_tokens/{save,delete}_trial_key` → diperbaiki.
 - `/panduan-internal` (tujuan tombol bantuan) 404 → halaman statis `deploy/panduan/index.html` dilayani Caddy (isi masih placeholder, menunggu IT Development).
 - `DEPLOY_SOP.md` merujuk "smoke test" tanpa lokasi → kini `lpms3/smoke/run.sh` lewat `ops/verify.sh`.
-- Pesan log guard IDS menyiratkan OIDC OpenProject dipakai; login sebenarnya lewat IdsLogin bridge (strategi OmniAuth OpenProject tidak aktif karena gerbang Enterprise) → pesan diperjelas.
+- Pesan log guard IDS menyiratkan OIDC LPMS dipakai; login sebenarnya lewat IdsLogin bridge (strategi OmniAuth LPMS tidak aktif karena gerbang Enterprise) → pesan diperjelas.
 
 **Status risiko (diperbarui 2026-11-15, rilis 1.17):**
 1. **SMTP:** masih terbuka, **ditunda sebagai pekerjaan rumah** (host/port/kredensial dari IT Development). 812 job GoodJob historis gagal `ECONNREFUSED localhost:25`; terbaru 2026-11-14, sebelum MOD-01.
-2. ~~`DROP_OLD_SESSIONS_ON_LOGOUT=false`~~ → **dikembalikan ke `true`** (bawaan OpenProject) di `deploy/docker-compose.stock.yml`.
+2. ~~`DROP_OLD_SESSIONS_ON_LOGOUT=false`~~ → **dikembalikan ke `true`** (bawaan LPMS) di `deploy/docker-compose.stock.yml`.
 3. ~~Branch belum digabung~~ → digabung ke `main` lewat pull request (lihat CHANGELOG 1.17).
 4. ~~`/admin/roles?page=N` dan `/projects?page=N` di luar rentang → 500~~ → diperbaiki oleh `plugin/.../config/initializers/pagination_guard.rb` (GET dialihkan ke halaman 1).
 5. ~~Tautan versi `github.com/opf/...`~~ → disembunyikan lewat `OPENPROJECT_SHOW__PRODUCT__VERSION=false`.
@@ -72,11 +72,11 @@ Anda **WAJIB BERHENTI (`HALT`)** seketika dan membatalkan perubahan sementara (`
 ## 1. LANDASAN KEPATUHAN HUKUM (GPLv3) & ISOLASI ENAM LAPIS
 
 Berdasarkan audit lisensi dan arsitektur kode sumber `opf/openproject`:
-1. **Hak Modifikasi In-House (GNU GPLv3):** Seluruh kode sumber di repositori utama—termasuk mekanisme pengecekan fitur `EnterpriseToken` dan modul di dalam direktori `modules/`—berada di bawah lisensi **GNU GPLv3**. Organisasi memiliki hak memodifikasi kode sumber untuk penggunaan internal dan membangun fungsionalitas sendiri (in-house) tanpa biaya lisensi bulanan. **Catatan revisi:** hak ini tidak dipakai untuk memalsukan/menimpa token atau gerbang lisensi Enterprise OpenProject; fitur Enterprise bawaan tetap terkunci dan tanpa kewajiban mempublikasikan kode hasil modifikasi selama aplikasi digunakan secara internal (*in-house*) dan tidak didistribusikan ke pihak eksternal.
+1. **Hak Modifikasi In-House (GNU GPLv3):** Seluruh kode sumber di repositori utama—termasuk mekanisme pengecekan fitur `EnterpriseToken` dan modul di dalam direktori `modules/`—berada di bawah lisensi **GNU GPLv3**. Organisasi memiliki hak memodifikasi kode sumber untuk penggunaan internal dan membangun fungsionalitas sendiri (in-house) tanpa biaya lisensi bulanan. **Catatan revisi:** hak ini tidak dipakai untuk memalsukan/menimpa token atau gerbang lisensi Enterprise LPMS; fitur Enterprise bawaan tetap terkunci dan tanpa kewajiban mempublikasikan kode hasil modifikasi selama aplikasi digunakan secara internal (*in-house*) dan tidak didistribusikan ke pihak eksternal.
 2. **Kewajiban Hak Cipta vs. Merek Dagang (Trademark):**
    - **Hak Cipta Kode (Wajib Dipertahankan):** File `LICENSE`, `COPYRIGHT`, serta header `#-- copyright` (OpenProject GmbH, ChiliProject Team, Jean-Philippe Lang, dan komponen MIT) di dalam kode sumber **tidak boleh dihapus**.
    - **Merek Dagang UI (Wajib Di-White-Label):** Nama dan logo `"OpenProject"` pada antarmuka pengguna, tab peramban, halaman login, dan *footer* email **wajib diganti** dengan identitas resmi organisasi agar tidak melanggar merek dagang OpenProject GmbH.
-   - **Atribusi Ikon (CC BY 3.0):** Catat atribusi *OpenProject Icon Font* di dalam dokumentasi lisensi internal repositori (`docs/plan/LEGAL_NOTICES.md`) sehingga antarmuka pengguna tetap bebas dari tautan keluar ke `www.openproject.org`.
+   - **Atribusi Ikon (CC BY 3.0):** Catat atribusi *LPMS Icon Font* di dalam dokumentasi lisensi internal repositori (`docs/plan/LEGAL_NOTICES.md`) sehingga antarmuka pengguna tetap bebas dari tautan keluar ke `www.openproject.org`.
 3. **Isolasi Jaringan Enam Lapis (Zero Outbound Traffic):**
    - **Lapis 1:** Matikan *Security Upgrade Badge* & *Release API* (`releases.openproject.com`) yang mengirimkan `installation_uuid` dan metadata server.
    - **Lapis 2:** Matikan widget *Community*, *Enterprise Upsell*, dan *New Features Teaser* pada *Homescreen*.
@@ -177,10 +177,10 @@ Selain 30 fitur utama di atas, sistem juga mendaftarkan 5 kunci kompatibilitas a
 
 ## 4. ARSITEKTUR "ADMIN FEATURE TOGGLE MANAGER" (REVISI: IN-HOUSE, TANPA MENYENTUH LISENSI)
 
-Saklar On/Off mengatur **fitur buatan LPMS3 sendiri**, bukan gerbang lisensi OpenProject.
+Saklar On/Off mengatur **fitur buatan LPMS3 sendiri**, bukan gerbang lisensi LPMS.
 
 1. **Penyimpanan:** `Setting.internal_enabled_features` (array kunci, default `[]`), didaftarkan oleh `plugin/openproject-lpms3/config/initializers/inhouse_feature_settings.rb`, disimpan di tabel `settings`.
-2. **Registri:** `OpenProject::Lpms3::Features` (`lib/open_project/lpms3/features.rb`): `CATALOG` 35 kunci klaster A-F, `IMPLEMENTED` (fitur yang sudah selesai; awalnya kosong), `enabled?(key)` = diimplementasikan **dan** dinyalakan admin. `EnterpriseToken` tidak dipanggil/diubah.
+2. **Registri:** `LPMS::Lpms3::Features` (`lib/open_project/lpms3/features.rb`): `CATALOG` 35 kunci klaster A-F, `IMPLEMENTED` (fitur yang sudah selesai; awalnya kosong), `enabled?(key)` = diimplementasikan **dan** dinyalakan admin. `EnterpriseToken` tidak dipanggil/diubah.
 3. **Metadata tampilan:** `InhouseFeatureCatalog` (`app/models/inhouse_feature_catalog.rb`) memuat judul, lokasi menu, deskripsi, tujuan, output dari Bagian 3.
 4. **Halaman admin:** `Administration -> Modul Fitur Internal` (`/admin/lpms3/internal_features`, admin saja): tabel per klaster dengan checkbox; fitur belum selesai tampil "Belum tersedia" dan tidak bisa dicentang; server menolak kunci di luar `IMPLEMENTED`.
 5. **Menambah fitur baru:** bangun UI/logika di plugin → tambahkan kunci ke `IMPLEMENTED` → lindungi dengan `Features.enabled?(key)` → tambahkan uji di `ops/audit_mod08.rb` → rilis.
@@ -237,11 +237,11 @@ Kerjakan modul di bawah ini **satu per satu secara berurutan**. Setiap modul waj
 ---
 
 ### MOD-02 (REVISI): Registri Fitur In-House & `Setting.internal_enabled_features`
-> **Revisi keputusan pemilik:** `EnterpriseToken` **tidak diubah** (token kosong, Community Edition). Dilarang menimpa `allows_to?`, `active?`, `token_object`, atau memalsukan token/lisensi. Seluruh fitur dikembangkan **sendiri (in-house)** di plugin `plugin/openproject-lpms3`, tanpa menyalin atau mengaktifkan kode Enterprise OpenProject. Menu dan navigasi dipertahankan sebagai kerangka kosong; kode fitur Enterprise terkunci milik OpenProject dihapus dari tampilan/build (lihat MOD-03 langkah 8).
+> **Revisi keputusan pemilik:** `EnterpriseToken` **tidak diubah** (token kosong, Community Edition). Dilarang menimpa `allows_to?`, `active?`, `token_object`, atau memalsukan token/lisensi. Seluruh fitur dikembangkan **sendiri (in-house)** di plugin `plugin/openproject-lpms3`, tanpa menyalin atau mengaktifkan kode Enterprise LPMS. Menu dan navigasi dipertahankan sebagai kerangka kosong; kode fitur Enterprise terkunci milik LPMS dihapus dari tampilan/build (lihat MOD-03 langkah 8).
 
 **Tujuan:** Menyediakan katalog 35 kunci fitur in-house dan penyimpanan saklar dinamis tanpa menyentuh mekanisme lisensi.
 
-1. `plugin/openproject-lpms3/lib/open_project/lpms3/features.rb`: modul `OpenProject::Lpms3::Features` berisi `CATALOG` (35 kunci + klaster A-F), `IMPLEMENTED` (daftar fitur yang sudah selesai; awalnya kosong), `enabled_keys`, dan `enabled?(key)` (true hanya bila fitur sudah **diimplementasikan** dan dinyalakan admin).
+1. `plugin/openproject-lpms3/lib/open_project/lpms3/features.rb`: modul `LPMS::Lpms3::Features` berisi `CATALOG` (35 kunci + klaster A-F), `IMPLEMENTED` (daftar fitur yang sudah selesai; awalnya kosong), `enabled_keys`, dan `enabled?(key)` (true hanya bila fitur sudah **diimplementasikan** dan dinyalakan admin).
 2. `plugin/openproject-lpms3/config/initializers/inhouse_feature_settings.rb`: `Settings::Definition.add :internal_enabled_features, default: [], format: :array, writable: true` (disimpan di tabel `settings`).
 3. Setiap fitur baru yang selesai dikembangkan: tambahkan kuncinya ke `IMPLEMENTED`, bangun UI/logikanya di plugin, dan lindungi dengan `Features.enabled?(key)`.
 4. **Verify:** `bundle exec rails runner` memeriksa `Features.keys.size == 35`, `Setting.internal_enabled_features == []` secara default, `Features.enabled?(:x) == false` untuk fitur belum selesai, set/baca ulang nilai setting berhasil, dan `EnterpriseToken.active?`/`show_banners?` tidak berubah dari bawaan.
@@ -250,7 +250,7 @@ Kerjakan modul di bawah ini **satu per satu secara berurutan**. Setiap modul waj
 ---
 
 ### MOD-03 (REVISI): Menu & Antarmuka "Admin Feature Toggle Manager" In-House
-> **Realisasi (rilis 1.8, ikon diperbaiki di 1.14):** semua berkas berada di plugin LPMS3, membaca `OpenProject::Lpms3::Features`, **bukan** `EnterpriseToken`.
+> **Realisasi (rilis 1.8, ikon diperbaiki di 1.14):** semua berkas berada di plugin LPMS3, membaca `LPMS::Lpms3::Features`, **bukan** `EnterpriseToken`.
 
 **Tujuan:** Halaman Administrator untuk melihat 35 fitur (30 utama + 5 kompatibilitas) lengkap dengan Deskripsi, Tujuan, Output, dan menyalakan/mematikan fitur yang sudah selesai dikembangkan.
 
@@ -261,13 +261,13 @@ Kerjakan modul di bawah ini **satu per satu secara berurutan**. Setiap modul waj
 5. Tampilan `plugin/.../app/views/lpms3/admin/internal_features_settings/show.html.erb`: tombol "Aktifkan semua yang tersedia" / "Matikan semua", tabel per klaster (checkbox, nama & kunci, lokasi menu, deskripsi, tujuan, output), tombol Simpan.
 6. Terjemahan `lpms3.internal_features.*` di `config/locales/en.yml` dan `id.yml` plugin.
 7. **Ritual Wajib:** Verify (`bash ops/verify.sh`) $\rightarrow$ Commit $\rightarrow$ Push $\rightarrow$ Live Deploy.
-8. **BELUM DIKERJAKAN:** menghapus tampilan fitur Enterprise terkunci bawaan OpenProject dengan menu & navigasi tetap ada; wajib per fitur dengan uji HTTP admin agar tidak memicu 500.
+8. **BELUM DIKERJAKAN:** menghapus tampilan fitur Enterprise terkunci bawaan LPMS dengan menu & navigasi tetap ada; wajib per fitur dengan uji HTTP admin agar tidak memicu 500.
 
 ---
 
 ### MOD-04: Pembersihan Widget Eksternal & Security Badge pada Homescreen
 > **Realisasi:** selesai lewat `plugin/.../homescreen_hardening.rb` (membuang blok `community`, `upsell`, `new_features`) dan patch `SecurityBadgeHelper` di `deploy/Dockerfile`. File komponen tidak diedit.
-**Tujuan:** Memastikan halaman utama (*Homescreen*) tidak menampilkan widget komunitas OpenProject, banner *upsell*, teaser fitur baru, maupun lencana keamanan eksternal.
+**Tujuan:** Memastikan halaman utama (*Homescreen*) tidak menampilkan widget komunitas LPMS, banner *upsell*, teaser fitur baru, maupun lencana keamanan eksternal.
 
 1. Pertahankan header `#-- copyright` pada masing-masing file berikut, lalu ubah metode `render?` agar selalu mengembalikan `false`:
    - `app/components/homescreen/blocks/community.rb`

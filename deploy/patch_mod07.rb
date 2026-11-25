@@ -8,7 +8,7 @@ s = File.read(path)
 end
 File.write(path, s)
 
-# text_powered_by (dipakai tautan "Powered by OpenProject"): teks netral tanpa %{link}. Plugin tidak bisa menimpa locale inti.
+# text_powered_by (dipakai tautan "Powered by LPMS"): teks netral tanpa %{link}. Plugin tidak bisa menimpa locale inti.
 { "/app/config/locales/en.yml" => ['text_powered_by: "Powered by %{link}"', 'text_powered_by: "LPMS3 internal portal"'],
   "/app/config/locales/crowdin/id.yml" => ["text_powered_by: Didukung oleh %{link}", 'text_powered_by: "Portal internal LPMS3"'] }.each do |file, (from, to)|
   t = File.read(file)

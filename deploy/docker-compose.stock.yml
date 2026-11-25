@@ -1,4 +1,4 @@
-# LPMS3 · override untuk OpenProject resmi + plugin LPMS3. Landing :5100 (IdsLogin): Login User dan Login Admin, keduanya via IDS.
+# LPMS3 · override untuk LPMS resmi + plugin LPMS3. Landing :5100 (IdsLogin): Login User dan Login Admin, keduanya via IDS.
 x-ids-env: &ids
   OPENPROJECT_OPENID__CONNECT_IDS_DISPLAY__NAME: "IDS Len"
   OPENPROJECT_OPENID__CONNECT_IDS_IDENTIFIER: "${IDS_CLIENT_ID}"
@@ -20,14 +20,14 @@ x-ids-env: &ids
   OPENPROJECT_FORCE__HELP__LINK: "/lpms3/panduan"
   OPENPROJECT_LOGIN__REQUIRED: "true"
   OPENPROJECT_DROP__OLD__SESSIONS__ON__LOGIN: "true"
-  OPENPROJECT_DROP__OLD__SESSIONS__ON__LOGOUT: "true"   # bawaan OpenProject; plan awal "false" ditolak (sesi lama tetap hidup setelah logout)
+  OPENPROJECT_DROP__OLD__SESSIONS__ON__LOGOUT: "true"   # bawaan LPMS; plan awal "false" ditolak (sesi lama tetap hidup setelah logout)
   OPENPROJECT_SHOW__PRODUCT__VERSION: "false"            # menyembunyikan tautan versi/commit ke github.com di Administration > Information
   OPENPROJECT_CSP__IMG__SRC: "[\"'self'\", 'data:', 'blob:']"
   OPENPROJECT_EMAIL__DELIVERY__METHOD: "smtp"
   OPENPROJECT_SELF__REGISTRATION: "0"
   # Kunci bersama pemicu LenO (header X-Lpms3-Key), boleh dua nilai dipisah koma untuk rotasi; kosong = API pemicu menolak semua.
   LPMS3_LENO_KEYS: "${LPMS3_LENO_KEYS:-}"
-# Image OpenProject + plugin LPMS3 (dibangun oleh ops/build_image.sh dari deploy/Dockerfile).
+# Image LPMS + plugin LPMS3 (dibangun oleh ops/build_image.sh dari deploy/Dockerfile).
 x-lpms3-op: &lpms3op
   image: lpms3/openproject:${LPMS3_IMAGE_TAG:-local}
 services:

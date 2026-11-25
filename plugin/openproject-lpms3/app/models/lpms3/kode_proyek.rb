@@ -4,7 +4,7 @@ module Lpms3
   # Kode Proyek sebagai identitas proyek (1.48): identifier URL = Kode Proyek (format XXX-XXXXXXXX, 12 karakter) dan
   # prefiks nomor WBS. Selama Kode belum diisi, dipakai 12 karakter pertama judul proyek; Admin Eselon 1 Fungsi
   # Pelaksanaan Proyek diberi tugas untuk mengisinya (Inbox.kode_proyek).
-  # Catatan: identifier OpenProject (mode klasik) hanya menerima huruf kecil, sehingga disimpan huruf kecil; tampilan
+  # Catatan: identifier LPMS (mode klasik) hanya menerima huruf kecil, sehingga disimpan huruf kecil; tampilan
   # (prefiks WBS, daftar) memakai huruf kapital lewat .prefix.
   module KodeProyek
     CF_NAME = "Kode Proyek"

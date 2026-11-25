@@ -37,7 +37,7 @@ module Lpms3
 
     def self.normalize_kode(value) = value.to_s.strip.upcase
 
-    # Wewenang dari keanggotaan peran global (langsung atau lewat grup). Admin OpenProject tidak otomatis lolos.
+    # Wewenang dari keanggotaan peran global (langsung atau lewat grup). Admin LPMS tidak otomatis lolos.
     def self.holds_global_permission?(user, perm)
       return false unless user.is_a?(::User) && user.active?
 
@@ -282,7 +282,7 @@ module Lpms3
         opt = cf.custom_options.find_by(value: pendekatan)
         values[cf.id] = opt.id.to_s if opt
       end
-      # OpenProject 17: atribut proyek harus diaktifkan per proyek sebelum nilainya bisa disimpan. Aktifkan semua atribut
+      # LPMS 17: atribut proyek harus diaktifkan per proyek sebelum nilainya bisa disimpan. Aktifkan semua atribut
       # proyek agar Pimpro juga bisa mengisi atribut wajib lain (pelanggan, kontrak, dst.).
       ::ProjectCustomField.find_each do |cf|
         ::ProjectCustomFieldProjectMapping.find_or_create_by!(project_id: proj.id, custom_field_id: cf.id)

@@ -66,7 +66,7 @@ RINGKASAN: 34 PASS, 1 FAIL dari 35
 ## Cakupan dan batas audit
 
 - **Saklar On/Off:** diuji pada `Setting.internal_enabled_features` (simpan, saring ke katalog, ON/OFF/ON, pemulihan). Karena belum ada fitur in-house yang selesai (`IMPLEMENTED` kosong), perilaku "ON + implemented" diuji dengan simulasi sementara di proses uji, bukan fitur nyata.
-- **"35 fitur bebas Error 500":** berarti halaman katalog `/admin/lpms3/internal_features` (memuat 35 kunci) dan halaman admin lain bukan 5xx. Fitur Enterprise bawaan OpenProject tetap terkunci dan tidak diuji karena memang tidak diaktifkan.
+- **"35 fitur bebas Error 500":** berarti halaman katalog `/admin/lpms3/internal_features` (memuat 35 kunci) dan halaman admin lain bukan 5xx. Fitur Enterprise bawaan LPMS tetap terkunci dan tidak diuji karena memang tidak diaktifkan.
 - **Gravatar:** `gravatar_enabled? == false` dan tidak ada string `gravatar` di halaman yang diuji. **Banner:** blok homescreen vendor dibuang dan CSS penyembunyi banner terpasang; elemen banner masih ada di DOM, hanya disembunyikan (tampilan tidak diperiksa di browser).
 - **PATCH saklar via UI:** hanya diuji sampai penolakan CSRF (422); simpan lewat browser dengan token sah belum diuji.
 - **Email:** isi dan tautan diperiksa pada MOD-07; pengiriman belum diuji (SMTP belum ada).
@@ -82,4 +82,4 @@ COPYRIGHT_short repo=b8cf52fa8ca00d47fe2f223f4435c6de324b9f8db6fed82ef48bf94f4a7
 
 ## Item terbuka di luar MOD-08
 
-SMTP internal (host/port/kredensial), halaman `/panduan-internal`, keputusan `DROP_OLD_SESSIONS_ON_LOGOUT` (kini `false` sesuai plan, bawaan OpenProject `true`), 2FA/monitoring/UAT (checklist D12), dan penghapusan tampilan fitur Enterprise terkunci (MOD-03 langkah 8).
+SMTP internal (host/port/kredensial), halaman `/panduan-internal`, keputusan `DROP_OLD_SESSIONS_ON_LOGOUT` (kini `false` sesuai plan, bawaan LPMS `true`), 2FA/monitoring/UAT (checklist D12), dan penghapusan tampilan fitur Enterprise terkunci (MOD-03 langkah 8).

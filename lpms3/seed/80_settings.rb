@@ -7,7 +7,7 @@ require_relative "00_data"
 Setting.app_title = "LPMS3"
 # MOD-07: identitas portal internal; footer email tanpa tautan eksternal.
 Setting.organization_name = "PT Len Industri (Persero)"
-# Teks sambutan bawaan OpenProject memuat tautan pemasaran ke openproject.org; diganti teks internal.
+# Teks sambutan bawaan LPMS memuat tautan pemasaran ke openproject.org; diganti teks internal.
 Setting.welcome_title = "Selamat datang di LPMS3"
 Setting.welcome_text = "LPMS3 adalah portal internal pengelolaan proyek. Masuk melalui IDS, lalu buka proyek Anda dari menu di sebelah kiri."
 Setting.emails_footer = {

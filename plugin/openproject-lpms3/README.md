@@ -5,7 +5,7 @@ Kerangka dan spesifikasi: `docs/plan/10_Spesifikasi_Teknis_v1.3.md` §12 (sideba
 ## Status (S1 - kerangka)
 | Bagian | Status |
 |---|---|
-| Tema UIx (token, Poppins 400/500/600 dari server sendiri, warna desain OpenProject diselaraskan) | Dasar selesai; sidebar/kartu bawaan OpenProject belum disesuaikan penuh |
+| Tema UIx (token, Poppins 400/500/600 dari server sendiri, warna desain LPMS diselaraskan) | Dasar selesai; sidebar/kartu bawaan LPMS belum disesuaikan penuh |
 | Settings › Organisasi & Fungsi (`/admin/lpms3/organisasi`, khusus admin) | Selesai, baca-saja (data Nota 021) |
 | Sidebar LPMS3 (§12.2), kapabilitas (§14), LKP (§13) | Belum |
 

@@ -4,7 +4,7 @@ Cakupan: stack compose `lpms3v2` (:5100). Jangan menyentuh v1/:5000, `lpms3-ui`,
 
 1. **Backup:** `bash ops/backup.sh` (dump DB + env + checksum SHA-256 di `data/backup/<tanggal>`).
 2. **Naikkan tag:** ubah `LPMS3_IMAGE_TAG` di `deploy/.env` dan `deploy/.env.example` (mis. `17.9.7-lpms3.1.N`).
-3. **Build + restart:** `bash ops/compose_up.sh` (`ops/build_image.sh` → `docker build -f deploy/Dockerfile -t lpms3/openproject:<tag> .`; `docker compose -p lpms3v2 build idslogin`; `docker compose -p lpms3v2 up -d`). Idempoten. Build **gagal sengaja** bila pola source OpenProject yang dipatch (`deploy/patch_mod06.rb`, `deploy/patch_mod07.rb`, `RUN sed` di Dockerfile) tidak ditemukan.
+3. **Build + restart:** `bash ops/compose_up.sh` (`ops/build_image.sh` → `docker build -f deploy/Dockerfile -t lpms3/openproject:<tag> .`; `docker compose -p lpms3v2 build idslogin`; `docker compose -p lpms3v2 up -d`). Idempoten. Build **gagal sengaja** bila pola source LPMS yang dipatch (`deploy/patch_mod06.rb`, `deploy/patch_mod07.rb`, `RUN sed` di Dockerfile) tidak ditemukan.
 4. **Bila Caddyfile atau `deploy/panduan/` berubah:** `docker restart lpms3v2-proxy-1` (proxy tidak otomatis memuat ulang konfigurasi).
 5. **Tunggu sehat:** `docker inspect -f '{{.State.Health.Status}}' lpms3v2-web-1` = `healthy`.
 6. **Seed pengaturan (bila `lpms3/seed/80_settings.rb` berubah):** `bash lpms3/seed/run.sh lpms3/seed/80_settings.rb`.

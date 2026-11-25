@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Backup OpenProject: dump PostgreSQL + opdata + lkp-raw + env. Retensi 14 hari.
+# Backup LPMS: dump PostgreSQL + opdata + lkp-raw + env. Retensi 14 hari.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TS=$(date +%Y%m%d-%H%M); DST="$ROOT/data/backup/$TS"; mkdir -p "$DST"

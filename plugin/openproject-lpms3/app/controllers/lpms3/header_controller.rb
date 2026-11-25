@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Lpms3
-  # Panel header gaya LenO: penyegaran berkala Reminder, Tasklist, Notifikasi (OpenProject::Lpms3::HeaderSummary).
+  # Panel header gaya LenO: penyegaran berkala Reminder, Tasklist, Notifikasi (LPMS::Lpms3::HeaderSummary).
   # Hanya data milik pengguna sendiri; tanpa parameter yang memilih pengguna lain.
   class HeaderController < ::ApplicationController
     before_action :require_login

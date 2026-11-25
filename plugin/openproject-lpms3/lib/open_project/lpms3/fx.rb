@@ -86,7 +86,7 @@ module OpenProject::Lpms3
       JSON.parse(res.body)
     end
 
-    # Selaraskan pengaturan biaya/budget OpenProject dengan mata uang dasar korporasi.
+    # Selaraskan pengaturan biaya/budget LPMS dengan mata uang dasar korporasi.
     def apply_base_to_budget_settings!
       b = base or return
       Setting.costs_currency = b.symbol

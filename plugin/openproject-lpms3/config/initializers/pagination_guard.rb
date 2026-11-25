@@ -15,7 +15,7 @@
 #++
 
 # LPMS3 audit: halaman daftar di luar rentang (mis. /projects?page=99, atau /admin/roles?page=2 setelah
-# per_page=100) membuat komponen pagination melempar ArgumentError di dalam view -> HTTP 500 bawaan OpenProject.
+# per_page=100) membuat komponen pagination melempar ArgumentError di dalam view -> HTTP 500 bawaan LPMS.
 # Untuk permintaan GET, arahkan ke halaman 1; error lain diteruskan ke penanganan 500 bawaan.
 Rails.application.config.to_prepare do
   next if ApplicationController.instance_variable_get(:@lpms3_pagination_guard)

@@ -525,7 +525,7 @@ module Lpms3
         attrs = { subject: "#{n.wbs_code} #{n.tasks}".first(255), description: n.notes.to_s,
                   assigned_to_id: n.pic_user_id, parent_id: parent_node.root? ? nil : parent_node.work_package_id }
         if r[:leaf]
-          # Tanggal WBS = tanggal kalender (template); tanpa ignore_non_working_days OpenProject menggeser tanggal akhir pekan
+          # Tanggal WBS = tanggal kalender (template); tanpa ignore_non_working_days LPMS menggeser tanggal akhir pekan
           # sehingga selalu berbeda dan setiap refresh menulis jurnal + notifikasi baru ke PIC (temuan 1.41).
           attrs.merge!(start_date: n.date_plan_start, due_date: n.date_plan_finish, schedule_manually: true,
                        ignore_non_working_days: true, done_ratio: (n.pct * 100).round)
