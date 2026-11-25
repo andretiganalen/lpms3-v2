@@ -12,7 +12,7 @@ SUBJ = "[T2-99] Review rencana: Risk Register & Change Request sesuai kebutuhan 
 DESC = "Catatan pengguna: Please keep this English text. Jangan ubah teks Indonesia ini. Status: In Progress."
 proj = nil
 begin
-  tpl = Project.find_by!(identifier: "lpms3-tpl-prediktif")
+  tpl = Project.find_by!(identifier: "lpms3-predik")
   res = Projects::CopyService.new(user: admin, source: tpl).call(target_project_params: { name: NAME, identifier: "smoke-lang-proyek" }, only: %i[members work_packages])
   raise "copy gagal: #{res.errors.full_messages.join('; ')}" unless res.success?
   proj = res.result

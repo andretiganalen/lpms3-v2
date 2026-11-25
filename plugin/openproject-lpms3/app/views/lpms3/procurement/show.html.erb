@@ -116,7 +116,7 @@
             <% @shown.each do |it| %>
               <% v = it.v %>
               <tr>
-                <% unless @project %><td><%= link_to it.wp.project.name, project_path(it.wp.project) %></td><% end %>
+                <% unless @project %><td><%= link_to ::Lpms3::KodeProyek.judul(it.wp.project), project_path(it.wp.project) %></td><% end %>
                 <% cols.each do |c| %>
                   <td>
                   <% if c == :item %><%= link_to it.wp.subject, work_package_path(it.wp) %>

@@ -2,8 +2,8 @@
 # PIC = eselon2.staff01.mpr (Tim Proyek), Pejabat Eselon 2 = eselon2.pejabat01.mpr (Project Sponsor). Idempoten.
 admin = User.find_by!(login: "andre.tigana.k@len.co.id")
 User.current = admin
-hib = Project.find_by!(identifier: "lpms3-tpl-hibrid")
-pj = Project.find_or_initialize_by(identifier: "leno-mobile-demo")
+hib = Project.find_by!(identifier: "lpms3-hibrid")
+pj = Project.find_or_initialize_by(identifier: "leno-mobile")
 pj.name = "LenO Mobile Demo"
 pj.workspace_type = "project"
 pj.public = false

@@ -47,10 +47,10 @@ module OpenProject::Lpms3
       list = []
       inbox.persetujuan(user).each do |t|
         list << item(title: t.work_package.subject, from: t.requested_by&.name, at: t.requested_at,
-                     text: "Menunggu keputusan Anda (#{t.project.name})", href: routes.lpms3_tugas_path)
+                     text: "Menunggu keputusan Anda (#{::Lpms3::KodeProyek.judul(t.project)})", href: routes.lpms3_tugas_path)
       end
       inbox.kickoff(user).each do |k|
-        list << item(title: "Kick-Off #{k.project.name}", from: k.assigned_by&.name || "Sistem", at: k.updated_at,
+        list << item(title: "Kick-Off #{::Lpms3::KodeProyek.judul(k.project)}", from: k.assigned_by&.name || "Sistem", at: k.updated_at,
                      text: k.state == "menunggu_analis" ? "Tunjuk Project Analis" : "Kirim undangan Kick-Off", href: routes.lpms3_tugas_path)
       end
       inbox.masukan(user).each do |f|
@@ -68,11 +68,11 @@ module OpenProject::Lpms3
                      href: routes.lpms3_pemicu_path(tr))
       end
       inbox.wbs_pic(user).each do |n|
-        list << item(title: "#{n.wbs_code} #{n.tasks}", from: n.project.name, at: n.updated_at,
+        list << item(title: "#{n.wbs_code} #{n.tasks}", from: ::Lpms3::KodeProyek.judul(n.project), at: n.updated_at,
                      text: "Tugaskan tim #{n.pic_unit&.name} sebagai PIC WBS", href: routes.lpms3_tugas_path)
       end
       inbox.anggota(user).each do |r|
-        list << item(title: "#{r.user.name} — #{r.project.name}", from: r.requester.name, at: r.requested_at,
+        list << item(title: "#{r.user.name} — #{::Lpms3::KodeProyek.judul(r.project)}", from: r.requester.name, at: r.requested_at,
                      text: "Setujui anggota proyek baru", href: routes.lpms3_tugas_path)
       end
       inbox.kode_proyek(user).each do |pj|
@@ -84,7 +84,7 @@ module OpenProject::Lpms3
                      text: "Peringatan kontrak", href: routes.lpms3_project_kontrak_path(k[:project]))
       end
       inbox.baseline_cr(user).each do |b|
-        list << item(title: "#{b.label} — #{b.project.name}", from: "Editor WBS", at: b.updated_at,
+        list << item(title: "#{b.label} — #{::Lpms3::KodeProyek.judul(b.project)}", from: "Editor WBS", at: b.updated_at,
                      text: "Ajukan Change Request ##{b.change_request_form_id} (BFR-001)", href: routes.work_package_path(b.change_request_form_id))
       end
       list.sort_by { |i| i[:at].to_s }.reverse
@@ -106,7 +106,7 @@ module OpenProject::Lpms3
                          .order(:due_date).limit(LIMIT)
       due.each do |wp|
         late = wp.due_date < Date.current
-        list << item(title: wp.subject, text: "#{wp.project.name} · #{late ? 'terlambat' : 'jatuh tempo'} #{I18n.l(wp.due_date, format: '%d %b %Y')}",
+        list << item(title: wp.subject, text: "#{::Lpms3::KodeProyek.judul(wp.project)} · #{late ? 'terlambat' : 'jatuh tempo'} #{I18n.l(wp.due_date, format: '%d %b %Y')}",
                      at: wp.due_date.in_time_zone, href: routes.work_package_path(wp), tone: late ? "danger" : "warning",
                      label: due_label(wp.due_date))
       end

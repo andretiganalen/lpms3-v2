@@ -6,7 +6,7 @@
 # Ruang informasi tanpa modul Work packages (mis. wiki "info-umum") dilewati. Item yang sudah ada (subjek sama) tidak diubah.
 admin = User.where(admin: true, status: User.statuses[:active], type: "User").where.not(login: "lpms3-bridge").order(:id).first || User.system
 User.current = admin
-tpls = { "Prediktif" => Project.find_by(identifier: "lpms3-tpl-prediktif"), "Hibrid" => Project.find_by(identifier: "lpms3-tpl-hibrid") }
+tpls = { "Prediktif" => Project.find_by(identifier: "lpms3-predik"), "Hibrid" => Project.find_by(identifier: "lpms3-hibrid") }
 delivery = ProjectCustomField.find_by(name: "Pendekatan Delivery")
 STEP_OR_DOC = /\A(\[T\d-\d+\]|G\d — |Dokumen Rencana — )/
 total = Hash.new(0)

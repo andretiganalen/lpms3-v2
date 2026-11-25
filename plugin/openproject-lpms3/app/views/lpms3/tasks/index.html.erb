@@ -20,7 +20,7 @@
       <div style="font-size:13px;color:var(--uix-text-body);margin-top:6px">
         <div><span style="color:var(--uix-text-secondary)">Dari:</span> <%= task.requested_by.name %></div>
         <div><span style="color:var(--uix-text-secondary)">Kapan:</span> <%= I18n.l(task.requested_at, format: "%d %b %Y %H:%M") %></div>
-        <div><span style="color:var(--uix-text-secondary)">Proyek:</span> <%= task.project.name %></div>
+        <div><span style="color:var(--uix-text-secondary)">Proyek:</span> <%= ::Lpms3::KodeProyek.judul(task.project) %></div>
         <% if task.requester_note.present? %>
           <div><span style="color:var(--uix-text-secondary)">Catatan pengaju:</span> <%= task.requester_note %></div>
         <% end %>
@@ -45,7 +45,7 @@
     <h2 style="margin:24px 0 4px">Permintaan anggota proyek <span style="font-size:14px;color:var(--uix-text-secondary)">(<%= @anggota.size %> menunggu persetujuan Pimpro)</span></h2>
     <% @anggota.each do |r| %>
       <section style="border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);padding:14px;margin-bottom:12px;background:var(--uix-surface)">
-        <strong><%= r.user.name %></strong> → <%= link_to r.project.name, project_path(r.project) %>
+        <strong><%= r.user.name %></strong> → <%= link_to ::Lpms3::KodeProyek.judul(r.project), project_path(r.project) %>
         <div style="font-size:13px;margin-top:6px"><span style="color:var(--uix-text-secondary)">Diusulkan:</span> <%= r.requester.name %> · <%= l(r.requested_at, format: :short) %> · Peran: <%= r.roles.map(&:name).join(", ").presence || "Tim Proyek" %></div>
         <%= form_with url: lpms3_tugas_anggota_path(r), method: :post, local: true, style: "margin-top:10px;display:flex;gap:8px;flex-wrap:wrap" do %>
           <input name="catatan" class="lpms3-input" placeholder="Catatan (opsional)" aria-label="Catatan keputusan">
@@ -64,7 +64,7 @@
         <% @isian.each do |wp| %>
           <tr>
             <th scope="row"><%= link_to wp.subject, work_package_path(wp) %><br><small class="lpms3-hint"><%= wp.type.name %></small></th>
-            <td><%= wp.project.name %></td>
+            <td><%= ::Lpms3::KodeProyek.judul(wp.project) %></td>
             <td><span class="lpms3-chip <%= 'lpms3-chip--warn' if ::Lpms3::DraftVisibility.draft?(wp) %>"><%= wp.status.name %></span></td>
             <td>
               <%= form_with url: lpms3_project_ajukan_path(wp.project, wp), method: :post, local: true, class: "lpms3-kontrak__inline" do %>
@@ -93,7 +93,7 @@
     <h2 style="margin:24px 0 4px">Draft Baseline WBS <span style="font-size:14px;color:var(--uix-text-secondary)">(<%= @baseline_cr.size %> menunggu pengajuan CR)</span></h2>
     <% @baseline_cr.each do |b| %>
       <section style="border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);padding:14px;margin-bottom:12px;background:var(--uix-surface)">
-        <strong><%= b.label %> — <%= b.project.name %></strong>
+        <strong><%= b.label %> — <%= ::Lpms3::KodeProyek.judul(b.project) %></strong>
         <div style="font-size:13px;color:var(--uix-text-body);margin-top:6px">
           <div><span style="color:var(--uix-text-secondary)">Harus:</span> <strong>Tinjau perubahan lalu ajukan Change Request (Draft → Diajukan)</strong></div>
           <div><%= link_to "Change Request ##{b.change_request_form_id}", work_package_path(b.change_request_form_id) %> · <%= link_to "WBS & Bobot", lpms3_project_wbs_path(b.project) %></div>
@@ -108,7 +108,7 @@
       <section style="border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);padding:14px;margin-bottom:12px;background:var(--uix-surface)">
         <strong><%= n.wbs_code %> <%= n.tasks %></strong>
         <div style="font-size:13px;color:var(--uix-text-body);margin-top:6px">
-          <div><span style="color:var(--uix-text-secondary)">Proyek:</span> <%= link_to n.project.name, lpms3_project_wbs_path(n.project) %></div>
+          <div><span style="color:var(--uix-text-secondary)">Proyek:</span> <%= link_to ::Lpms3::KodeProyek.judul(n.project), lpms3_project_wbs_path(n.project) %></div>
           <div><span style="color:var(--uix-text-secondary)">Jadwal:</span> <%= n.date_plan_start ? l(n.date_plan_start) : "—" %> s.d. <%= n.date_plan_finish ? l(n.date_plan_finish) : "—" %></div>
           <div><span style="color:var(--uix-text-secondary)">Harus:</span> <strong>Tugaskan anggota tim <%= n.pic_unit.name %> sebagai PIC</strong></div>
         </div>
@@ -127,7 +127,7 @@
     <p class="lpms3-note">Isi atribut <strong>Kode Proyek</strong> (format XXX-XXXXXXXX) di pengaturan proyek. Kode menjadi alamat (URL) proyek dan prefiks nomor WBS; sementara dipakai 12 karakter dari judul proyek.</p>
     <% @kode_proyek.each do |pj| %>
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;margin-bottom:8px;border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);background:var(--uix-surface)">
-        <div><strong><%= pj.name %></strong><div style="font-size:12px;color:var(--uix-text-secondary)">Sementara: <%= ::Lpms3::KodeProyek.prefix(pj) %></div></div>
+        <div><strong><%= ::Lpms3::KodeProyek.judul(pj) %></strong><div style="font-size:12px;color:var(--uix-text-secondary)">Sementara: <%= ::Lpms3::KodeProyek.prefix(pj) %></div></div>
         <%= link_to "Isi Kode Proyek", "/projects/#{pj.identifier}/settings/general", style: "display:inline-flex;align-items:center;height:40px;padding:0 14px;border-radius:var(--uix-radius-control);font-weight:600;color:var(--uix-surface);background:var(--uix-primary);text-decoration:none" %>
       </div>
     <% end %>
@@ -178,7 +178,7 @@
       <section style="border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);padding:14px;margin-bottom:12px;background:var(--uix-surface)">
         <strong><%= t.work_package.subject %></strong>
         <div style="font-size:13px;color:var(--uix-text-body);margin-top:6px">
-          <div><span style="color:var(--uix-text-secondary)">Proyek:</span> <%= t.project.name %></div>
+          <div><span style="color:var(--uix-text-secondary)">Proyek:</span> <%= ::Lpms3::KodeProyek.judul(t.project) %></div>
           <div><span style="color:var(--uix-text-secondary)">Disetujui:</span> <%= I18n.l(t.decided_at, format: "%d %b %Y %H:%M") %></div>
         </div>
         <%= form_with url: lpms3_tugas_tembusan_path(t), method: :post, local: true, style: "margin-top:10px" do %>
@@ -196,7 +196,7 @@
       <div style="font-size:13px;color:var(--uix-text-body);margin-top:6px">
         <div><span style="color:var(--uix-text-secondary)">Dari:</span> <%= t.tembusan_by&.name %> (Eselon 1)</div>
         <div><span style="color:var(--uix-text-secondary)">Kapan:</span> <%= I18n.l(t.tembusan_at, format: "%d %b %Y %H:%M") %></div>
-        <div><span style="color:var(--uix-text-secondary)">Proyek:</span> <%= t.project.name %> · hanya untuk diketahui</div>
+        <div><span style="color:var(--uix-text-secondary)">Proyek:</span> <%= ::Lpms3::KodeProyek.judul(t.project) %> · hanya untuk diketahui</div>
       </div>
     </section>
   <% end %>
@@ -207,7 +207,7 @@
   <% end %>
   <% @kickoff_tunjuk.each do |k| %>
     <section style="border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);padding:14px;margin-bottom:12px;background:var(--uix-surface)">
-      <strong><%= k.project.name %></strong>
+      <strong><%= ::Lpms3::KodeProyek.judul(k.project) %></strong>
       <p style="font-size:13px;color:var(--uix-text-secondary);margin:6px 0">Dari: Dokumen Inisiasi telah disetujui final. Harus: tunjuk Project Analis (peran "Project Analis" di proyek ini).</p>
       <% if k.analis_candidates.empty? %>
         <div style="font-size:13px;color:var(--uix-danger)">Belum ada anggota proyek dengan peran Project Analis.</div>
@@ -221,7 +221,7 @@
   <% end %>
   <% @kickoff_undang.each do |k| %>
     <section style="border:1px solid var(--uix-border);border-radius:var(--uix-radius-card);padding:14px;margin-bottom:12px;background:var(--uix-surface)">
-      <strong><%= k.project.name %></strong>
+      <strong><%= ::Lpms3::KodeProyek.judul(k.project) %></strong>
       <p style="font-size:13px;color:var(--uix-text-secondary);margin:6px 0">Dari: <%= k.assigned_by&.name %> (Fungsi Pengawasan Proyek). Harus: kirim undangan Kick-Off ke seluruh stakeholder.</p>
       <% k.roster.each do |_, r| %>
         <div style="font-size:13px;color:<%= r[:users].any? ? 'var(--uix-success)' : 'var(--uix-danger)' %>"><%= r[:label] %>: <%= r[:users].any? ? r[:users].map(&:name).join(', ') : 'BELUM TERISI (wajib)' %></div>

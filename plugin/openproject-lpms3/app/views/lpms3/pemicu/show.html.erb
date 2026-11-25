@@ -35,7 +35,7 @@
         <% if tr.diputus_oleh %>
           <div><span style="<%= muted %>">Keputusan:</span> <%= tr.diputus_oleh.name %> · <%= format_time(tr.diputus_pada) %><%= " · #{tr.catatan_keputusan}" if tr.catatan_keputusan.present? %></div>
         <% end %>
-        <% if tr.project %><div><span style="<%= muted %>">Proyek:</span> <%= link_to tr.project.name, project_path(tr.project) %></div><% end %>
+        <% if tr.project %><div><span style="<%= muted %>">Proyek:</span> <%= link_to ::Lpms3::KodeProyek.judul(tr.project), project_path(tr.project) %></div><% end %>
         <% if tr.pembuatan_galat.present? && tr.project.nil? %>
           <div style="color:var(--uix-danger)">Pembuatan proyek gagal: <%= tr.pembuatan_galat %></div>
         <% end %>

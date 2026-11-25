@@ -28,7 +28,7 @@ begin
   end
 
   # U01 buat proyek dari template
-  tpl = Project.find_by!(identifier: "lpms3-tpl-prediktif")
+  tpl = Project.find_by!(identifier: "lpms3-predik")
   res = Projects::CopyService.new(user: admin, source: tpl)
           .call(target_project_params: { name: "SMOKE D10", identifier: "#{TAG}-proyek" },
                 only: %i[members work_packages wiki_page_content])

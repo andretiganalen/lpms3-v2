@@ -20,7 +20,7 @@ module Lpms3
     PERM_REGISTER = :lpms3_register_project_trigger
     PERM_APPROVE = :lpms3_approve_project_trigger
     # Template yang boleh dipilih Admin => nilai "Pendekatan Delivery" (Purnajual tidak punya padanan).
-    TEMPLATES = { "lpms3-tpl-prediktif" => "Prediktif", "lpms3-tpl-hibrid" => "Hibrid", "lpms3-tpl-purnajual" => nil }.freeze
+    TEMPLATES = { "lpms3-predik" => "Prediktif", "lpms3-hibrid" => "Hibrid", "lpms3-contoh" => nil }.freeze
     PIMPRO_ROLE = "Pimpro"
     VP_ROLE = "Fungsi Pelaksanaan Proyek (Struktural)"
 

@@ -1,5 +1,7 @@
 # Data deklaratif seed LPMS3 (Spesifikasi Teknis §5.3, §5.5, §5.6). Dimuat oleh seed lain.
 module Lpms3Data
+  # Identifier proyek = Kode Proyek, atau 12 karakter judul bila kode belum ada (1.48). Nomor lama dummy-project-N dipetakan di sini.
+  DUMMY_IDENT = { 1 => "revitalisasi", 2 => "revitalisas-2", 3 => "double-track", 4 => "jalur-selata", 5 => "palapa-ring", 6 => "plts-ipp-kup" }.freeze
   # Tipe WP => [status berurutan, warna, milestone?]
   TYPES = {
     "Deliverable"      => [%w[Baru Dikerjakan Verifikasi\ Internal Validasi\ Pelanggan Diterima\ Pelanggan Ditolak], "#1D6FA5"],

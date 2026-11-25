@@ -24,7 +24,7 @@
       <% wp = r.work_package %>
       <%= link_to lpms3_m_keputusan_path(wp), class: "lm-card" do %>
         <div class="lm-row">
-          <span class="lm-code"><%= Lpms3::Leno.code(wp) %> · <%= wp.project.name %></span>
+          <span class="lm-code"><%= Lpms3::Leno.code(wp) %> · <%= ::Lpms3::KodeProyek.judul(wp.project) %></span>
           <span class="lm-chip lm-chip--warn">Menunggu <%= ((Lpms3::Leno.today - (r.submitted_at || Time.current).to_date).to_i) %> hari</span>
         </div>
         <span style="font-size:16px;font-weight:600"><%= Lpms3::Leno.title(wp) %></span>

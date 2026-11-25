@@ -71,7 +71,7 @@ module Lpms3
 
       {
         id: project.id,
-        kode: cfv(project, "Kode Proyek").presence || project.identifier,
+        kode: ::Lpms3::KodeProyek.prefix(project),
         judul: cfv(project, "Judul Proyek Lengkap").presence || project.name,
         kontrak: cfv(project, "Nomor Kontrak"),
         amendemen: cfv(project, "Nomor Adendum Terakhir"),

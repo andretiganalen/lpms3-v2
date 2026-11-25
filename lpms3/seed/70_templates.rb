@@ -136,13 +136,13 @@ end
 
 ALLT = Lpms3Data::TYPES.keys + %w[Task Milestone]
 common = { admin: admin, group: group, role_for: role_for, rasci_rows: RASCI }
-pred = build_template("LPMS3-Prediktif", "lpms3-tpl-prediktif", modules: MODULES_COMMON, types: ALLT, rasci: true, doks: true, gates: true,
+pred = build_template("LPMS3-Prediktif", "lpms3-predik", modules: MODULES_COMMON, types: ALLT, rasci: true, doks: true, gates: true,
   desc: "Template default untuk proyek kontrak (hardware/sistem/konstruksi). BOP-001.", **common)
 hib_mod = (MODULES_COMMON + %w[backlogs board_view]) & OpenProject::AccessControl.available_project_modules.map(&:to_s) | %w[wiki]
-hib  = build_template("LPMS3-Hibrid", "lpms3-tpl-hibrid", modules: hib_mod, types: ALLT, rasci: true, doks: true, gates: true,
+hib  = build_template("LPMS3-Hibrid", "lpms3-hibrid", modules: hib_mod, types: ALLT, rasci: true, doks: true, gates: true,
   desc: "Prediktif + Backlogs/Boards untuk komponen perangkat lunak (sprint).", **common)
 pj_types = %w[Isu Action\ Item Milestone Lesson\ Learned Task]
-puma = build_template("LPMS3-Purnajual", "lpms3-tpl-purnajual", modules: %w[work_package_tracking wiki meetings news], types: pj_types,
+puma = build_template("LPMS3-Purnajual", "lpms3-contoh", modules: %w[work_package_tracking wiki meetings news], types: pj_types,
   rasci: false, doks: false, gates: false, desc: "Template ringan purnajual: Isu, Action Item, SLA milestone, Lessons Learned.", **common)
 add_wp(puma, Type.find_by!(name: "Milestone"), "SLA — batas waktu respons purnajual", admin, desc: "Atur tanggal SLA per kontrak.")
 

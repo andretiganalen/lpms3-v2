@@ -37,12 +37,12 @@ ActiveRecord::Base.transaction do
   tr, = PT.receive!(kode_proyek: "UJI137-LPMS2-001", id_kiriman: "s1", lpms2_proyek_id: 991)
   chk "pemicu baru muncul di tugas registrar", PT.pending_for(reg).include?(tr) && PT.pending_for(outsider).empty?
 
-  ok = { template: "lpms3-tpl-prediktif", nama_proyek: "Proyek Uji 1.37", kode_proyek_lpms3: "U37-00000001",
+  ok = { template: "lpms3-predik", nama_proyek: "Proyek Uji 1.37", kode_proyek_lpms3: "U37-00000001",
          pimpro_id: pim.id, vp_id: vp.id }
   chk "bukan registrar tidak bisa mengusulkan", raises { tr.usulkan!(outsider, **ok) }
   chk "admin tanpa peran tidak bisa mengusulkan", raises { tr.usulkan!(adm, **ok) }
   chk "kode LPMS3 salah format ditolak", raises { tr.usulkan!(reg, **ok, kode_proyek_lpms3: "SALAH") }
-  chk "template bukan daftar ditolak", raises { tr.usulkan!(reg, **ok, template: "proyek-kristian") }
+  chk "template bukan daftar ditolak", raises { tr.usulkan!(reg, **ok, template: "1ud-123ud001") }
   chk "Pimpro wajib", raises { tr.usulkan!(reg, **ok, pimpro_id: nil) }
 
   tr.usulkan!(both, **ok, catatan: "uji")

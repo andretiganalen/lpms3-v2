@@ -61,7 +61,7 @@
           <tr>
             <td>
               <strong><%= link_to tr.kode_proyek, lpms3_pemicu_path(tr) %></strong>
-              <% if tr.project %><br><%= link_to tr.project.name, project_path(tr.project) %><% end %>
+              <% if tr.project %><br><%= link_to ::Lpms3::KodeProyek.judul(tr.project), project_path(tr.project) %><% end %>
             </td>
             <td><span class="lpms3-chip"><%= t("lpms3.pemicu_leno.status.#{tr.status}") %></span></td>
             <td><%= tr.lpms2_proyek_id || "—" %></td>

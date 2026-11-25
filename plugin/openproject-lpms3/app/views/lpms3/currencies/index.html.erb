@@ -161,7 +161,7 @@
             <% @budget_rows.each do |b, amount, shown| %>
               <tr>
                 <th scope="row"><%= link_to b.subject, budget_path(b) %></th>
-                <td><%= b.project.name %></td>
+                <td><%= ::Lpms3::KodeProyek.judul(b.project) %></td>
                 <td><%= fmt.(amount, @base&.minor_units || 0) %></td>
                 <td><%= shown ? fmt.(shown, @currencies.find { _1.code == @c_to }&.minor_units || 2) : t("lpms3.currencies.no_rate") %></td>
               </tr>

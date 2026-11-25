@@ -153,6 +153,20 @@ module OpenProject::Lpms3
     end
 
     config.to_prepare do
+      # Daftar proyek OpenProject: Kode Proyek tampil sebelum judul proyek (1.48).
+      if defined?(::Projects::RowComponent) && !::Projects::RowComponent.instance_variable_get(:@lpms3_kode)
+        ::Projects::RowComponent.instance_variable_set(:@lpms3_kode, true)
+        ::Projects::RowComponent.prepend(Module.new do
+          def name_link_section
+            kode = ::Lpms3::KodeProyek.prefix(project)
+            badge = helpers.content_tag(:span, kode, class: "lpms3-kode", title: "Kode Proyek")
+            helpers.safe_join([badge, super])
+          end
+        end)
+      end
+    end
+
+    config.to_prepare do
       # Kode Proyek = identifier (1.48): saat Kode Proyek disimpan, atau proyek baru/diganti judulnya tanpa kode,
       # identifier disamakan (Lpms3::KodeProyek). Memakai update_columns, jadi tanpa rekursi callback.
       unless ::CustomValue.instance_variable_get(:@lpms3_kode_proyek)

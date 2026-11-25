@@ -5,7 +5,7 @@
     <div class="lm-row"><span class="lm-code" style="letter-spacing:.04em">KONTEKS</span><span class="lm-sect" style="color:var(--uix-success);font-weight:600">Terisi otomatis</span></div>
     <div class="lm-meta" style="display:grid;grid-template-columns:96px minmax(0,1fr);row-gap:6px;font-size:14px;color:var(--uix-text-head)">
       <span style="color:var(--uix-text-secondary)">Work order</span><span style="font-weight:500"><%= Lpms3::Leno.code(wp) %> · <%= Lpms3::Leno.title(wp) %></span>
-      <span style="color:var(--uix-text-secondary)">Proyek</span><span style="font-weight:500"><%= wp.project.name %></span>
+      <span style="color:var(--uix-text-secondary)">Proyek</span><span style="font-weight:500"><%= ::Lpms3::KodeProyek.judul(wp.project) %></span>
       <span style="color:var(--uix-text-secondary)">Progres</span><span style="font-weight:500"><%= Lpms3::Leno.progress(wp).round %>%</span>
     </div>
   </section>

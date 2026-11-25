@@ -31,7 +31,7 @@ begin
   pimpro = users[:pimpro][0]
   pengawas = users[:pengawas][0]
 
-  tpl = Project.find_by!(identifier: "lpms3-tpl-prediktif")
+  tpl = Project.find_by!(identifier: "lpms3-predik")
   res = Projects::CopyService.new(user: admin, source: tpl)
           .call(target_project_params: { name: "SMOKE FASE", identifier: "#{TAG}-proyek" }, only: %i[members work_packages wiki_page_content])
   raise "copy gagal: #{res.errors.full_messages.join('; ')}" unless res.success?

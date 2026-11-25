@@ -1070,3 +1070,7 @@ html #main-menu .op-sidemenu-filterable-tree .TreeViewItemContentText, html #mai
 .lpms3-wbs__tg--none::before { content: none; }
 .lpms3-wbs__table tr[hidden] { display: none; }
 .lpms3-wbs__code { min-width: 120px; }
+
+/* v6 (1.48): Kode Proyek sebelum judul proyek di tabel/daftar */
+.lpms3-kode { display: inline-block; margin-right: 8px; padding: 1px 6px; border: 1px solid var(--leno-panel-border); border-radius: var(--uix-radius-chip); background: var(--leno-table-head); color: var(--leno-text); font-family: var(--uix-font-mono); font-size: 11px; font-weight: 500; white-space: nowrap; vertical-align: baseline; }
+.projects-table--name { display: flex; align-items: center; flex-wrap: wrap; }

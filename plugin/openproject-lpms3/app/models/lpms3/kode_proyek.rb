@@ -13,7 +13,7 @@ module Lpms3
 
     module_function
 
-    def field = ::ProjectCustomField.find_by(name: CF_NAME)
+    def field = (@field_id ||= ::ProjectCustomField.where(name: CF_NAME).pick(:id)) && ::ProjectCustomField.find_by(id: @field_id)
 
     def kode_of(project)
       cf = field or return nil
@@ -23,6 +23,13 @@ module Lpms3
     # Prefiks tampilan: kode proyek (huruf kapital) atau 12 karakter pertama judul.
     def prefix(project)
       kode_of(project) || from_title(project.name)
+    end
+
+    # Judul untuk tabel: Kode Proyek (atau 12 karakter judul) sebelum nama proyek.
+    def judul(project)
+      return "" unless project
+
+      "#{prefix(project)} · #{project.name}"
     end
 
     def from_title(name)
@@ -45,7 +52,7 @@ module Lpms3
     # Menyamakan identifier dengan Kode/judul. Identifier lama disimpan sebagai riwayat FriendlyId (URL lama tetap berlaku).
     def sync_identifier!(project)
       project = ::Project.find_by(id: project.id) or return
-      return if SYSTEM_IDENTIFIERS.include?(project.identifier) || project.templated? # template dirujuk lewat identifier (pemicu, seed)
+      return if SYSTEM_IDENTIFIERS.include?(project.identifier)
 
       new_id = identifier_for(project)
       return if new_id == project.identifier
