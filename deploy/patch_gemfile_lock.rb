@@ -1,7 +1,7 @@
-# Menambahkan plugin path (openproject-lpms3) ke Gemfile.lock tanpa resolusi jaringan.
+# Menambahkan plugin path (lpms3) ke Gemfile.lock tanpa resolusi jaringan.
 # Alasan: `bundle install` di image slim ingin mengambil gem git grup dev (pry) dan git tidak tersedia.
 lock = File.read("Gemfile.lock")
-name = "openproject-lpms3"
+name = "lpms3"
 version = ARGV.fetch(0)
 path = ARGV.fetch(1)
 abort("#{name} sudah ada di Gemfile.lock") if lock.include?("#{name} (")

@@ -3,7 +3,7 @@
 # Hanya membaca (psql, file). Status: PASS = bukti ada; GAP = belum terwujud (diketahui, bukan kesalahan); FAIL = menyimpang dari yang seharusnya ada.
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"; cd "$ROOT"
-P() { docker exec lpms3v2-db-1 psql -U postgres -d openproject -Atc "$1" 2>/dev/null; }
+P() { docker exec lpms3v2-db-1 psql -U postgres -d lpms3 -Atc "$1" 2>/dev/null; }
 PASS=0; GAP=0; FAIL=0
 r() { # status id uraian bukti
   case "$1" in PASS) PASS=$((PASS+1));; GAP) GAP=$((GAP+1));; FAIL) FAIL=$((FAIL+1));; esac
@@ -22,11 +22,11 @@ eq J1.4 "template tidak publik" "$(P "select count(*) from projects where templa
 echo "-- J2 Formulir & prosedur"
 eq J2.1 "18 definisi formulir (form_definition)" "$(P "select count(*) from lpms3_form.form_definition")" 18
 ge J2.2 "tabel skema lpms3_form (43 tabel formulir + infrastruktur)" "$(P "select count(*) from information_schema.tables where table_schema='lpms3_form'")" 43
-ls plugin/openproject-lpms3/app/controllers/lpms3/ | grep -qi "form" && r PASS J2.3 "UI pengisian & cetak PDF formulir" "controller formulir ada" || r GAP J2.3 "UI pengisian & cetak PDF formulir resmi" "belum ada controller/halaman formulir di plugin (form_instance=$(P "select count(*) from lpms3_form.form_instance"))"
+ls plugin/lpms3/app/controllers/lpms3/ | grep -qi "form" && r PASS J2.3 "UI pengisian & cetak PDF formulir" "controller formulir ada" || r GAP J2.3 "UI pengisian & cetak PDF formulir resmi" "belum ada controller/halaman formulir di plugin (form_instance=$(P "select count(*) from lpms3_form.form_instance"))"
 
 echo "-- J3 WBS Template LPMS"
 ge J3.1 "tabel WBS/Kurva-S tersedia" "$(P "select count(*) from information_schema.tables where table_schema='lpms3' and table_name in ('wbs_node','wbs_progress','scurve_plan','baseline','baseline_item')")" 5
-ls plugin/openproject-lpms3/app/controllers/lpms3/ | grep -qi "wbs" && r PASS J3.2 "impor WBS Template + folder bukti + Kurva-S" "controller WBS ada" || r GAP J3.2 "impor WBS Template, folder bukti, Kurva-S" "belum ada UI/impor WBS (wbs_node=$(P "select count(*) from lpms3.wbs_node"))"
+ls plugin/lpms3/app/controllers/lpms3/ | grep -qi "wbs" && r PASS J3.2 "impor WBS Template + folder bukti + Kurva-S" "controller WBS ada" || r GAP J3.2 "impor WBS Template, folder bukti, Kurva-S" "belum ada UI/impor WBS (wbs_node=$(P "select count(*) from lpms3.wbs_node"))"
 
 echo "-- J4 RASCI, organisasi, fungsi"
 eq J4.1 "ref_rasci (Tabel 1-6)" "$(P "select count(*) from lpms3.ref_rasci")" 312

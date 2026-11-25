@@ -65,7 +65,7 @@ chk "halaman fitur memuat 35 kunci", C.keys.all? { bodies["/admin/lpms3/internal
 chk "Gravatar nonaktif", OpenProject::Avatars::AvatarManager.gravatar_enabled? == false
 chk "security badge nonaktif", Class.new { include SecurityBadgeHelper }.new.display_security_badge_graphic? == false
 chk "blok homescreen vendor dibuang", (OpenProject::Static::Homescreen[:blocks].map { _1[:name] } & %w[community upsell new_features]).empty?
-css = File.read("/app/custom-plugins/openproject-lpms3/assets/uix/uix.css")
+css = File.read("/app/custom-plugins/lpms3/assets/uix/uix.css")
 chk "CSS sembunyikan banner Enterprise", css.include?("op-enterprise-banner") && css.include?("display: none !important")
 csp = File.read("/app/config/initializers/content_security_policy.rb")
 chk "CSP tanpa domain vendor", %w[chargebee start.openproject releases.openproject].none? { csp.include?(_1) } || csp.scan(/chargebee_src = \[\]/).any?

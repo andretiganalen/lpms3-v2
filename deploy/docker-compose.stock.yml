@@ -29,8 +29,11 @@ x-ids-env: &ids
   LPMS3_LENO_KEYS: "${LPMS3_LENO_KEYS:-}"
 # Image LPMS + plugin LPMS3 (dibangun oleh ops/build_image.sh dari deploy/Dockerfile).
 x-lpms3-op: &lpms3op
-  image: lpms3/openproject:${LPMS3_IMAGE_TAG:-local}
+  image: lpms3/app:${LPMS3_IMAGE_TAG:-local}
 services:
+  db:
+    environment:
+      POSTGRES_DB: lpms3   # nama database = lpms3 (bukan nama bawaan platform)
   web:      { <<: *lpms3op, environment: *ids }
   worker:   { <<: *lpms3op, environment: *ids }
   cron:     { <<: *lpms3op, environment: *ids }
@@ -40,7 +43,7 @@ services:
     image: lpms3/data:${LPMS3_IMAGE_TAG:-local}
     restart: unless-stopped
     environment:
-      PG_DSN: "postgresql://postgres:${LPMS3_PG_PASSWORD}@db:5432/openproject"
+      PG_DSN: "postgresql://postgres:${LPMS3_PG_PASSWORD}@db:5432/lpms3"
       STARROCKS_HOST: "${STARROCKS_HOST}"
       STARROCKS_PORT: "${STARROCKS_PORT}"
       STARROCKS_DATABASE: "${STARROCKS_DATABASE}"
@@ -57,9 +60,9 @@ services:
       Oidc__ClientId: "${IDS_CLIENT_ID}"
       Oidc__ClientSecret: "${IDS_CLIENT_SECRET}"
       Oidc__Authority: "https://dev-ids-intern.len.co.id"
-      OpenProject__BaseUrl: "http://web:8080"
-      OpenProject__PublicHost: "${OPENPROJECT_HOST__NAME}"
-      OpenProject__BridgeApiKey: "${LPMS3_BRIDGE_API_KEY}"
+      Lpms__BaseUrl: "http://web:8080"
+      Lpms__PublicHost: "${OPENPROJECT_HOST__NAME}"
+      Lpms__BridgeApiKey: "${LPMS3_BRIDGE_API_KEY}"
       # Tidak ada AdminRoles/AdminEmails: admin ditentukan di aplikasi (Role Akun), bukan oleh klaim IDS.
       Lpms3__Release: "${LPMS3_IMAGE_TAG:-local}"   # pemecah cache uix.css di landing
     volumes:

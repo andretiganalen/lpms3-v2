@@ -1,5 +1,5 @@
 Gem::Specification.new do |s|
-  s.name        = "openproject-lpms3"
+  s.name        = "lpms3"
   s.version     = "0.1.0"
   s.authors     = "LPMS3 Len Industri"
   s.email       = "lpms3@len.co.id"

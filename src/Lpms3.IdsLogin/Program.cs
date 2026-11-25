@@ -67,8 +67,8 @@ app.UseAuthorization();
 const string OpSessionCookie = "_open_project_session";
 const string LoopCookie = "lpms3.enter";
 var cfg = app.Configuration;
-var opBase = cfg["OpenProject:BaseUrl"] ?? "http://web:8080";
-string OpHost(HttpContext c) => cfg["OpenProject:PublicHost"] ?? c.Request.Host.Value ?? "";
+var opBase = cfg["Lpms:BaseUrl"] ?? "http://web:8080";
+string OpHost(HttpContext c) => cfg["Lpms:PublicHost"] ?? c.Request.Host.Value ?? "";
 
 // ---------- Halaman (UIx) ----------
 // Token dan font Poppins dari uix.css plugin (dilayani OpenProject); versi rilis di URL sebagai pemecah cache.
@@ -183,8 +183,8 @@ app.MapGet("/ids/enter", async (HttpContext c, IHttpClientFactory f) =>
     }
     c.Response.Cookies.Append(LoopCookie, (n + 1) + ":" + since, new CookieOptions { Path = "/ids", HttpOnly = true, SameSite = SameSiteMode.Lax, MaxAge = TimeSpan.FromSeconds(10) });
 
-    var key = cfg["OpenProject:BridgeApiKey"];
-    if (string.IsNullOrEmpty(key)) { app.Logger.LogError("OpenProject:BridgeApiKey belum diatur."); return Fail("Layanan belum siap", "Konfigurasi login aplikasi belum lengkap. Hubungi administrator.", 503); }
+    var key = cfg["Lpms:BridgeApiKey"];
+    if (string.IsNullOrEmpty(key)) { app.Logger.LogError("Lpms:BridgeApiKey belum diatur."); return Fail("Layanan belum siap", "Konfigurasi login aplikasi belum lengkap. Hubungi administrator.", 503); }
 
     var email = (c.User.FindFirst("email")?.Value
                  ?? c.User.FindAll("preferred_username").Select(x => x.Value).FirstOrDefault(v => v.Contains('@')))?.Trim().ToLowerInvariant();

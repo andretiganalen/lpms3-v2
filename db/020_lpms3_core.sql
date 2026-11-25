@@ -1,6 +1,6 @@
 -- =====================================================================
 -- LPMS3 · PostgreSQL (database OpenProject) · schema lpms3
--- Data transaksional plugin openproject-lpms3: organisasi & kapabilitas (§14),
+-- Data transaksional plugin lpms3: organisasi & kapabilitas (§14),
 -- WBS Template LPMS + Kurva-S + baseline (§5, §15), referensi dari SOP.
 -- Seluruh tabel dicerminkan ke StarRocks default_catalog.lpms3 (db/starrocks/*).
 -- =====================================================================

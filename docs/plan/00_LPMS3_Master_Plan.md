@@ -37,7 +37,7 @@ Karena itu setiap fitur di plan ini harus menjawab salah satu dari tujuh janji b
 
 | # | Keputusan | Isi |
 |---|---|---|
-| K1 | Platform aplikasi | LPMS Community (branch `stable/17`, image dipin) + plugin **`openproject-lpms3`** (sidebar, halaman fase, formulir, WBS, Kurva-S, approval) + layanan **`lpms3-data`** (Python: ETL LKP, sinkron StarRocks, render PDF) |
+| K1 | Platform aplikasi | LPMS Community (branch `stable/17`, image dipin) + plugin **`lpms3`** (sidebar, halaman fase, formulir, WBS, Kurva-S, approval) + layanan **`lpms3-data`** (Python: ETL LKP, sinkron StarRocks, render PDF) |
 | K2 | URL | `http://192.168.125.14:5100` (TLS internal menyusul) |
 | K3 | **Database utama** | **StarRocks `default_catalog.lpms3`** di `192.168.125.29:9030` (JDBC `jdbc:mysql://192.168.125.29:9030/lpms3`; driver StarRocks/MySQL) — seluruh data domain LPMS3 (formulir, WBS, Kurva-S, LKP, mart, BI) |
 | K4 | Database runtime LPMS | **PostgreSQL** (wajib; LPMS tidak dapat berjalan di StarRocks). PG menjadi *system of entry* transaksional; setiap perubahan **disinkron ke StarRocks ≤ 1 menit** lewat outbox |
@@ -58,7 +58,7 @@ Karena itu setiap fitur di plan ini harus menjawab salah satu dari tujuh janji b
  Pengguna (browser, LAN Len) ──http://192.168.125.14:5100──┐
                                                              ▼
 ┌──────────────────────── VM Ubuntu 24.04 · 192.168.125.14 (Docker Compose "lpms3") ────────────────────────┐
-│ proxy(Caddy:80→5100) → web (LPMS 17 + plugin openproject-lpms3) ── worker ── cron ── hocuspocus     │
+│ proxy(Caddy:80→5100) → web (LPMS 17 + plugin lpms3) ── worker ── cron ── hocuspocus     │
 │                              │ ActiveRecord                      │                                         │
 │                              ▼                                   ▼                                         │
 │                   PostgreSQL 17 (db, internal)          lpms3-data (Python, internal, tanpa port publik)   │

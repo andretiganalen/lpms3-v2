@@ -15,7 +15,7 @@ say() { # level cek pesan
   [ "$1" = CRIT ] && CRIT=1
   return 0
 }
-PSQL() { docker exec lpms3v2-db-1 psql -U postgres -d openproject -Atc "$1" 2>/dev/null; }
+PSQL() { docker exec lpms3v2-db-1 psql -U postgres -d lpms3 -Atc "$1" 2>/dev/null; }
 
 # 1. Kontainer inti harus berjalan (dan sehat bila punya healthcheck)
 for c in web worker cron db proxy idslogin lpms3-data cache hocuspocus; do

@@ -10,11 +10,11 @@ trap 'docker rm -f $N >/dev/null 2>&1 || true' EXIT
 T0=$(date +%s); docker rm -f $N >/dev/null 2>&1 || true
 docker run -d --name $N -e POSTGRES_PASSWORD=drill postgres:17 >/dev/null
 until docker exec $N pg_isready -U postgres >/dev/null 2>&1; do sleep 1; done; sleep 2
-docker exec $N createdb -U postgres openproject
-docker exec -i $N pg_restore -U postgres -d openproject --no-owner < "$B/openproject.dump"
+docker exec $N createdb -U postgres lpms3
+docker exec -i $N pg_restore -U postgres -d lpms3 --no-owner < "$( [ -f "$B/lpms3.dump" ] && echo "$B/lpms3.dump" || echo "$B/openproject.dump" )"
 echo "waktu restore: $(( $(date +%s)-T0 )) detik"
 Q="select (select count(*) from projects),(select count(*) from work_packages),(select count(*) from users),(select count(*) from workflows),(select count(*) from lpms3_form.form_definition),(select count(*) from lpms3.org_unit),(select count(*) from lpms3.ref_rasci),(select count(*) from custom_fields)"
-L=$(docker exec lpms3v2-db-1 psql -U postgres -d openproject -Atc "$Q"); R=$(docker exec $N psql -U postgres -d openproject -Atc "$Q")
+L=$(docker exec lpms3v2-db-1 psql -U postgres -d lpms3 -Atc "$Q"); R=$(docker exec $N psql -U postgres -d lpms3 -Atc "$Q")
 echo "proyek|wp|user|workflow|form|org_unit|rasci|cf"; echo "LIVE   : $L"; echo "RESTORE: $R"
 tar -tzf "$B/opdata.tgz" >/dev/null && tar -tzf "$B/lkp-raw.tgz" >/dev/null && echo "arsip opdata & lkp-raw utuh"
 [ "$L" = "$R" ] && echo "DRILL OK (selisih dapat terjadi bila ada perubahan sejak backup)" || echo "DRILL: jumlah berbeda — periksa apakah ada perubahan sejak backup"

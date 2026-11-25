@@ -1,9 +1,9 @@
 # LPMS3 override untuk opf/openproject-docker-compose (stable/17).
 # Verifikasi nama layanan: docker compose config --services
 x-lpms3-image: &lpms3img
-  image: lpms3/openproject:${LPMS3_IMAGE_TAG}
+  image: lpms3/app:${LPMS3_IMAGE_TAG}
 x-opdb: &opdb
-  DATABASE_URL: "postgres://postgres:${LPMS3_PG_PASSWORD}@db/openproject?pool=20&encoding=unicode&reconnect=true"
+  DATABASE_URL: "postgres://postgres:${LPMS3_PG_PASSWORD}@db/lpms3?pool=20&encoding=unicode&reconnect=true"
 services:
   db:
     environment:
@@ -20,7 +20,7 @@ services:
     build: { context: ../etl }
     restart: unless-stopped
     environment:
-      PG_DSN: "postgresql://postgres:${LPMS3_PG_PASSWORD}@db/openproject"
+      PG_DSN: "postgresql://postgres:${LPMS3_PG_PASSWORD}@db/lpms3"
       STARROCKS_HOST: ${STARROCKS_HOST}
       STARROCKS_PORT: ${STARROCKS_PORT}
       STARROCKS_DATABASE: ${STARROCKS_DATABASE}

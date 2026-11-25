@@ -35,7 +35,7 @@ Anda **WAJIB BERHENTI (`HALT`)** seketika dan membatalkan perubahan sementara (`
 ## 0A. STATUS REALISASI & PRINSIP REVISI (hasil audit 2026-11-15)
 
 **Prinsip yang berlaku (mengalahkan teks lama di bawah bila bertentangan):**
-1. **Tidak ada penimpaan lisensi.** `EnterpriseToken` tidak diubah (Community Edition, token kosong). Fitur Enterprise bawaan LPMS tetap terkunci; fitur dikembangkan in-house di plugin `plugin/openproject-lpms3` (lihat Bagian 4 yang direvisi).
+1. **Tidak ada penimpaan lisensi.** `EnterpriseToken` tidak diubah (Community Edition, token kosong). Fitur Enterprise bawaan LPMS tetap terkunci; fitur dikembangkan in-house di plugin `plugin/lpms3` (lihat Bagian 4 yang direvisi).
 2. **Source LPMS tidak ada di repo** (hanya di image `openproject/openproject:17-slim@sha256:4e97…`). Path seperti `app/models/...`, `config/initializers/...` pada modul lama dibaca sebagai path di dalam image. Perubahan dilakukan lewat (a) plugin LPMS3, (b) env di `deploy/docker-compose.stock.yml`, (c) patch saat build (`deploy/patch_mod06.rb`, `deploy/patch_mod07.rb`, `RUN sed` di `deploy/Dockerfile`) yang **membatalkan build bila pola source berubah**, (d) Caddy `deploy/Caddyfile.landing`.
 3. **Tidak ada kontak ke LPMS/afiliasi** (keputusan pemilik): tanpa trial, tanpa unduh source frontend dari repo vendor.
 4. **Scope hanya `:5100`**, stack compose `lpms3v2`.
@@ -179,7 +179,7 @@ Selain 30 fitur utama di atas, sistem juga mendaftarkan 5 kunci kompatibilitas a
 
 Saklar On/Off mengatur **fitur buatan LPMS3 sendiri**, bukan gerbang lisensi LPMS.
 
-1. **Penyimpanan:** `Setting.internal_enabled_features` (array kunci, default `[]`), didaftarkan oleh `plugin/openproject-lpms3/config/initializers/inhouse_feature_settings.rb`, disimpan di tabel `settings`.
+1. **Penyimpanan:** `Setting.internal_enabled_features` (array kunci, default `[]`), didaftarkan oleh `plugin/lpms3/config/initializers/inhouse_feature_settings.rb`, disimpan di tabel `settings`.
 2. **Registri:** `LPMS::Lpms3::Features` (`lib/open_project/lpms3/features.rb`): `CATALOG` 35 kunci klaster A-F, `IMPLEMENTED` (fitur yang sudah selesai; awalnya kosong), `enabled?(key)` = diimplementasikan **dan** dinyalakan admin. `EnterpriseToken` tidak dipanggil/diubah.
 3. **Metadata tampilan:** `InhouseFeatureCatalog` (`app/models/inhouse_feature_catalog.rb`) memuat judul, lokasi menu, deskripsi, tujuan, output dari Bagian 3.
 4. **Halaman admin:** `Administration -> Modul Fitur Internal` (`/admin/lpms3/internal_features`, admin saja): tabel per klaster dengan checkbox; fitur belum selesai tampil "Belum tersedia" dan tidak bisa dicentang; server menolak kunci di luar `IMPLEMENTED`.
@@ -237,12 +237,12 @@ Kerjakan modul di bawah ini **satu per satu secara berurutan**. Setiap modul waj
 ---
 
 ### MOD-02 (REVISI): Registri Fitur In-House & `Setting.internal_enabled_features`
-> **Revisi keputusan pemilik:** `EnterpriseToken` **tidak diubah** (token kosong, Community Edition). Dilarang menimpa `allows_to?`, `active?`, `token_object`, atau memalsukan token/lisensi. Seluruh fitur dikembangkan **sendiri (in-house)** di plugin `plugin/openproject-lpms3`, tanpa menyalin atau mengaktifkan kode Enterprise LPMS. Menu dan navigasi dipertahankan sebagai kerangka kosong; kode fitur Enterprise terkunci milik LPMS dihapus dari tampilan/build (lihat MOD-03 langkah 8).
+> **Revisi keputusan pemilik:** `EnterpriseToken` **tidak diubah** (token kosong, Community Edition). Dilarang menimpa `allows_to?`, `active?`, `token_object`, atau memalsukan token/lisensi. Seluruh fitur dikembangkan **sendiri (in-house)** di plugin `plugin/lpms3`, tanpa menyalin atau mengaktifkan kode Enterprise LPMS. Menu dan navigasi dipertahankan sebagai kerangka kosong; kode fitur Enterprise terkunci milik LPMS dihapus dari tampilan/build (lihat MOD-03 langkah 8).
 
 **Tujuan:** Menyediakan katalog 35 kunci fitur in-house dan penyimpanan saklar dinamis tanpa menyentuh mekanisme lisensi.
 
-1. `plugin/openproject-lpms3/lib/open_project/lpms3/features.rb`: modul `LPMS::Lpms3::Features` berisi `CATALOG` (35 kunci + klaster A-F), `IMPLEMENTED` (daftar fitur yang sudah selesai; awalnya kosong), `enabled_keys`, dan `enabled?(key)` (true hanya bila fitur sudah **diimplementasikan** dan dinyalakan admin).
-2. `plugin/openproject-lpms3/config/initializers/inhouse_feature_settings.rb`: `Settings::Definition.add :internal_enabled_features, default: [], format: :array, writable: true` (disimpan di tabel `settings`).
+1. `plugin/lpms3/lib/open_project/lpms3/features.rb`: modul `LPMS::Lpms3::Features` berisi `CATALOG` (35 kunci + klaster A-F), `IMPLEMENTED` (daftar fitur yang sudah selesai; awalnya kosong), `enabled_keys`, dan `enabled?(key)` (true hanya bila fitur sudah **diimplementasikan** dan dinyalakan admin).
+2. `plugin/lpms3/config/initializers/inhouse_feature_settings.rb`: `Settings::Definition.add :internal_enabled_features, default: [], format: :array, writable: true` (disimpan di tabel `settings`).
 3. Setiap fitur baru yang selesai dikembangkan: tambahkan kuncinya ke `IMPLEMENTED`, bangun UI/logikanya di plugin, dan lindungi dengan `Features.enabled?(key)`.
 4. **Verify:** `bundle exec rails runner` memeriksa `Features.keys.size == 35`, `Setting.internal_enabled_features == []` secara default, `Features.enabled?(:x) == false` untuk fitur belum selesai, set/baca ulang nilai setting berhasil, dan `EnterpriseToken.active?`/`show_banners?` tidak berubah dari bawaan.
 5. **Ritual Wajib:** Verify $\rightarrow$ Commit $\rightarrow$ Push $\rightarrow$ Live Deploy.
@@ -254,8 +254,8 @@ Kerjakan modul di bawah ini **satu per satu secara berurutan**. Setiap modul waj
 
 **Tujuan:** Halaman Administrator untuk melihat 35 fitur (30 utama + 5 kompatibilitas) lengkap dengan Deskripsi, Tujuan, Output, dan menyalakan/mematikan fitur yang sudah selesai dikembangkan.
 
-1. `plugin/openproject-lpms3/app/models/inhouse_feature_catalog.rb`: metadata 35 fitur persis dari Bagian 3 (tujuan/output klaster F ditulis tim LPMS3).
-2. `plugin/openproject-lpms3/app/controllers/lpms3/admin/internal_features_settings_controller.rb` (`require_admin`, `menu_item :lpms3_internal_features`); `update` menyimpan hanya kunci di `IMPLEMENTED`; mode `all`/`none` untuk tombol cepat.
+1. `plugin/lpms3/app/models/inhouse_feature_catalog.rb`: metadata 35 fitur persis dari Bagian 3 (tujuan/output klaster F ditulis tim LPMS3).
+2. `plugin/lpms3/app/controllers/lpms3/admin/internal_features_settings_controller.rb` (`require_admin`, `menu_item :lpms3_internal_features`); `update` menyimpan hanya kunci di `IMPLEMENTED`; mode `all`/`none` untuk tombol cepat.
 3. Rute di `plugin/.../config/routes.rb`: `GET/PATCH /admin/lpms3/internal_features`.
 4. Menu di `plugin/.../lib/open_project/lpms3/engine.rb` (`menu :admin_menu, :lpms3_internal_features, ... icon: "gear"`). **Ikon harus ada di set Octicon** (`settings` tidak ada dan menyebabkan HTTP 500 seluruh halaman admin; `gear`/`organization` valid).
 5. Tampilan `plugin/.../app/views/lpms3/admin/internal_features_settings/show.html.erb`: tombol "Aktifkan semua yang tersedia" / "Matikan semua", tabel per klaster (checkbox, nama & kunci, lokasi menu, deskripsi, tujuan, output), tombol Simpan.

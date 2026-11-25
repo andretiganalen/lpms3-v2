@@ -337,7 +337,7 @@ services:
     restart: unless-stopped
   web:
     environment: &opdb
-      DATABASE_URL: "postgres://postgres:${LPMS3_PG_PASSWORD}@db/openproject?pool=20&encoding=unicode&reconnect=true"
+      DATABASE_URL: "postgres://postgres:${LPMS3_PG_PASSWORD}@db/lpms3?pool=20&encoding=unicode&reconnect=true"
     volumes:
       - /srv/lpms3/app/lpms3:/app/lpms3:ro
     deploy: { resources: { limits: { memory: 6g } } }
@@ -403,7 +403,7 @@ Simpan bukti (screenshot + output) ke `docs/evidence/F2/`.
 set -euo pipefail
 TS=$(date +%Y%m%d-%H%M); DST=/srv/lpms3/backup/$TS; mkdir -p "$DST"
 cd /srv/lpms3/app/upstream
-docker compose -p lpms3 exec -T db pg_dump -U postgres -Fc openproject > "$DST/openproject.dump"
+docker compose -p lpms3 exec -T db pg_dump -U postgres -Fc lpms3 > "$DST/lpms3.dump"
 docker compose -p lpms3 exec -T db pg_dump -U postgres -Fc lpms3_dw > "$DST/lpms3_dw.dump"   # data LKP (§13)
 tar -C /srv/lpms3 -czf "$DST/opdata.tgz" opdata
 tar -C /srv/lpms3 -czf "$DST/lkp-raw.tgz" lkp-raw                                               # berkas LKP asli
@@ -1152,7 +1152,7 @@ Pola registrasi (kerangka, diuji di staging):
 # plugin/openproject-lpms3/lib/open_project/lpms3/engine.rb
 module LPMS::Lpms3
   class Engine < ::Rails::Engine
-    engine_name :openproject_lpms3
+    engine_name :lpms3_plugin
     include LPMS::Plugins::ActsAsOpEngine
 
     register "openproject-lpms3", author_url: "https://www.len.co.id", bundled: false do

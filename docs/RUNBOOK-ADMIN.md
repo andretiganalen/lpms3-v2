@@ -34,7 +34,7 @@ Health check cepat: `curl -s -o /dev/null -w '%{http_code}\n' http://localhost:5
 
 ## 4. Backup & restore
 - Otomatis: cron harian 02:00 menjalankan `ops/backup.sh` (log: `data/backup/backup.log`), retensi 14 hari.
-- Manual: `bash ops/backup.sh`. Isi: `openproject.dump`, `opdata.tgz`, `lkp-raw.tgz`, `env.backup`, `config-commit.txt`, `SHA256SUMS`.
+- Manual: `bash ops/backup.sh`. Isi: `lpms3.dump` (backup lama: `openproject.dump`), `opdata.tgz`, `lkp-raw.tgz`, `env.backup`, `config-commit.txt`, `SHA256SUMS`.
 - StarRocks: BACKUP SNAPSHOT dikelola admin StarRocks.
 - Verifikasi: `cd data/backup/<ts> && sha256sum -c SHA256SUMS`.
 
@@ -42,9 +42,9 @@ Restore database (downtime singkat):
 ```bash
 cd ~/lpms3-v2/upstream
 docker compose -p lpms3v2 stop web worker cron hocuspocus
-docker compose -p lpms3v2 exec -T db dropdb -U postgres openproject
-docker compose -p lpms3v2 exec -T db createdb -U postgres openproject
-docker compose -p lpms3v2 exec -T db pg_restore -U postgres -d openproject < ../data/backup/<ts>/openproject.dump
+docker compose -p lpms3v2 exec -T db dropdb -U postgres lpms3
+docker compose -p lpms3v2 exec -T db createdb -U postgres lpms3
+docker compose -p lpms3v2 exec -T db pg_restore -U postgres -d lpms3 < ../data/backup/<ts>/lpms3.dump
 tar -C ../data -xzf ../data/backup/<ts>/opdata.tgz     # bila aset ikut dipulihkan
 docker compose -p lpms3v2 start web worker cron hocuspocus
 ```

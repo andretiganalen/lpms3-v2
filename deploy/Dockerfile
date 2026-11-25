@@ -1,17 +1,17 @@
 # Image OpenProject + plugin LPMS3 (tema UIx, Organisasi & Fungsi, sidebar). Dibangun dari konteks root repo:
-#   docker build -f deploy/Dockerfile -t lpms3/openproject:local .
+#   docker build -f deploy/Dockerfile -t lpms3/app:local .
 # OP_IMAGE harus sama dengan image yang dipakai deploy/docker-compose.stock.yml sebelum plugin.
 # Dipin ke digest OP 17.9.7 (diuji 2026-11-14). Ganti hanya lewat prosedur upgrade.
 ARG OP_IMAGE=openproject/openproject:17-slim@sha256:4e978557b4009dfdcdab6f18acd1aa9348a2c41ce5cd50c3d535e4c093a5c505
 FROM ${OP_IMAGE}
-COPY --chown=app:app plugin/openproject-lpms3 /app/custom-plugins/openproject-lpms3
+COPY --chown=app:app plugin/lpms3 /app/custom-plugins/lpms3
 COPY --chown=app:app deploy/Gemfile.plugins /app/Gemfile.plugins
 COPY --chown=app:app deploy/patch_gemfile_lock.rb /tmp/patch_gemfile_lock.rb
 # Plugin tidak punya dependensi gem baru dan tidak punya aset frontend (CSS dilayani plugin sendiri),
 # jadi cukup mendaftarkannya ke Gemfile.lock; tidak perlu `bundle install` maupun precompile.
-RUN ruby /tmp/patch_gemfile_lock.rb 0.1.0 /app/custom-plugins/openproject-lpms3 \
+RUN ruby /tmp/patch_gemfile_lock.rb 0.1.0 /app/custom-plugins/lpms3 \
  && rm /tmp/patch_gemfile_lock.rb \
- && bundle exec ruby -e 'abort("plugin tidak termuat") unless Gem.loaded_specs["openproject-lpms3"]'
+ && bundle exec ruby -e 'abort("plugin tidak termuat") unless Gem.loaded_specs["lpms3"]'
 # MOD-05: netralisasi tautan keluar ke openproject.*/github opf/chargebee/youtube di static_links.yml -> "/" (tanpa kontak vendor).
 RUN sed -i -E 's#(href:[[:space:]]*)https?://([a-z0-9.-]*\.)?(openproject\.org|openproject\.com|openproject-docs\.s3[a-z0-9.-]*\.amazonaws\.com|chargebee\.com|youtube\.com)[^[:space:]]*#\1"/"#; s#(href:[[:space:]]*)https://github\.com/opf/[^[:space:]]*#\1"/"#' /app/config/static_links.yml \
  && ! grep -E 'href:[[:space:]]*https?://([a-z0-9.-]*\.)?(openproject|chargebee)' /app/config/static_links.yml \

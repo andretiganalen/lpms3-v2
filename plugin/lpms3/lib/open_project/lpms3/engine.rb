@@ -10,7 +10,7 @@ require "open_project/lpms3/header_summary"
 
 module OpenProject::Lpms3
   class Engine < ::Rails::Engine
-    engine_name :openproject_lpms3
+    engine_name :lpms3_plugin
 
     include OpenProject::Plugins::ActsAsOpEngine
 
@@ -33,7 +33,7 @@ module OpenProject::Lpms3
       end
     end
 
-    register "openproject-lpms3",
+    register "lpms3",
              author_url: "https://github.com/andretiganalen/lpms3-v2" do
       # Mata uang & kurs: izin global untuk peran Keuangan (peran global di Administrasi -> Peran). Admin selalu boleh.
 

@@ -1,4 +1,4 @@
-# openproject-lpms3 (plugin)
+# lpms3 (plugin)
 
 Kerangka dan spesifikasi: `docs/plan/10_Spesifikasi_Teknis_v1.3.md` §12 (sidebar), §13 (LKP/approval), §14 (kapabilitas) dan `docs/plan/00_LPMS3_Master_Plan.md` §3–§7.
 
@@ -17,7 +17,7 @@ Kerangka dan spesifikasi: `docs/plan/10_Spesifikasi_Teknis_v1.3.md` §12 (sideba
 
 ## Build & deploy
 ```bash
-bash ops/build_image.sh                              # image lpms3/openproject:local
+bash ops/build_image.sh                              # image lpms3/app:local
 cd upstream && docker compose -p lpms3v2 up -d --no-deps web worker cron
 ```
 `web` restart sekitar 1–2 menit.
