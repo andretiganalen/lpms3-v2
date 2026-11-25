@@ -63,6 +63,7 @@
   <% if @all || @section == "langkah" %>
   <section class="lpms3-card" id="langkah">
     <h3 class="lpms3-card__title"><%= t("lpms3.phases.steps") %></h3>
+    <p class="lpms3-ident"><span>Kode Proyek:</span> <%= ::Lpms3::KodeProyek.prefix(@project) %> <span class="lpms3-ident__sep">·</span> <span>Judul Proyek:</span> <%= @project.name %></p>
     <% if @steps.empty? %>
       <p class="lpms3-hint"><%= t("lpms3.phases.no_steps") %></p>
     <% else %>
@@ -111,6 +112,7 @@
   <% if @section == "aspek" %>
   <section class="lpms3-card" id="aspek">
     <h3 class="lpms3-card__title"><%= t("lpms3.pmp9.title") %></h3>
+    <p class="lpms3-ident"><span>Kode Proyek:</span> <%= ::Lpms3::KodeProyek.prefix(@project) %> <span class="lpms3-ident__sep">·</span> <span>Judul Proyek:</span> <%= @project.name %></p>
     <p class="lpms3-hint"><%= t("lpms3.pmp9.hint") %></p>
     <div class="lpms3-sticky-bar" role="region" aria-label="Pengajuan aspek">
       <span class="lpms3-sticky-bar__info">
@@ -133,14 +135,16 @@
       <p class="lpms3-hint"><%= t("lpms3.pmp9.empty") %></p>
     <% else %>
       <div class="lpms3-table-wrap">
-        <table class="lpms3-table">
+        <table class="lpms3-table lpms3-table--aspek">
+          <colgroup><col class="c-aspek"><col class="c-status"><col class="c-pic"><col class="c-isi"><col class="c-lampiran"><col class="c-aksi"></colgroup>
           <thead>
             <tr>
               <th scope="col"><%= t("lpms3.pmp9.col.aspect") %></th>
               <th scope="col"><%= t("lpms3.pmp9.col.status") %></th>
+              <th scope="col"><%= t("lpms3.phases.col.assignee") %></th>
               <th scope="col"><%= t("lpms3.pmp9.col.content") %></th>
               <th scope="col"><%= t("lpms3.pmp9.col.attachments") %></th>
-              <th scope="col"><%= t("lpms3.pmp9.col.actions") %></th>
+              <th scope="col" class="lpms3-col-actions"><%= t("lpms3.pmp9.col.actions") %></th>
             </tr>
           </thead>
           <tbody>
@@ -150,11 +154,12 @@
               <tr>
                 <th scope="row"><%= link_to aspect_name, work_package_path(wp) %></th>
                 <td><span class="lpms3-chip<%= ' lpms3-chip--ok' if wp.status.name == "Disahkan" %>"><%= wp.status.name %></span></td>
+                <td><%= wp.assigned_to&.name || t("lpms3.phases.unassigned") %></td>
                 <td>
                   <% if @can_edit && !locked %>
                     <%= form_with url: lpms3_project_aspect_update_path(@project, wp), method: :patch, local: true, data: { turbo: false } do %>
                       <%= text_area_tag :description, wp.description, rows: 5, "aria-label": aspect_name, class: "lpms3-input" %>
-                      <p><%= submit_tag t("lpms3.pmp9.save"), class: "lpms3-btn" %></p>
+                      <div class="lpms3-form-actions"><%= submit_tag t("lpms3.pmp9.save"), class: "lpms3-btn -primary" %></div>
                     <% end %>
                   <% else %>
                     <div><%= simple_format(wp.description.to_s) %></div>
@@ -172,12 +177,12 @@
                   <% end %>
                   <% if @can_attach && @can_edit && !locked %>
                     <%= form_with url: lpms3_project_aspect_attach_path(@project, wp), method: :post, multipart: true, local: true, data: { turbo: false } do %>
-                      <%= file_field_tag :file, required: true %>
-                      <%= submit_tag t("lpms3.pmp9.upload"), class: "lpms3-btn" %>
+                      <%= file_field_tag :file, required: true, class: "lpms3-file" %>
+                      <div class="lpms3-form-actions"><%= submit_tag t("lpms3.pmp9.upload"), class: "lpms3-btn" %></div>
                     <% end %>
                   <% end %>
                 </td>
-                <td>
+                <td class="lpms3-col-actions"><div class="lpms3-cell-actions">
                   <% if @can_edit && %w[Draft Revisi].include?(wp.status.name) %>
                     <%= form_with url: lpms3_project_aspect_step_path(@project, wp), method: :post, local: true, data: { turbo: false } do %>
                       <%= hidden_field_tag :step, "submit" %>
@@ -190,17 +195,17 @@
                   <% unless @can_edit %>
                     <%= form_with url: lpms3_masukan_path(wp), method: :post, local: true, data: { turbo: false } do %>
                       <%= text_area_tag :masukan, nil, rows: 2, required: true, "aria-label": "Masukan untuk pembuat", placeholder: "Beri masukan (mis. typo)", class: "lpms3-input" %>
-                      <%= submit_tag "Kirim masukan", class: "lpms3-btn" %>
+                      <div class="lpms3-form-actions"><%= submit_tag "Kirim masukan", class: "lpms3-btn" %></div>
                     <% end %>
                   <% end %>
                   <% if @aspek_revisable.include?(wp.id) %>
                     <%= form_with url: lpms3_project_aspect_step_path(@project, wp), method: :post, local: true, data: { turbo: false } do %>
                       <%= hidden_field_tag :step, "revision" %>
                       <%= text_area_tag :note, nil, rows: 2, required: true, "aria-label": t("lpms3.pmp9.note"), placeholder: t("lpms3.pmp9.note") %>
-                      <%= submit_tag t("lpms3.pmp9.revision"), class: "lpms3-btn" %>
+                      <div class="lpms3-form-actions"><%= submit_tag t("lpms3.pmp9.revision"), class: "lpms3-btn" %></div>
                     <% end %>
                   <% end %>
-                </td>
+                </div></td>
               </tr>
             <% end %>
           </tbody>
